@@ -1,4 +1,4 @@
-<img height="150" src="./img/icon.png">
+<img height="140" src="./img/icon.png">
 
 [![Crate][crate-image]][crate-url]
 [![Build Status][github-actions-image]][github-actions-url]
@@ -58,9 +58,7 @@ $ cargo fmt
 $ cargo clippy
 ```
 
-All code that goes into master must pass all tests, including the lint checks.
-
-To run unit tests, simply run:
+All code that goes into master must pass all tests. To run all tests, use:
 
 ```sh
 $ cargo test
