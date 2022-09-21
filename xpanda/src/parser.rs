@@ -3,11 +3,11 @@ use crate::lexer::Lexer;
 use crate::token::Token;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct ParseError {
+pub struct Error {
     pub message: String,
 }
 
-impl ParseError {
+impl Error {
     const fn new(message: String) -> Self {
         Self { message }
     }
@@ -15,18 +15,19 @@ impl ParseError {
 
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
+    #[allow(clippy::option_option)]
     peeked: Option<Option<Token<'a>>>,
 }
 
 impl<'a> Parser<'a> {
-    pub fn new(source: &'a str) -> Self {
+    pub const fn new(lexer: Lexer<'a>) -> Self {
         Self {
-            lexer: Lexer::new(source),
+            lexer,
             peeked: None,
         }
     }
 
-    pub fn parse(&mut self) -> Result<Ast<'a>, ParseError> {
+    pub fn parse(&mut self) -> Result<Ast<'a>, Error> {
         let mut nodes = Vec::new();
 
         while self.peek_token().is_some() {
@@ -50,24 +51,47 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_node(&mut self) -> Result<Node<'a>, ParseError> {
+    fn parse_node(&mut self) -> Result<Node<'a>, Error> {
         match self.peek_token() {
             Some(Token::Text(_)) => Ok(Node::Text(self.parse_text()?.unwrap_or(""))),
             Some(Token::DollarSign) => {
                 self.next_token();
                 Ok(Node::Param(self.parse_param()?))
             },
-            Some(token) => Err(ParseError::new(format!("Unexpected token {:?}", token))),
-            _ => Err(ParseError::new(String::from("Unexpected EOF"))),
+            Some(token) => Err(Error::new(format!("Unexpected token {:?}", token))),
+            _ => Err(Error::new(String::from("Unexpected EOF"))),
         }
     }
 
-    fn parse_param(&mut self) -> Result<Param<'a>, ParseError> {
+    fn parse_param(&mut self) -> Result<Param<'a>, Error> {
         match self.peek_token() {
             Some(Token::OpenBrace) => {
                 self.next_token();
 
                 match self.peek_token() {
+                    Some(Token::PoundSign) => {
+                        self.next_token();
+                        let param = Param::Length {
+                            identifier: self.parse_identifier()?,
+                        };
+
+                        match self.next_token() {
+                            Some(Token::CloseBrace) => {},
+                            Some(token) => {
+                                return Err(Error::new(format!(
+                                    "Expected close brace, found {:?}",
+                                    token
+                                )));
+                            },
+                            _ => {
+                                return Err(Error::new(String::from(
+                                    "Expected close brace, found EOF",
+                                )))
+                            },
+                        }
+
+                        Ok(param)
+                    },
                     Some(_) => {
                         let identifier = self.parse_identifier()?;
                         let mut treat_empty_as_unset = false;
@@ -91,18 +115,21 @@ impl<'a> Parser<'a> {
                             },
                             Some(Token::QuestionMark) => Param::WithError {
                                 identifier,
-                                error: self.parse_text()?,
+                                error: match self.peek_token() {
+                                    Some(Token::Text(_)) => self.parse_text()?,
+                                    _ => None,
+                                },
                                 treat_empty_as_unset,
                             },
                             Some(Token::CloseBrace) => Param::Simple { identifier },
                             Some(ref token) => {
-                                return Err(ParseError::new(format!(
+                                return Err(Error::new(format!(
                                     "Invalid param, unexpected token {:?}",
                                     token
                                 )))
                             },
                             _ => {
-                                return Err(ParseError::new(String::from(
+                                return Err(Error::new(String::from(
                                     "Invalid param, unexpected EOF",
                                 )))
                             },
@@ -112,7 +139,7 @@ impl<'a> Parser<'a> {
                             token = self.next_token();
 
                             if token != Some(Token::CloseBrace) {
-                                return Err(ParseError::new(format!(
+                                return Err(Error::new(format!(
                                     "Expected close brace, found {:?}",
                                     token
                                 )));
@@ -121,14 +148,8 @@ impl<'a> Parser<'a> {
 
                         Ok(param)
                     },
-                    None => Err(ParseError::new(String::from("Expected param, found EOF"))),
+                    None => Err(Error::new(String::from("Expected param, found EOF"))),
                 }
-            },
-            Some(Token::PoundSign) => {
-                self.next_token();
-                Ok(Param::Length {
-                    identifier: self.parse_identifier()?,
-                })
             },
             _ => Ok(Param::Simple {
                 identifier: self.parse_identifier()?,
@@ -136,25 +157,452 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_text(&mut self) -> Result<Option<&'a str>, ParseError> {
+    fn parse_text(&mut self) -> Result<Option<&'a str>, Error> {
         match self.next_token() {
             Some(Token::Text(text)) => Ok(Some(text)),
-            Some(token) => Err(ParseError::new(format!("Expected text, found {:?}", token))),
+            Some(token) => Err(Error::new(format!("Expected text, found {:?}", token))),
             None => Ok(None),
         }
     }
 
-    fn parse_identifier(&mut self) -> Result<Identifier<'a>, ParseError> {
+    fn parse_identifier(&mut self) -> Result<Identifier<'a>, Error> {
         match self.next_token() {
             Some(Token::Identifier(name)) => Ok(Identifier::Named(name)),
             Some(Token::Index(index)) => Ok(Identifier::Indexed(index)),
-            Some(token) => Err(ParseError::new(format!(
+            Some(token) => Err(Error::new(format!(
                 "Expected identifier, found {:?}",
                 token
             ))),
-            None => Err(ParseError::new(String::from(
-                "Expected identifier, found EOF",
-            ))),
+            None => Err(Error::new(String::from("Expected identifier, found EOF"))),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn simple_index() {
+        let mut lexer = Lexer::new("$1");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Simple {
+                identifier: Identifier::Indexed(1)
+            })]))
+        );
+    }
+
+    #[test]
+    fn simple_index_text() {
+        let mut lexer = Lexer::new("pre $1 post");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![
+                Node::Text("pre "),
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Indexed(1),
+                }),
+                Node::Text(" post")
+            ]))
+        );
+    }
+
+    #[test]
+    fn simple_named() {
+        let mut lexer = Lexer::new("$VAR");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Simple {
+                identifier: Identifier::Named("VAR")
+            })]))
+        );
+    }
+
+    #[test]
+    fn simple_named_text() {
+        let mut lexer = Lexer::new("pre $VAR post");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![
+                Node::Text("pre "),
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Named("VAR"),
+                }),
+                Node::Text(" post")
+            ]))
+        );
+    }
+
+    #[test]
+    fn braced_index() {
+        let mut lexer = Lexer::new("${1}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Simple {
+                identifier: Identifier::Indexed(1),
+            })]))
+        );
+    }
+
+    #[test]
+    fn braced_index_text() {
+        let mut lexer = Lexer::new("pre ${1} post");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![
+                Node::Text("pre "),
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Indexed(1),
+                }),
+                Node::Text(" post")
+            ]))
+        );
+    }
+
+    #[test]
+    fn braced_named() {
+        let mut lexer = Lexer::new("${VAR}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Simple {
+                identifier: Identifier::Named("VAR"),
+            })]))
+        );
+    }
+
+    #[test]
+    fn braced_named_text() {
+        let mut lexer = Lexer::new("pre ${VAR} post");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![
+                Node::Text("pre "),
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Named("VAR"),
+                }),
+                Node::Text(" post"),
+            ]))
+        );
+    }
+
+    #[test]
+    fn default_index() {
+        let mut lexer = Lexer::new("${1-default}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Indexed(1),
+                default: Box::new(Node::Text("default")),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn default_named() {
+        let mut lexer = Lexer::new("${VAR-default}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named("VAR"),
+                default: Box::new(Node::Text("default")),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn default_pattern() {
+        let mut lexer = Lexer::new("${VAR-$DEF}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named("VAR"),
+                default: Box::new(Node::Param(Param::Simple {
+                    identifier: Identifier::Named("DEF"),
+                })),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn default_index_no_empty() {
+        let mut lexer = Lexer::new("${1:-default}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Indexed(1),
+                default: Box::new(Node::Text("default")),
+                treat_empty_as_unset: true,
+            })]))
+        );
+    }
+
+    #[test]
+    fn default_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:-default}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named("VAR"),
+                default: Box::new(Node::Text("default")),
+                treat_empty_as_unset: true,
+            })]))
+        );
+    }
+
+    #[test]
+    fn default_pattern_no_empty() {
+        let mut lexer = Lexer::new("${VAR:-$DEF}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named("VAR"),
+                default: Box::new(Node::Param(Param::Simple {
+                    identifier: Identifier::Named("DEF"),
+                })),
+                treat_empty_as_unset: true,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_index() {
+        let mut lexer = Lexer::new("${1+alt}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Indexed(1),
+                alt: Box::new(Node::Text("alt")),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_named() {
+        let mut lexer = Lexer::new("${VAR+alt}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named("VAR"),
+                alt: Box::new(Node::Text("alt")),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_pattern() {
+        let mut lexer = Lexer::new("${VAR+$ALT}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named("VAR"),
+                alt: Box::new(Node::Param(Param::Simple {
+                    identifier: Identifier::Named("ALT"),
+                })),
+                treat_empty_as_unset: false,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_index_no_empty() {
+        let mut lexer = Lexer::new("${1:+alt}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Indexed(1),
+                alt: Box::new(Node::Text("alt")),
+                treat_empty_as_unset: true,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:+alt}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named("VAR"),
+                alt: Box::new(Node::Text("alt")),
+                treat_empty_as_unset: true,
+            })]))
+        );
+    }
+
+    #[test]
+    fn alt_pattern_no_empty() {
+        let mut lexer = Lexer::new("${VAR:+$ALT}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named("VAR"),
+                alt: Box::new(Node::Param(Param::Simple {
+                    identifier: Identifier::Named("ALT")
+                })),
+                treat_empty_as_unset: true
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_index() {
+        let mut lexer = Lexer::new("${1?msg}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Indexed(1),
+                error: Some("msg"),
+                treat_empty_as_unset: false
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_named() {
+        let mut lexer = Lexer::new("${VAR?msg}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named("VAR"),
+                error: Some("msg"),
+                treat_empty_as_unset: false
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_index_no_empty() {
+        let mut lexer = Lexer::new("${1:?msg}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Indexed(1),
+                error: Some("msg"),
+                treat_empty_as_unset: true
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:?msg}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named("VAR"),
+                error: Some("msg"),
+                treat_empty_as_unset: true
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_no_message() {
+        let mut lexer = Lexer::new("${VAR?}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named("VAR"),
+                error: None,
+                treat_empty_as_unset: false
+            })]))
+        );
+    }
+
+    #[test]
+    fn error_no_message_no_empty() {
+        let mut lexer = Lexer::new("${VAR:?}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named("VAR"),
+                error: None,
+                treat_empty_as_unset: true
+            })]))
+        );
+    }
+
+    #[test]
+    fn len_index() {
+        let mut lexer = Lexer::new("${#1}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Length {
+                identifier: Identifier::Indexed(1)
+            })]))
+        );
+    }
+
+    #[test]
+    fn len_named() {
+        let mut lexer = Lexer::new("${#VAR}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Length {
+                identifier: Identifier::Named("VAR")
+            })]))
+        );
     }
 }

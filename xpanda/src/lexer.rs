@@ -150,3 +150,365 @@ impl<'a> Lexer<'a> {
         Some(token)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn simple_index() {
+        let mut lexer = Lexer::new("$1");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn simple_index_text() {
+        let mut lexer = Lexer::new("pre $1 post");
+
+        assert_eq!(lexer.next_token(), Some(Token::Text("pre ")));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Text(" post")));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn simple_named() {
+        let mut lexer = Lexer::new("$VAR");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn simple_named_text() {
+        let mut lexer = Lexer::new("pre $VAR post");
+
+        assert_eq!(lexer.next_token(), Some(Token::Text("pre ")));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Text(" post")));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn braced_index() {
+        let mut lexer = Lexer::new("${1}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn braced_index_text() {
+        let mut lexer = Lexer::new("pre ${1} post");
+
+        assert_eq!(lexer.next_token(), Some(Token::Text("pre ")));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Text(" post")));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn braced_named() {
+        let mut lexer = Lexer::new("${VAR}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn braced_named_text() {
+        let mut lexer = Lexer::new("pre ${VAR} post");
+
+        assert_eq!(lexer.next_token(), Some(Token::Text("pre ")));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Text(" post")));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_index() {
+        let mut lexer = Lexer::new("${1-default}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::Text("default")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_named() {
+        let mut lexer = Lexer::new("${VAR-default}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::Text("default")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_pattern() {
+        let mut lexer = Lexer::new("${VAR-$DEF}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("DEF")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_index_no_empty() {
+        let mut lexer = Lexer::new("${1:-default}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::Text("default")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:-default}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::Text("default")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn default_pattern_no_empty() {
+        let mut lexer = Lexer::new("${VAR:-$DEF}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Dash));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("DEF")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_index() {
+        let mut lexer = Lexer::new("${1+alt}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::Text("alt")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_named() {
+        let mut lexer = Lexer::new("${VAR+alt}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::Text("alt")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_pattern() {
+        let mut lexer = Lexer::new("${VAR+$ALT}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("ALT")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_index_no_empty() {
+        let mut lexer = Lexer::new("${1:+alt}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::Text("alt")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:+alt}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::Text("alt")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn alt_pattern_no_empty() {
+        let mut lexer = Lexer::new("${VAR:+$ALT}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::Plus));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("ALT")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_index() {
+        let mut lexer = Lexer::new("${1?msg}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::Text("msg")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_named() {
+        let mut lexer = Lexer::new("${VAR?msg}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::Text("msg")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_index_no_empty() {
+        let mut lexer = Lexer::new("${1:?msg}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::Text("msg")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_named_no_empty() {
+        let mut lexer = Lexer::new("${VAR:?msg}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::Text("msg")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_no_message() {
+        let mut lexer = Lexer::new("${VAR?}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn error_no_message_no_empty() {
+        let mut lexer = Lexer::new("${VAR:?}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::Colon));
+        assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn len_index() {
+        let mut lexer = Lexer::new("${#1}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::PoundSign));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn len_named() {
+        let mut lexer = Lexer::new("${#VAR}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::PoundSign));
+        assert_eq!(lexer.next_token(), Some(Token::Identifier("VAR")));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+}
