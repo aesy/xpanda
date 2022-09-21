@@ -1,5 +1,9 @@
 [package]
 name = "xpanda-cli"
+description = "Unix shell-like parameter expansion/variable substitution"
+authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
+homepage = "https://github.com/aesy/xpanda"
+license-file = "LICENSE"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +11,4 @@ edition = "2021"
 
 [dependencies]
 xpanda = { path = "../xpanda" }
+clap = { version = "3.2.17", features = ["derive"] }
