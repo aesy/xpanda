@@ -1,15 +1,15 @@
 # Comparison
 
-This document lists which patterns from other programs that are supported/unsupported by xpanda.
+This document lists which patterns from other programs that are supported/unsupported by `Xpanda`.
 
-## Envsubst
+## GNU envsubst
 
 | Pattern    | Description                                                |        Status |
 |------------|:-----------------------------------------------------------|--------------:|
 | `$param`   | `$param` if set, else empty                                |     SUPPORTED |
 | `${param}` | `$param` if set and non-empty, else empty                  |     SUPPORTED |
 
-## Bash
+## POSIX shell & bash
 
 | Pattern                  | Description                                                |        Status |
 |--------------------------|:-----------------------------------------------------------|--------------:|
@@ -19,8 +19,8 @@ This document lists which patterns from other programs that are supported/unsupp
 | `${param:-pattern}`      | `$param` if set and non-empty, else `pattern`              |     SUPPORTED |
 | `${param=pattern}`       | `$param` and assign `pattern` to it if not set             | NOT SUPPORTED |
 | `${param=-pattern}`      | `$param` and assign `pattern to it if not set or empty     | NOT SUPPORTED |
-| `${param+pattern}`       | `pattern` if `$param` is set, else empty                   |     SUPPORTED |
-| `${param:+pattern}`      | `pattern` if `$param` is set and non-empty, else empty     |     SUPPORTED |
+| `${param+pattern}`       | `pattern` if `$param` is set and non-empty, else empty     |     SUPPORTED |
+| `${param:+pattern}`      | `pattern` if `$param` is set, else empty                   |     SUPPORTED |
 | `${param?text}`          | `$param` if set, else exit with error `text`               |     SUPPORTED |
 | `${param:?text}`         | `$param` if set and non-empty, else exit with error `text` |     SUPPORTED |
 | `${#param}`              | Character length of `$param` if set, else `0`              |     SUPPORTED |

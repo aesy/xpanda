@@ -16,22 +16,22 @@
 
 [license-url]: https://github.com/aesy/xpanda/blob/master/LICENSE
 
-Safe Unix shell-like parameter expansion for those who need a more powerful alternative to 
+Safe Unix shell-like parameter expansion/variable substitution for those who need a more powerful alternative to 
 [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html) but don't want to resort 
-to using [`eval`](https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html), while also not
-wanting to use a full-on templating engine. Available as a native single-binary Windows/Linux CLI tool or as a 
-Rust crate.
+to using Bash's [`eval`](https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html), while also not
+wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Windows/Linux CLI tool and 
+a Rust library.
 
 [See how it compares to other programs](./docs/COMPARISON.md).
 
 ## Usage
 
-Check out which [patterns](./docs/PATTERNS.md) `xpanda` will recognize and expand. 
+Check out which [patterns](./docs/PATTERNS.md) `Xpanda` will recognize and expand. 
 
 Also check out the readme of the submodule that you are interested in:
 
 * [CLI](./xpanda-cli/README.md) 
-* [API](./xpanda/README.md)
+* [LIB](./xpanda/README.md)
 
 ## Development
 

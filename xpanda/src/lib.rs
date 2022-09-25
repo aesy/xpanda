@@ -49,30 +49,36 @@ pub struct Builder {
 }
 
 impl Builder {
+    /// With this flag set, missing variables without any default value will cause cause an error
+    /// instead of omitting en empty string. Off by default.
     #[must_use]
     pub const fn no_unset(mut self, no_unset: bool) -> Self {
         self.no_unset = no_unset;
         self
     }
 
+    /// Adds all environment variables as named variables.
     #[must_use]
     pub fn with_env_vars(mut self) -> Self {
         self.named_vars.extend(env::vars());
         self
     }
 
+    /// Adds the given map values as named variables.
     #[must_use]
     pub fn with_named_vars(mut self, vars: HashMap<String, String>) -> Self {
         self.named_vars.extend(vars);
         self
     }
 
+    /// Adds the given strings as positional variables.
     #[must_use]
     pub fn with_positional_vars(mut self, vars: Vec<String>) -> Self {
         self.positional_vars.extend(vars);
         self
     }
 
+    /// Builds a new [`Xpanda`] instance.
     #[must_use]
     pub fn build(self) -> Xpanda {
         Xpanda::new(self)

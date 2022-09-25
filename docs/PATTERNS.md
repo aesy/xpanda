@@ -8,8 +8,8 @@ The following patterns/rules are supported:
 | `${param}`          | `$param` if set and non-empty, else empty                  |
 | `${param-pattern}`  | `$param` if set, else `pattern`                            |
 | `${param:-pattern}` | `$param` if set and non-empty, else `pattern`              |
-| `${param+pattern}`  | `pattern` if `$param` is set, else empty                   |
-| `${param:+pattern}` | `pattern` if `$param` is set and non-empty, else empty     |
+| `${param+pattern}`  | `pattern` if `$param` is set and non-empty, else empty     |
+| `${param:+pattern}` | `pattern` if `$param` is set, else empty                   |
 | `${param?text}`     | `$param` if set, else exit with error `text`               |
 | `${param:?text}`    | `$param` if set and non-empty, else exit with error `text` |
 | `${#param}`         | Character length of `$param` if set, else `0`              |

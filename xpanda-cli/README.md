@@ -1,11 +1,11 @@
-# CLI
+# Xpanda CLI
 
 ## Usage
 
 CLI options and examples can be viewed via the CLI's help command:
 
 ```shell
-xpanda -h
+xpanda --help
 ```
 
 ```
@@ -49,15 +49,17 @@ any of the forms listed above, the program will fail to parse the variable and e
 program with a status code of 1.
 
 EXAMPLES:
-`echo '$VAR' | xpanda -v VAR=value`   substitute `$VAR` with `value` using `-v`.
+`echo '$VAR' | xpanda -v VAR=value`   substitute `$VAR` with `value` using a named variable
+                                      argument.
 `VAR=value echo '$VAR' | xpanda`      substitute `$VAR` with `value` using an environment
                                       variable.
-`echo '$1' | xpanda value`            substitute `$1` with `value` using a positional variable.
-`cat some_file | xpanda`              output a copy of `some_file` with variables substituted
+`echo '$1' | xpanda value`            substitute `$1` with `value` using a positional variable
+                                      argument.
+`xpanda < some_file`                  output a copy of `some_file` with variables substituted
                                       with environment variables.
-`cat some_file | xpanda -f var_file`  output a copy of `some_file` with variables substituted
+`xpanda -f var_file < some_file`      output a copy of `some_file` with variables substituted
                                       with variables from `var_file`.
-`cat some_file | xpanda -v VAR=value` output a copy of `some_file` with `$VAR` substituted with
+`xpanda -v VAR=value < some_file`     output a copy of `some_file` with `$VAR` substituted with
                                       `value` using `-v`.
 
 USAGE:
@@ -65,7 +67,7 @@ USAGE:
 
 ARGS:
     <POSITIONAL_VARS>...
-            Zero or more positional variable values. The first value can be substituted using `$1`,
+            Zero or more positional variable values. The first value can be referenced using `$1`,
             the second `$2` and so on.
             
             If any positional variables are provided then the default setting to source values
@@ -73,16 +75,16 @@ ARGS:
             values as well, add the `--env-vars` flag.
 
 OPTIONS:
-    -e, --env-vars <ENV_VARS>
+    -e, --env-vars
             With this flag set, named variables will be sourced from environment variables in
-            addition
-            to any other provided variables. Named variables will always take precedence over
-            environment variables though. This flag is implicitly true if unset and no other
-            variables
-            are set.
+            addition to any other provided variables. Named variables will always take precedence
+            over environment variables though. This flag is implicitly true if no other variables
+            are provided.
 
-    -f, --var-file <VAR_FILE>
+    -f, --var-file <VAR_FILES>
             Provide a file to source variable values from.
+            
+            This option can be used multiple times in order to add multiple files.
             
             Using this option will override the default setting to source values from environment
             variables. To continue sourcing from environment values as well, add the `--env-vars`
@@ -100,7 +102,7 @@ OPTIONS:
 
     -u, --no-unset
             With this flag set, missing variables without any default value will cause the program
-            to exit with a status code of 1.
+            to exit with a status code of 1. Off by default.
 
     -v, --var <NAMED_VARS>
             Adds a named variable to source from. The value should be a key value pair separated
@@ -128,7 +130,7 @@ releases](https://github.com/aesy/xpanda/releases). Binaries for other platforms
 Example on how to download and install an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda -o xpanda
+curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda
 chmod +x xpanda
 sudo mv xpanda /usr/local/bin
 ```
