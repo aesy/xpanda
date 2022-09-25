@@ -17,12 +17,26 @@ use std::env;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Error {
     pub message: String,
+    pub line: usize,
+    pub col: usize,
 }
 
 impl From<parser::Error> for Error {
     fn from(error: parser::Error) -> Self {
         Self {
             message: error.message,
+            line: error.line,
+            col: error.col,
+        }
+    }
+}
+
+impl From<eval::Error> for Error {
+    fn from(error: eval::Error) -> Self {
+        Self {
+            message: error.message,
+            line: error.line,
+            col: error.col,
         }
     }
 }
@@ -109,7 +123,7 @@ impl Xpanda {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse()?;
-        let result = self.evaluator.eval(&ast);
+        let result = self.evaluator.eval(&ast)?;
 
         Ok(result)
     }

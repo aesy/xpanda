@@ -5,14 +5,14 @@ mod args;
 mod read;
 
 use crate::args::Args;
-use crate::read::read_var_file;
+use crate::read::{read_line, read_var_file};
 use clap::Parser;
 use std::io::{self, Write};
 use std::process::ExitCode;
 use xpanda::Xpanda;
 
 fn main() -> ExitCode {
-    let stdin = io::stdin().lines();
+    let mut stdin = io::stdin().lock();
     let mut stdout = io::stdout().lock();
     let mut stderr = io::stderr().lock();
 
@@ -27,11 +27,8 @@ fn main() -> ExitCode {
         var_file.is_some() || !named_vars.is_empty() || !positional_vars.is_empty();
     let mut builder = Xpanda::builder().no_unset(no_unset);
 
-    match env_vars {
-        Some(true) | None if !has_user_provided_vars => {
-            builder = builder.with_env_vars();
-        },
-        _ => {},
+    if env_vars || !has_user_provided_vars {
+        builder = builder.with_env_vars();
     }
 
     if let Some(file) = var_file {
@@ -39,7 +36,7 @@ fn main() -> ExitCode {
             Ok(vars) => vars,
             Err(error) => {
                 stderr
-                    .write_all(format!("Failed to read var file: {:?}", error).as_bytes())
+                    .write_all(format!("Failed to read var file: {}", error).as_bytes())
                     .unwrap();
                 return ExitCode::from(1);
             },
@@ -53,15 +50,15 @@ fn main() -> ExitCode {
         .with_named_vars(named_vars.into_iter().collect())
         .build();
 
-    // Rule disabled because it's a false positive
-    // See https://github.com/rust-lang/rust-clippy/issues/9135
-    #[allow(clippy::significant_drop_in_scrutinee)]
-    for line in stdin {
+    let mut line_number = 0;
+    while let Some(line) = read_line(&mut stdin) {
+        line_number += 1;
+
         let line = match line {
             Ok(line) => line,
             Err(error) => {
                 stderr
-                    .write_all(format!("Failed to read stdin: {:?}", error).as_bytes())
+                    .write_all(format!("Failed to read stdin: {}", error).as_bytes())
                     .unwrap();
                 return ExitCode::from(1);
             },
@@ -71,7 +68,9 @@ fn main() -> ExitCode {
             Ok(text) => text,
             Err(error) => {
                 stderr
-                    .write_all(format!("Failed to expand text: {:?}", error).as_bytes())
+                    .write_all(
+                        format!("{}:{} {}", line_number, error.col, error.message).as_bytes(),
+                    )
                     .unwrap();
                 return ExitCode::from(1);
             },
@@ -79,7 +78,7 @@ fn main() -> ExitCode {
 
         if let Err(error) = stdout.write_all(text.as_bytes()) {
             stderr
-                .write_all(format!("Failed to write to stdout: {:?}", error).as_bytes())
+                .write_all(format!("Failed to write to stdout: {}", error).as_bytes())
                 .unwrap();
             return ExitCode::from(1);
         }

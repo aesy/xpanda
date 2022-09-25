@@ -6,6 +6,8 @@ pub struct Lexer<'a> {
     source: &'a str,
     chars: Peekable<CharIndices<'a>>,
     index: usize,
+    line: usize,
+    col: usize,
     previous_token: Option<Token<'a>>,
     is_param: bool,
     brace_level: usize,
@@ -20,6 +22,8 @@ impl<'a> Lexer<'a> {
             source,
             chars,
             index: 0,
+            line: 1,
+            col: 1,
             previous_token: None,
             is_param,
             brace_level: 0,
@@ -51,6 +55,14 @@ impl<'a> Lexer<'a> {
         token
     }
 
+    pub const fn line(&self) -> usize {
+        self.line
+    }
+
+    pub const fn col(&self) -> usize {
+        self.col
+    }
+
     fn peek_char(&mut self) -> Option<char> {
         self.chars.peek().map(|(_, c)| *c)
     }
@@ -59,6 +71,13 @@ impl<'a> Lexer<'a> {
         let (i, c) = self.chars.next()?;
 
         self.index = i + c.len_utf8();
+
+        if c == '\n' {
+            self.line += 1;
+            self.col = 1;
+        } else {
+            self.col += 1;
+        }
 
         Some(c)
     }

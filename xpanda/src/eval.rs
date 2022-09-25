@@ -1,6 +1,19 @@
 use crate::ast::{Ast, Identifier, Node, Param};
-use crate::parser::{Error, Parser};
+use crate::parser::{self, Parser};
 use std::collections::HashMap;
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Error {
+    pub message: String,
+    pub line: usize,
+    pub col: usize,
+}
+
+impl Error {
+    const fn new(message: String, line: usize, col: usize) -> Self {
+        Self { message, line, col }
+    }
+}
 
 #[derive(Default)]
 pub struct Evaluator {
@@ -22,33 +35,58 @@ impl Evaluator {
         }
     }
 
-    pub fn eval(&self, ast: &Ast) -> String {
+    pub fn eval(&self, ast: &Ast) -> Result<String, Error> {
         let mut result = String::new();
 
         for node in &ast.nodes {
-            let text = self.eval_node(node);
+            let text = self.eval_node(node)?;
             result.push_str(&text);
         }
 
-        result
+        Ok(result)
     }
 
-    fn eval_node(&self, node: &Node) -> String {
+    fn eval_node(&self, node: &Node) -> Result<String, Error> {
         match node {
-            Node::Text(text) => (*text).to_string(),
+            Node::Text(text) => Ok((*text).to_string()),
             Node::Param(param) => self.eval_param(param),
         }
     }
 
-    fn eval_param(&self, param: &Param) -> String {
+    fn eval_param(&self, param: &Param) -> Result<String, Error> {
+        fn error_message(identifier: &Identifier, no_unset: bool) -> String {
+            if no_unset {
+                format!("'{}' is unset or empty", identifier)
+            } else {
+                format!("'{}' is unset", identifier)
+            }
+        }
+
         match param {
-            Param::Simple { identifier } => self
-                .eval_identifier(identifier, self.no_unset)
-                .unwrap_or_else(|| String::from("")),
+            Param::Simple { identifier } => {
+                self.eval_identifier(identifier, self.no_unset).map_or_else(
+                    || {
+                        if self.no_unset {
+                            // TODO wrong line/col
+                            Err(Error::new(error_message(identifier, self.no_unset), 0, 0))
+                        } else {
+                            Ok(String::from(""))
+                        }
+                    },
+                    Ok,
+                )
+            },
             Param::Length { identifier } => {
                 self.eval_identifier(identifier, self.no_unset).map_or_else(
-                    || String::from("0"),
-                    |identifier| identifier.len().to_string(),
+                    || {
+                        if self.no_unset {
+                            // TODO wrong line/col
+                            Err(Error::new(error_message(identifier, self.no_unset), 0, 0))
+                        } else {
+                            Ok(String::from("0"))
+                        }
+                    },
+                    |value| Ok(value.len().to_string()),
                 )
             },
             Param::WithDefault {
@@ -57,28 +95,27 @@ impl Evaluator {
                 treat_empty_as_unset,
             } => self
                 .eval_identifier(identifier, *treat_empty_as_unset)
-                .unwrap_or_else(|| self.eval_node(default)),
+                .map_or_else(|| self.eval_node(default), Ok),
             Param::WithAlt {
                 identifier,
                 alt,
                 treat_empty_as_unset,
             } => self
                 .eval_identifier(identifier, *treat_empty_as_unset)
-                .map_or_else(|| String::from(""), |_| self.eval_node(alt)),
+                .map_or_else(|| self.eval_node(alt), |_| Ok(String::from(""))),
             Param::WithError {
                 identifier,
                 error,
                 treat_empty_as_unset,
             } => self
                 .eval_identifier(identifier, *treat_empty_as_unset)
-                .unwrap_or_else(|| {
-                    error.map(str::to_string).unwrap_or_else(|| {
-                        if *treat_empty_as_unset {
-                            format!("{:?} is unset or empty", identifier)
-                        } else {
-                            format!("{:?} is unset", identifier)
-                        }
-                    })
+                .ok_or_else(|| {
+                    let msg = error
+                        .map(str::to_string)
+                        .unwrap_or_else(|| error_message(identifier, *treat_empty_as_unset));
+
+                    // TODO wrong line/col
+                    Error::new(msg, 0, 0)
                 }),
         }
     }
@@ -109,19 +146,22 @@ mod tests {
     #[test]
     fn simple_index() {
         let positional_vars = vec![String::from("one 2")];
-        let mut evaluator = Evaluator::new(false, positional_vars, HashMap::new());
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
                 identifier: Identifier::Indexed(1)
             })])),
-            String::from("one 2")
+            Ok(String::from("one 2"))
         );
     }
 
     #[test]
     fn simple_index_missing() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -131,15 +171,16 @@ mod tests {
                 }),
                 Node::Text(" def")
             ])),
-            String::from("abc  def")
+            Ok(String::from("abc  def"))
         );
     }
 
     #[test]
     fn simple_index_text() {
+        let positional_vars = Vec::new();
         let mut named_vars = HashMap::new();
         named_vars.insert(String::from("VAR"), String::from("one 2"));
-        let mut evaluator = Evaluator::new(false, Vec::new(), named_vars);
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -149,13 +190,15 @@ mod tests {
                 }),
                 Node::Text(" post")
             ])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn simple_named_missing() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -165,25 +208,29 @@ mod tests {
                 }),
                 Node::Text(" def")
             ])),
-            String::from("abc  def")
+            Ok(String::from("abc  def"))
         );
     }
 
     #[test]
     fn simple_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
                 identifier: Identifier::Named("VAR")
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn simple_named_text() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -193,25 +240,29 @@ mod tests {
                 }),
                 Node::Text(" post")
             ])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn braced_index() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
                 identifier: Identifier::Indexed(1),
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn braced_index_text() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = vec![String::from("value")];
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -221,25 +272,30 @@ mod tests {
                 }),
                 Node::Text(" post")
             ])),
-            String::from("")
+            Ok(String::from("pre value post"))
         );
     }
 
     #[test]
     fn braced_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
                 identifier: Identifier::Named("VAR"),
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn braced_named_text() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let mut named_vars = HashMap::new();
+        named_vars.insert(String::from("VAR"), String::from("value"));
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
@@ -249,13 +305,15 @@ mod tests {
                 }),
                 Node::Text(" post"),
             ])),
-            String::from("")
+            Ok(String::from("pre value post"))
         );
     }
 
     #[test]
     fn default_index() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -263,13 +321,15 @@ mod tests {
                 default: Box::new(Node::Text("default")),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn default_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -277,13 +337,15 @@ mod tests {
                 default: Box::new(Node::Text("default")),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn default_pattern() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -293,13 +355,15 @@ mod tests {
                 })),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn default_index_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -307,13 +371,15 @@ mod tests {
                 default: Box::new(Node::Text("default")),
                 treat_empty_as_unset: true,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn default_named_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -321,13 +387,15 @@ mod tests {
                 default: Box::new(Node::Text("default")),
                 treat_empty_as_unset: true,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn default_pattern_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
@@ -337,13 +405,15 @@ mod tests {
                 })),
                 treat_empty_as_unset: true,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn alt_index() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -351,13 +421,15 @@ mod tests {
                 alt: Box::new(Node::Text("alt")),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from("alt"))
         );
     }
 
     #[test]
     fn alt_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -365,13 +437,15 @@ mod tests {
                 alt: Box::new(Node::Text("alt")),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from("alt"))
         );
     }
 
     #[test]
     fn alt_pattern() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -381,13 +455,15 @@ mod tests {
                 })),
                 treat_empty_as_unset: false,
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn alt_index_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -395,13 +471,15 @@ mod tests {
                 alt: Box::new(Node::Text("alt")),
                 treat_empty_as_unset: true,
             })])),
-            String::from("")
+            Ok(String::from("alt"))
         );
     }
 
     #[test]
     fn alt_named_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -409,13 +487,15 @@ mod tests {
                 alt: Box::new(Node::Text("alt")),
                 treat_empty_as_unset: true,
             })])),
-            String::from("")
+            Ok(String::from("alt"))
         );
     }
 
     #[test]
     fn alt_pattern_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
@@ -425,13 +505,15 @@ mod tests {
                 })),
                 treat_empty_as_unset: true
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_index() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -439,13 +521,15 @@ mod tests {
                 error: Some("msg"),
                 treat_empty_as_unset: false
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -453,13 +537,15 @@ mod tests {
                 error: Some("msg"),
                 treat_empty_as_unset: false
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_index_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -467,13 +553,15 @@ mod tests {
                 error: Some("msg"),
                 treat_empty_as_unset: true
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_named_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -481,13 +569,15 @@ mod tests {
                 error: Some("msg"),
                 treat_empty_as_unset: true
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_no_message() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -495,13 +585,15 @@ mod tests {
                 error: None,
                 treat_empty_as_unset: false
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn error_no_message_no_empty() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
@@ -509,31 +601,35 @@ mod tests {
                 error: None,
                 treat_empty_as_unset: true
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn len_index() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
                 identifier: Identifier::Indexed(1)
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 
     #[test]
     fn len_named() {
-        let mut evaluator = Evaluator::new(false, Vec::new(), HashMap::new());
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
                 identifier: Identifier::Named("VAR")
             })])),
-            String::from("")
+            Ok(String::from(""))
         );
     }
 }

@@ -5,11 +5,13 @@ use crate::token::Token;
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Error {
     pub message: String,
+    pub line: usize,
+    pub col: usize,
 }
 
 impl Error {
-    const fn new(message: String) -> Self {
-        Self { message }
+    const fn new(message: String, line: usize, col: usize) -> Self {
+        Self { message, line, col }
     }
 }
 
@@ -58,8 +60,11 @@ impl<'a> Parser<'a> {
                 self.next_token();
                 Ok(Node::Param(self.parse_param()?))
             },
-            Some(token) => Err(Error::new(format!("Unexpected token {:?}", token))),
-            _ => Err(Error::new(String::from("Unexpected EOF"))),
+            Some(token) => {
+                let msg = format!("Unexpected token {}", token);
+                Err(self.create_error(&msg))
+            },
+            _ => Err(self.create_error("Unexpected EOF")),
         }
     }
 
@@ -78,16 +83,12 @@ impl<'a> Parser<'a> {
                         match self.next_token() {
                             Some(Token::CloseBrace) => {},
                             Some(token) => {
-                                return Err(Error::new(format!(
-                                    "Expected close brace, found {:?}",
+                                return Err(self.create_error(&format!(
+                                    "Expected close brace, found {}",
                                     token
                                 )));
                             },
-                            _ => {
-                                return Err(Error::new(String::from(
-                                    "Expected close brace, found EOF",
-                                )))
-                            },
+                            _ => return Err(self.create_error("Expected close brace, found EOF")),
                         }
 
                         Ok(param)
@@ -123,32 +124,34 @@ impl<'a> Parser<'a> {
                             },
                             Some(Token::CloseBrace) => Param::Simple { identifier },
                             Some(ref token) => {
-                                return Err(Error::new(format!(
-                                    "Invalid param, unexpected token {:?}",
+                                return Err(self.create_error(&format!(
+                                    "Invalid param, unexpected token {}",
                                     token
                                 )))
                             },
-                            _ => {
-                                return Err(Error::new(String::from(
-                                    "Invalid param, unexpected EOF",
-                                )))
-                            },
+                            _ => return Err(self.create_error("Invalid param, unexpected EOF")),
                         };
 
                         if token != Some(Token::CloseBrace) {
                             token = self.next_token();
 
-                            if token != Some(Token::CloseBrace) {
-                                return Err(Error::new(format!(
-                                    "Expected close brace, found {:?}",
-                                    token
-                                )));
+                            match token {
+                                Some(Token::CloseBrace) => {},
+                                Some(token) => {
+                                    return Err(self.create_error(&format!(
+                                        "Expected close brace, found {}",
+                                        token
+                                    )))
+                                },
+                                None => {
+                                    return Err(self.create_error("Expected close brace, found EOF"))
+                                },
                             }
                         }
 
                         Ok(param)
                     },
-                    None => Err(Error::new(String::from("Expected param, found EOF"))),
+                    None => Err(self.create_error("Expected param, found EOF")),
                 }
             },
             _ => Ok(Param::Simple {
@@ -160,7 +163,7 @@ impl<'a> Parser<'a> {
     fn parse_text(&mut self) -> Result<Option<&'a str>, Error> {
         match self.next_token() {
             Some(Token::Text(text)) => Ok(Some(text)),
-            Some(token) => Err(Error::new(format!("Expected text, found {:?}", token))),
+            Some(token) => Err(self.create_error(&format!("Expected text, found {}", token))),
             None => Ok(None),
         }
     }
@@ -169,12 +172,13 @@ impl<'a> Parser<'a> {
         match self.next_token() {
             Some(Token::Identifier(name)) => Ok(Identifier::Named(name)),
             Some(Token::Index(index)) => Ok(Identifier::Indexed(index)),
-            Some(token) => Err(Error::new(format!(
-                "Expected identifier, found {:?}",
-                token
-            ))),
-            None => Err(Error::new(String::from("Expected identifier, found EOF"))),
+            Some(token) => Err(self.create_error(&format!("Expected identifier, found {}", token))),
+            None => Err(self.create_error("Expected identifier, found EOF")),
         }
+    }
+
+    fn create_error(&self, msg: &str) -> Error {
+        Error::new(msg.to_string(), self.lexer.line(), self.lexer.col())
     }
 }
 
