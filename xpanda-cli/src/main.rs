@@ -18,21 +18,21 @@ fn main() -> ExitCode {
 
     let Args {
         no_unset,
-        var_file,
+        var_files,
         env_vars,
         named_vars,
         positional_vars,
     } = Args::parse();
     let has_user_provided_vars =
-        var_file.is_some() || !named_vars.is_empty() || !positional_vars.is_empty();
+        !var_files.is_empty() || !named_vars.is_empty() || !positional_vars.is_empty();
     let mut builder = Xpanda::builder().no_unset(no_unset);
 
     if env_vars || !has_user_provided_vars {
         builder = builder.with_env_vars();
     }
 
-    if let Some(file) = var_file {
-        let file_vars = match read_var_file(&file) {
+    for var_file in var_files {
+        let file_vars = match read_var_file(&var_file) {
             Ok(vars) => vars,
             Err(error) => {
                 stderr
