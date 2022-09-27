@@ -40,61 +40,10 @@ pub enum Param<'a> {
     },
 }
 
-impl Display for Param<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Param::Simple { identifier } => write!(f, "{}", identifier),
-            Param::Length { identifier } => write!(f, "${{#{}}}", identifier),
-            Param::WithDefault {
-                identifier,
-                default,
-                treat_empty_as_unset,
-            } => write!(
-                f,
-                "${{{}{}-{}}}",
-                identifier,
-                if *treat_empty_as_unset { ":" } else { "" },
-                default
-            ),
-            Param::WithAlt {
-                identifier,
-                alt,
-                treat_empty_as_unset,
-            } => write!(
-                f,
-                "${{{}{}+{}}}",
-                identifier,
-                if *treat_empty_as_unset { ":" } else { "" },
-                alt
-            ),
-            Param::WithError {
-                identifier,
-                error,
-                treat_empty_as_unset,
-            } => write!(
-                f,
-                "${{{}{}?{}}}",
-                identifier,
-                if *treat_empty_as_unset { ":" } else { "" },
-                error.unwrap_or("")
-            ),
-        }
-    }
-}
-
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Node<'a> {
     Text(&'a str),
     Param(Param<'a>),
-}
-
-impl Display for Node<'_> {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Node::Text(text) => write!(f, "{}", text),
-            Node::Param(param) => write!(f, "{}", param),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

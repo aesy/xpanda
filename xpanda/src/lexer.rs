@@ -10,7 +10,7 @@ pub struct Lexer<'a> {
     col: usize,
     previous_token: Option<Token<'a>>,
     is_param: bool,
-    brace_level: usize,
+    nesting_level: usize,
 }
 
 impl<'a> Lexer<'a> {
@@ -26,7 +26,7 @@ impl<'a> Lexer<'a> {
             col: 1,
             previous_token: None,
             is_param,
-            brace_level: 0,
+            nesting_level: 0,
         }
     }
 
@@ -38,15 +38,15 @@ impl<'a> Lexer<'a> {
         };
 
         match token {
-            Some(Token::OpenBrace) => self.brace_level += 1,
-            Some(Token::CloseBrace) => self.brace_level -= 1,
+            Some(Token::OpenBrace) => self.nesting_level += 1,
+            Some(Token::CloseBrace) => self.nesting_level -= 1,
             _ => {},
         }
 
         match token {
             _ if !self.is_param => self.is_param = true,
             Some(Token::DollarSign) => self.is_param = true,
-            _ if self.brace_level == 0 => self.is_param = false,
+            _ if self.nesting_level == 0 => self.is_param = false,
             _ => self.is_param = true,
         }
 

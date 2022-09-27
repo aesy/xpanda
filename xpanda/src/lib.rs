@@ -21,6 +21,13 @@ pub struct Error {
     pub col: usize,
 }
 
+impl Error {
+    #[must_use]
+    pub const fn new(message: String, line: usize, col: usize) -> Self {
+        Self { message, line, col }
+    }
+}
+
 impl From<parser::Error> for Error {
     fn from(error: parser::Error) -> Self {
         Self {
