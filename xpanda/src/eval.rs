@@ -54,77 +54,97 @@ impl Evaluator {
     }
 
     fn eval_param(&self, param: &Param) -> Result<String, Error> {
-        fn error_message(identifier: &Identifier, treat_empty_as_unset: bool) -> String {
-            if treat_empty_as_unset {
-                format!("'{}' is unset or empty", identifier)
-            } else {
-                format!("'{}' is unset", identifier)
-            }
-        }
-
         match param {
-            Param::Simple { identifier } => {
-                self.eval_identifier(identifier, false).map_or_else(
-                    || {
-                        if self.no_unset {
-                            // TODO wrong line/col
-                            Err(Error::new(error_message(identifier, false), 0, 0))
-                        } else {
-                            Ok(String::from(""))
-                        }
-                    },
-                    Ok,
-                )
-            },
-            Param::Length { identifier } => {
-                self.eval_identifier(identifier, false).map_or_else(
-                    || {
-                        if self.no_unset {
-                            // TODO wrong line/col
-                            Err(Error::new(error_message(identifier, false), 0, 0))
-                        } else {
-                            Ok(String::from("0"))
-                        }
-                    },
-                    |value| Ok(value.len().to_string()),
-                )
-            },
+            Param::Simple { identifier } => self.eval_simple_param(identifier),
             Param::WithDefault {
                 identifier,
                 default,
                 treat_empty_as_unset,
-            } => self
-                .eval_identifier(identifier, *treat_empty_as_unset)
-                .map_or_else(|| self.eval_node(default), Ok),
+            } => self.eval_default_param(identifier, default, *treat_empty_as_unset),
             Param::WithAlt {
                 identifier,
                 alt,
                 treat_empty_as_unset,
-            } => self
-                .eval_identifier(identifier, !*treat_empty_as_unset)
-                .map_or_else(|| Ok(String::from("")), |_| self.eval_node(alt)),
+            } => self.eval_alt_param(identifier, alt, *treat_empty_as_unset),
             Param::WithError {
                 identifier,
                 error,
                 treat_empty_as_unset,
-            } => self
-                .eval_identifier(identifier, *treat_empty_as_unset)
-                .ok_or_else(|| {
-                    let msg = error
-                        .map(str::to_string)
-                        .unwrap_or_else(|| error_message(identifier, *treat_empty_as_unset));
-
-                    // TODO wrong line/col
-                    Error::new(msg, 0, 0)
-                }),
+            } => self.eval_error_param(identifier, *error, *treat_empty_as_unset),
+            Param::Length { identifier } => self.eval_length_param(identifier),
         }
     }
 
-    fn eval_identifier(
+    fn eval_simple_param(&self, identifier: &Identifier) -> Result<String, Error> {
+        self.eval_identifier(identifier).map_or_else(
+            || {
+                if self.no_unset {
+                    // TODO wrong line/col
+                    Err(Error::new(Self::error_message(identifier, false), 0, 0))
+                } else {
+                    Ok(String::from(""))
+                }
+            },
+            Ok,
+        )
+    }
+
+    fn eval_default_param(
         &self,
         identifier: &Identifier,
+        default: &Node,
         treat_empty_as_unset: bool,
-    ) -> Option<String> {
+    ) -> Result<String, Error> {
+        self.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset && value.is_empty()))
+            .map_or_else(|| self.eval_node(default), Ok)
+    }
+
+    fn eval_alt_param(
+        &self,
+        identifier: &Identifier,
+        alt: &Node,
+        treat_empty_as_unset: bool,
+    ) -> Result<String, Error> {
+        self.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset && value.is_empty()))
+            .map_or_else(|| Ok(String::from("")), |_| self.eval_node(alt))
+    }
+
+    fn eval_error_param(
+        &self,
+        identifier: &Identifier,
+        error: Option<&str>,
+        treat_empty_as_unset: bool,
+    ) -> Result<String, Error> {
+        self.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset && value.is_empty()))
+            .ok_or_else(|| {
+                let msg = error.map_or_else(
+                    || Self::error_message(identifier, treat_empty_as_unset),
+                    str::to_string,
+                );
+
+                // TODO wrong line/col
+                Error::new(msg, 0, 0)
+            })
+    }
+
+    fn eval_length_param(&self, identifier: &Identifier) -> Result<String, Error> {
+        self.eval_identifier(identifier).map_or_else(
+            || {
+                if self.no_unset {
+                    // TODO wrong line/col
+                    Err(Error::new(Self::error_message(identifier, false), 0, 0))
+                } else {
+                    Ok(String::from("0"))
+                }
+            },
+            |value| Ok(value.len().to_string()),
+        )
+    }
+
+    fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
         match identifier {
             Identifier::Named(name) => self.named_vars.get(*name).cloned(),
             Identifier::Indexed(index) => {
@@ -135,7 +155,14 @@ impl Evaluator {
                 }
             },
         }
-        .filter(|value| !(treat_empty_as_unset && value.is_empty()))
+    }
+
+    fn error_message(identifier: &Identifier, treat_empty_as_unset: bool) -> String {
+        if treat_empty_as_unset {
+            format!("'{}' is unset or empty", identifier)
+        } else {
+            format!("'{}' is unset", identifier)
+        }
     }
 }
 
