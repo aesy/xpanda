@@ -1,13 +1,8 @@
+use crate::str_read::StrRead;
 use crate::token::Token;
-use std::iter::Peekable;
-use std::str::CharIndices;
 
 pub struct Lexer<'a> {
-    source: &'a str,
-    chars: Peekable<CharIndices<'a>>,
-    index: usize,
-    line: usize,
-    col: usize,
+    reader: StrRead<'a>,
     previous_token: Option<Token<'a>>,
     is_param: bool,
     nesting_level: usize,
@@ -15,17 +10,10 @@ pub struct Lexer<'a> {
 
 impl<'a> Lexer<'a> {
     pub fn new(source: &'a str) -> Self {
-        let mut chars = source.char_indices().peekable();
-        let is_param = matches!(chars.peek(), Some((_, '$')));
-
         Self {
-            source,
-            chars,
-            index: 0,
-            line: 1,
-            col: 1,
+            reader: StrRead::new(source),
             previous_token: None,
-            is_param,
+            is_param: false,
             nesting_level: 0,
         }
     }
@@ -56,54 +44,16 @@ impl<'a> Lexer<'a> {
     }
 
     pub const fn line(&self) -> usize {
-        self.line
+        self.reader.line()
     }
 
     pub const fn col(&self) -> usize {
-        self.col
-    }
-
-    fn peek_char(&mut self) -> Option<char> {
-        self.chars.peek().map(|(_, c)| *c)
-    }
-
-    fn consume_char(&mut self) -> Option<char> {
-        let (i, c) = self.chars.next()?;
-
-        self.index = i + c.len_utf8();
-
-        if c == '\n' {
-            self.line += 1;
-            self.col = 1;
-        } else {
-            self.col += 1;
-        }
-
-        Some(c)
-    }
-
-    fn consume_while<P>(&mut self, predicate: P) -> &'a str
-    where
-        P: Fn(char) -> bool,
-    {
-        let start = self.index;
-
-        while let Some(c) = self.peek_char() {
-            if !predicate(c) {
-                break;
-            }
-
-            self.consume_char();
-        }
-
-        let end = self.index;
-
-        &self.source[start..end]
+        self.reader.col()
     }
 
     fn read_text(&mut self) -> Option<Token<'a>> {
         let end = if self.is_param { '}' } else { '$' };
-        let text = self.consume_while(|c| c != end);
+        let text = self.reader.consume_while(|c| c != end);
 
         if text.is_empty() {
             None
@@ -113,54 +63,56 @@ impl<'a> Lexer<'a> {
     }
 
     fn read_param(&mut self) -> Option<Token<'a>> {
-        let next_token = self.peek_char()?;
+        let next_char = self.reader.peek_char()?;
 
         if let Some(Token::Dash | Token::Plus | Token::QuestionMark) = self.previous_token {
-            if next_token != '$' && next_token != '}' {
+            if next_char != '$' && next_char != '}' {
                 return self.read_text();
             }
         };
 
-        let token = match next_token {
+        let token = match next_char {
             '{' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::OpenBrace
             },
             '}' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::CloseBrace
             },
             '$' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::DollarSign
             },
             ':' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::Colon
             },
             '-' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::Dash
             },
             '+' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::Plus
             },
             '?' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::QuestionMark
             },
             '#' => {
-                self.consume_char()?;
+                self.reader.consume_char()?;
                 Token::PoundSign
             },
             c if c.is_numeric() => {
-                let text = self.consume_while(char::is_numeric);
+                let text = self.reader.consume_while(char::is_numeric);
                 let number = text.parse().unwrap_or(0);
                 Token::Index(number)
             },
             c if c.is_alphanumeric() || c == '_' => {
-                let text = self.consume_while(|c| c.is_alphanumeric() || c == '_');
+                let text = self
+                    .reader
+                    .consume_while(|c| c.is_alphanumeric() || c == '_');
                 Token::Identifier(text)
             },
             _ => self.read_text()?,

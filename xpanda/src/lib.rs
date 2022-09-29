@@ -6,6 +6,7 @@ mod ast;
 mod eval;
 mod lexer;
 mod parser;
+mod str_read;
 mod token;
 
 use crate::eval::Evaluator;
