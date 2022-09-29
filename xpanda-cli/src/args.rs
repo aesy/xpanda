@@ -54,11 +54,11 @@ use std::path::PathBuf;
 /// `xpanda -v VAR=value < some_file`     output a copy of `some_file` with `$VAR` substituted with
 ///                                       `value` using `-v`.
 #[derive(Parser, Debug)]
-#[clap(name = "Xpanda", version, verbatim_doc_comment)]
+#[command(name = "Xpanda", version, verbatim_doc_comment)]
 pub struct Args {
     /// With this flag set, missing variables without any default value will cause the program
     /// to exit with a status code of 1. Off by default.
-    #[clap(long = "no-unset", short = 'u', verbatim_doc_comment)]
+    #[arg(long = "no-unset", short = 'u', verbatim_doc_comment)]
     pub no_unset: bool,
 
     /// Provide a file to source variable values from.
@@ -75,11 +75,10 @@ pub struct Args {
     /// Example:
     /// KEY1=value
     /// KEY2=value
-    #[clap(
+    #[arg(
         long = "var-file",
         short = 'f',
-        multiple = true,
-        number_of_values = 1,
+        num_args = 1,
         value_hint = clap::ValueHint::FilePath,
         verbatim_doc_comment
     )]
@@ -89,7 +88,7 @@ pub struct Args {
     /// addition to any other provided variables. Named variables will always take precedence
     /// over environment variables though. This flag is implicitly true if no other variables
     /// are provided.
-    #[clap(long = "env-vars", short = 'e', verbatim_doc_comment)]
+    #[arg(long = "env-vars", short = 'e', verbatim_doc_comment)]
     pub env_vars: bool,
 
     /// Adds a named variable to source from. The value should be a key value pair separated
@@ -100,12 +99,11 @@ pub struct Args {
     /// Using this option will override the default setting to source values from environment
     /// variables. To continue sourcing from environment values as well, add the `--env-vars`
     /// flag.
-    #[clap(
+    #[arg(
         long = "var",
         short = 'v',
-        multiple = true,
-        number_of_values = 1,
-        parse(try_from_str = read_named_arg),
+        num_args = 1,
+        value_parser = read_named_arg,
         verbatim_doc_comment
     )]
     pub named_vars: Vec<(String, String)>,
@@ -116,6 +114,6 @@ pub struct Args {
     /// If any positional variables are provided then the default setting to source values
     /// from environment variables will be overridden. To continue sourcing from environment
     /// values as well, add the `--env-vars` flag.
-    #[clap(multiple = true, verbatim_doc_comment)]
+    #[arg(num_args = 0.., verbatim_doc_comment)]
     pub positional_vars: Vec<String>,
 }
