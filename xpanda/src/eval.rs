@@ -74,6 +74,7 @@ impl Evaluator {
             } => self.eval_error_param(identifier, error.clone(), *treat_empty_as_unset),
             Param::Length { identifier } => self.eval_length_param(identifier),
             Param::Arity => self.eval_arity_param(),
+            Param::Ref { identifier } => self.eval_ref_param(identifier),
         }
     }
 
@@ -149,6 +150,11 @@ impl Evaluator {
     #[allow(clippy::unnecessary_wraps)]
     fn eval_arity_param(&self) -> Result<String, Error> {
         Ok(self.positional_vars.len().to_string())
+    }
+
+    fn eval_ref_param(&self, identifier: &Identifier) -> Result<String, Error> {
+        self.eval_simple_param(identifier)
+            .and_then(|name| self.eval_simple_param(&Identifier::Named(Cow::from(name))))
     }
 
     fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
@@ -625,6 +631,37 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Arity)])),
             Ok(String::from("2"))
+        );
+    }
+
+    #[test]
+    fn ref_index() {
+        let positional_vars = vec![String::from("VAR")];
+        let mut named_vars = HashMap::new();
+        named_vars.insert(String::from("VAR"), String::from("woop"));
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
+
+        assert_eq!(
+            evaluator.eval(&Ast::new(vec![Node::Param(Param::Ref {
+                identifier: Identifier::Indexed(1)
+            })])),
+            Ok(String::from("woop"))
+        );
+    }
+
+    #[test]
+    fn ref_named() {
+        let positional_vars = Vec::new();
+        let mut named_vars = HashMap::new();
+        named_vars.insert(String::from("VAR1"), String::from("VAR2"));
+        named_vars.insert(String::from("VAR2"), String::from("woop"));
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
+
+        assert_eq!(
+            evaluator.eval(&Ast::new(vec![Node::Param(Param::Ref {
+                identifier: Identifier::Named(Cow::from("VAR1"))
+            })])),
+            Ok(String::from("woop"))
         );
     }
 }

@@ -87,7 +87,7 @@ impl<'a> Lexer<'a> {
         let next_char = self.reader.peek_char()?;
         let can_be_identifier = matches!(
             self.previous_token,
-            Some(Token::DollarSign | Token::OpenBrace | Token::PoundSign)
+            Some(Token::DollarSign | Token::OpenBrace | Token::PoundSign | Token::ExclamationMark)
         );
         let mut is_escaped = self.reader.peek_count(2) == "$$";
         let token = match next_char {
@@ -102,6 +102,10 @@ impl<'a> Lexer<'a> {
             '}' => {
                 self.reader.consume_char();
                 Token::CloseBrace
+            },
+            '!' => {
+                self.reader.consume_char();
+                Token::ExclamationMark
             },
             ':' => {
                 self.reader.consume_char();
@@ -584,6 +588,33 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(lexer.next_token(), Some(Token::PoundSign));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn ref_index() {
+        let mut lexer = Lexer::new("${!1}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::ExclamationMark));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
+    fn ref_named() {
+        let mut lexer = Lexer::new("${!VAR}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::ExclamationMark));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Identifier(Cow::from("VAR")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }

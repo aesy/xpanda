@@ -41,16 +41,32 @@ impl<'a> Parser<'a> {
         Ok(Ast::new(nodes))
     }
 
+    #[must_use]
     fn peek_token(&mut self) -> Option<&Token<'a>> {
         self.peeked
             .get_or_insert_with(|| self.lexer.next_token())
             .as_ref()
     }
 
+    #[must_use]
     fn next_token(&mut self) -> Option<Token<'a>> {
         match self.peeked.take() {
             Some(option) => option,
             None => self.lexer.next_token(),
+        }
+    }
+
+    fn skip_token(&mut self) {
+        self.next_token();
+    }
+
+    fn expect_token(&mut self, expected: &Token) -> Result<(), Error> {
+        match self.next_token() {
+            Some(expected) => Ok(()),
+            Some(unexpected) => {
+                Err(self.create_error(format!("Expected {}, found {}", expected, unexpected)))
+            },
+            _ => Err(self.create_error(format!("Expected {}, found EOF", expected))),
         }
     }
 
@@ -60,12 +76,12 @@ impl<'a> Parser<'a> {
                 self.parse_text()?.unwrap_or_else(|| Cow::from("")),
             )),
             Some(Token::DollarSign) => {
-                self.next_token();
+                self.skip_token();
                 Ok(Node::Param(self.parse_param()?))
             },
             Some(token) => {
                 let msg = format!("Unexpected token {}", token);
-                Err(self.create_error(&msg))
+                Err(self.create_error(msg))
             },
             _ => Err(self.create_error("Unexpected EOF")),
         }
@@ -74,102 +90,89 @@ impl<'a> Parser<'a> {
     fn parse_param(&mut self) -> Result<Param<'a>, Error> {
         match self.peek_token() {
             Some(Token::OpenBrace) => {
-                self.next_token();
+                self.skip_token();
 
                 match self.peek_token() {
-                    Some(Token::PoundSign) => {
-                        self.next_token();
-
-                        match self.peek_token() {
-                            Some(Token::CloseBrace) => {
-                                self.next_token();
-                                Ok(Param::Arity)
-                            },
-                            Some(token) => {
-                                let param = Param::Length {
-                                    identifier: self.parse_identifier()?,
-                                };
-
-                                match self.next_token() {
-                                    Some(Token::CloseBrace) => Ok(param),
-                                    Some(token) => Err(self.create_error(format!(
-                                        "Expected close brace, found {}",
-                                        token
-                                    ))),
-                                    _ => Err(self.create_error("Expected close brace, found EOF")),
-                                }
-                            },
-                            _ => {
-                                Err(self
-                                    .create_error("Expected identifier or close brace, found EOF"))
-                            },
-                        }
-                    },
-                    Some(_) => {
-                        let identifier = self.parse_identifier()?;
-                        let mut treat_empty_as_unset = false;
-                        let mut token = self.next_token();
-
-                        if token == Some(Token::Colon) {
-                            treat_empty_as_unset = true;
-                            token = self.next_token();
-                        }
-
-                        let param = match token {
-                            Some(Token::Dash) => Param::WithDefault {
-                                identifier,
-                                default: Box::new(self.parse_node()?),
-                                treat_empty_as_unset,
-                            },
-                            Some(Token::Plus) => Param::WithAlt {
-                                identifier,
-                                alt: Box::new(self.parse_node()?),
-                                treat_empty_as_unset,
-                            },
-                            Some(Token::QuestionMark) => Param::WithError {
-                                identifier,
-                                error: match self.peek_token() {
-                                    Some(Token::Text(_)) => self.parse_text()?.map(Cow::from),
-                                    _ => None,
-                                },
-                                treat_empty_as_unset,
-                            },
-                            Some(Token::CloseBrace) => Param::Simple { identifier },
-                            Some(ref token) => {
-                                return Err(self.create_error(format!(
-                                    "Invalid param, unexpected token {}",
-                                    token
-                                )))
-                            },
-                            _ => return Err(self.create_error("Invalid param, unexpected EOF")),
-                        };
-
-                        if token != Some(Token::CloseBrace) {
-                            token = self.next_token();
-
-                            match token {
-                                Some(Token::CloseBrace) => {},
-                                Some(token) => {
-                                    return Err(self.create_error(format!(
-                                        "Expected close brace, found {}",
-                                        token
-                                    )))
-                                },
-                                None => {
-                                    return Err(self.create_error("Expected close brace, found EOF"))
-                                },
-                            }
-                        }
-
-                        Ok(param)
-                    },
+                    Some(Token::PoundSign) => self.parse_len_or_arity_param(),
+                    Some(Token::ExclamationMark) => self.parse_ref_param(),
+                    Some(_) => self.parse_other_param(),
                     None => Err(self.create_error("Expected param, found EOF")),
                 }
             },
-            _ => Ok(Param::Simple {
-                identifier: self.parse_identifier()?,
-            }),
+            _ => self.parse_simple_param(),
         }
+    }
+
+    fn parse_len_or_arity_param(&mut self) -> Result<Param<'a>, Error> {
+        self.expect_token(&Token::ExclamationMark)?;
+
+        match self.peek_token() {
+            Some(Token::CloseBrace) => {
+                self.skip_token();
+                Ok(Param::Arity)
+            },
+            Some(_) => {
+                let identifier = self.parse_identifier()?;
+                self.expect_token(&Token::CloseBrace)?;
+                Ok(Param::Length { identifier })
+            },
+            _ => Err(self.create_error("Expected identifier or close brace, found EOF")),
+        }
+    }
+
+    fn parse_ref_param(&mut self) -> Result<Param<'a>, Error> {
+        self.expect_token(&Token::ExclamationMark)?;
+        let identifier = self.parse_identifier()?;
+        self.expect_token(&Token::CloseBrace)?;
+        Ok(Param::Ref { identifier })
+    }
+
+    fn parse_other_param(&mut self) -> Result<Param<'a>, Error> {
+        let identifier = self.parse_identifier()?;
+        let mut treat_empty_as_unset = false;
+        let mut token = self.next_token();
+
+        if token == Some(Token::Colon) {
+            treat_empty_as_unset = true;
+            token = self.next_token();
+        }
+
+        let param = match token {
+            Some(Token::Dash) => Param::WithDefault {
+                identifier,
+                default: Box::new(self.parse_node()?),
+                treat_empty_as_unset,
+            },
+            Some(Token::Plus) => Param::WithAlt {
+                identifier,
+                alt: Box::new(self.parse_node()?),
+                treat_empty_as_unset,
+            },
+            Some(Token::QuestionMark) => Param::WithError {
+                identifier,
+                error: match self.peek_token() {
+                    Some(Token::Text(_)) => self.parse_text()?.map(Cow::from),
+                    _ => None,
+                },
+                treat_empty_as_unset,
+            },
+            Some(Token::CloseBrace) => Param::Simple { identifier },
+            Some(token) => {
+                return Err(self.create_error(format!("Invalid param, unexpected token {}", token)))
+            },
+            _ => return Err(self.create_error("Invalid param, unexpected EOF")),
+        };
+
+        if token != Some(Token::CloseBrace) {
+            self.expect_token(&Token::CloseBrace)?;
+        }
+
+        Ok(param)
+    }
+
+    fn parse_simple_param(&mut self) -> Result<Param<'a>, Error> {
+        let identifier = self.parse_identifier()?;
+        Ok(Param::Simple { identifier })
     }
 
     fn parse_text(&mut self) -> Result<Option<Cow<'a, str>>, Error> {
@@ -630,6 +633,32 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::Arity)]))
+        );
+    }
+
+    #[test]
+    fn ref_index() {
+        let mut lexer = Lexer::new("${!1}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Ref {
+                identifier: Identifier::Indexed(1)
+            })]))
+        );
+    }
+
+    #[test]
+    fn ref_named() {
+        let mut lexer = Lexer::new("${!VAR}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Ref {
+                identifier: Identifier::Named(Cow::from("VAR"))
+            })]))
         );
     }
 

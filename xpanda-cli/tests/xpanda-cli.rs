@@ -281,3 +281,27 @@ fn arity() {
         .success()
         .stdout(diff("2"));
 }
+
+#[test]
+fn ref_index() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(&["-v", "VAR=woop"])
+        .arg("VAR")
+        .write_stdin("${!1}")
+        .assert()
+        .success()
+        .stdout(diff("woop"));
+}
+
+#[test]
+fn ref_named() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(&["-v", "VAR1=VAR2"])
+        .args(&["-v", "VAR2=woop"])
+        .write_stdin("${!VAR1}")
+        .assert()
+        .success()
+        .stdout(diff("woop"));
+}

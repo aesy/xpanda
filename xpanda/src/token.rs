@@ -17,6 +17,7 @@ pub enum Token<'a> {
     Plus,
     QuestionMark,
     PoundSign,
+    ExclamationMark,
 }
 
 impl Display for Token<'_> {
@@ -33,6 +34,7 @@ impl Display for Token<'_> {
             Token::Plus => write!(f, "'+'"),
             Token::QuestionMark => write!(f, "'?'"),
             Token::PoundSign => write!(f, "'#'"),
+            Token::ExclamationMark => write!(f, "'!'"),
         }
     }
 }

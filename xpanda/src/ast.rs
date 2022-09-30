@@ -48,6 +48,10 @@ pub enum Param<'a> {
     },
     // ${#}
     Arity,
+    // ${!identifier}
+    Ref {
+        identifier: Identifier<'a>,
+    },
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
