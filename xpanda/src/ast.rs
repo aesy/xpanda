@@ -1,3 +1,4 @@
+use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -45,6 +46,8 @@ pub enum Param<'a> {
     Length {
         identifier: Identifier<'a>,
     },
+    // ${#}
+    Arity,
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]

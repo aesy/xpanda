@@ -73,6 +73,7 @@ impl Evaluator {
                 treat_empty_as_unset,
             } => self.eval_error_param(identifier, error.clone(), *treat_empty_as_unset),
             Param::Length { identifier } => self.eval_length_param(identifier),
+            Param::Arity => self.eval_arity_param(),
         }
     }
 
@@ -143,6 +144,11 @@ impl Evaluator {
             },
             |value| Ok(value.len().to_string()),
         )
+    }
+
+    #[allow(clippy::unnecessary_wraps)]
+    fn eval_arity_param(&self) -> Result<String, Error> {
+        Ok(self.positional_vars.len().to_string())
     }
 
     fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
@@ -607,6 +613,18 @@ mod tests {
                 identifier: Identifier::Named(Cow::from("VAR"))
             })])),
             Ok(String::from("4"))
+        );
+    }
+
+    #[test]
+    fn arity() {
+        let positional_vars = vec![String::from("one"), String::from("two")];
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
+
+        assert_eq!(
+            evaluator.eval(&Ast::new(vec![Node::Param(Param::Arity)])),
+            Ok(String::from("2"))
         );
     }
 }

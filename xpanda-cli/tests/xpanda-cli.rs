@@ -270,3 +270,14 @@ fn len_named() {
         .success()
         .stdout(diff("4"));
 }
+
+#[test]
+fn arity() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(&["one", "two"])
+        .write_stdin("${#}")
+        .assert()
+        .success()
+        .stdout(diff("2"));
+}

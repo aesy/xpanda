@@ -578,6 +578,17 @@ mod tests {
     }
 
     #[test]
+    fn arity() {
+        let mut lexer = Lexer::new("${#}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(lexer.next_token(), Some(Token::PoundSign));
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
+
+    #[test]
     fn simple_escaped() {
         let mut lexer = Lexer::new("pre $${VAR post");
 

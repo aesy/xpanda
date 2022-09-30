@@ -79,22 +79,31 @@ impl<'a> Parser<'a> {
                 match self.peek_token() {
                     Some(Token::PoundSign) => {
                         self.next_token();
-                        let param = Param::Length {
-                            identifier: self.parse_identifier()?,
-                        };
 
-                        match self.next_token() {
-                            Some(Token::CloseBrace) => {},
-                            Some(token) => {
-                                return Err(self.create_error(format!(
-                                    "Expected close brace, found {}",
-                                    token
-                                )));
+                        match self.peek_token() {
+                            Some(Token::CloseBrace) => {
+                                self.next_token();
+                                Ok(Param::Arity)
                             },
-                            _ => return Err(self.create_error("Expected close brace, found EOF")),
-                        }
+                            Some(token) => {
+                                let param = Param::Length {
+                                    identifier: self.parse_identifier()?,
+                                };
 
-                        Ok(param)
+                                match self.next_token() {
+                                    Some(Token::CloseBrace) => Ok(param),
+                                    Some(token) => Err(self.create_error(format!(
+                                        "Expected close brace, found {}",
+                                        token
+                                    ))),
+                                    _ => Err(self.create_error("Expected close brace, found EOF")),
+                                }
+                            },
+                            _ => {
+                                Err(self
+                                    .create_error("Expected identifier or close brace, found EOF"))
+                            },
+                        }
                     },
                     Some(_) => {
                         let identifier = self.parse_identifier()?;
@@ -610,6 +619,17 @@ mod tests {
             Ok(Ast::new(vec![Node::Param(Param::Length {
                 identifier: Identifier::Named(Cow::from("VAR"))
             })]))
+        );
+    }
+
+    #[test]
+    fn arity() {
+        let mut lexer = Lexer::new("${#}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![Node::Param(Param::Arity)]))
         );
     }
 
