@@ -4,6 +4,7 @@
 
 mod ast;
 mod eval;
+mod forward_peekable;
 mod lexer;
 mod parser;
 mod str_read;

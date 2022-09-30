@@ -1,5 +1,6 @@
 use crate::ast::{Ast, Identifier, Node, Param};
 use crate::parser::{self, Parser};
+use std::borrow::Cow;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -70,7 +71,7 @@ impl Evaluator {
                 identifier,
                 error,
                 treat_empty_as_unset,
-            } => self.eval_error_param(identifier, *error, *treat_empty_as_unset),
+            } => self.eval_error_param(identifier, error.clone(), *treat_empty_as_unset),
             Param::Length { identifier } => self.eval_length_param(identifier),
         }
     }
@@ -114,7 +115,7 @@ impl Evaluator {
     fn eval_error_param(
         &self,
         identifier: &Identifier,
-        error: Option<&str>,
+        error: Option<Cow<str>>,
         treat_empty_as_unset: bool,
     ) -> Result<String, Error> {
         self.eval_identifier(identifier)
@@ -122,7 +123,7 @@ impl Evaluator {
             .ok_or_else(|| {
                 let msg = error.map_or_else(
                     || Self::error_message(identifier, treat_empty_as_unset),
-                    str::to_string,
+                    Cow::into_owned,
                 );
 
                 // TODO wrong line/col
@@ -146,7 +147,7 @@ impl Evaluator {
 
     fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
         match identifier {
-            Identifier::Named(name) => self.named_vars.get(*name).cloned(),
+            Identifier::Named(name) => self.named_vars.get(name.as_ref()).cloned(),
             Identifier::Indexed(index) => {
                 if *index == 0 {
                     Some(self.positional_vars.join(" "))
@@ -192,11 +193,11 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
-                Node::Text("pre "),
+                Node::Text(Cow::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1)
                 }),
-                Node::Text(" post")
+                Node::Text(Cow::from(" post"))
             ])),
             Ok(String::from("pre  post"))
         );
@@ -210,11 +211,11 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
-                Node::Text("pre "),
+                Node::Text(Cow::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1),
                 }),
-                Node::Text(" post")
+                Node::Text(Cow::from(" post"))
             ])),
             Ok(String::from("pre woop post"))
         );
@@ -229,7 +230,7 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
-                identifier: Identifier::Named("VAR")
+                identifier: Identifier::Named(Cow::from("VAR"))
             })])),
             Ok(String::from("woop"))
         );
@@ -243,11 +244,11 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
-                Node::Text("pre "),
+                Node::Text(Cow::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named("VAR")
+                    identifier: Identifier::Named(Cow::from("VAR"))
                 }),
-                Node::Text(" post")
+                Node::Text(Cow::from(" post"))
             ])),
             Ok(String::from("pre  post"))
         );
@@ -262,11 +263,11 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![
-                Node::Text("pre "),
+                Node::Text(Cow::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named("VAR"),
+                    identifier: Identifier::Named(Cow::from("VAR")),
                 }),
-                Node::Text(" post")
+                Node::Text(Cow::from(" post"))
             ])),
             Ok(String::from("pre woop post"))
         );
@@ -281,7 +282,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text("default")),
+                default: Box::new(Node::Text(Cow::from("default"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("default"))
@@ -296,8 +297,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named("VAR"),
-                default: Box::new(Node::Text("default")),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                default: Box::new(Node::Text(Cow::from("default"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("default"))
@@ -313,9 +314,9 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named("DEF"),
+                    identifier: Identifier::Named(Cow::from("DEF")),
                 })),
                 treat_empty_as_unset: false,
             })])),
@@ -332,7 +333,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text("default")),
+                default: Box::new(Node::Text(Cow::from("default"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from("default"))
@@ -348,8 +349,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named("VAR"),
-                default: Box::new(Node::Text("default")),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                default: Box::new(Node::Text(Cow::from("default"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from("default"))
@@ -366,9 +367,9 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named("DEF"),
+                    identifier: Identifier::Named(Cow::from("DEF")),
                 })),
                 treat_empty_as_unset: true,
             })])),
@@ -385,7 +386,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text("alt")),
+                alt: Box::new(Node::Text(Cow::from("alt"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("alt"))
@@ -401,8 +402,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named("VAR"),
-                alt: Box::new(Node::Text("alt")),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                alt: Box::new(Node::Text(Cow::from("alt"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("alt"))
@@ -419,9 +420,9 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named("ALT"),
+                    identifier: Identifier::Named(Cow::from("ALT")),
                 })),
                 treat_empty_as_unset: false,
             })])),
@@ -438,7 +439,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text("alt")),
+                alt: Box::new(Node::Text(Cow::from("alt"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from(""))
@@ -454,8 +455,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named("VAR"),
-                alt: Box::new(Node::Text("alt")),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                alt: Box::new(Node::Text(Cow::from("alt"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from(""))
@@ -472,9 +473,9 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named("ALT")
+                    identifier: Identifier::Named(Cow::from("ALT"))
                 })),
                 treat_empty_as_unset: true
             })])),
@@ -491,7 +492,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some("msg"),
+                error: Some(Cow::from("msg")),
                 treat_empty_as_unset: false
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -506,8 +507,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named("VAR"),
-                error: Some("msg"),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                error: Some(Cow::from("msg")),
                 treat_empty_as_unset: false
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -524,7 +525,7 @@ mod tests {
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some("msg"),
+                error: Some(Cow::from("msg")),
                 treat_empty_as_unset: true
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -539,8 +540,8 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named("VAR"),
-                error: Some("msg"),
+                identifier: Identifier::Named(Cow::from("VAR")),
+                error: Some(Cow::from("msg")),
                 treat_empty_as_unset: true
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -555,7 +556,7 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 error: None,
                 treat_empty_as_unset: false
             })])),
@@ -572,7 +573,7 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named("VAR"),
+                identifier: Identifier::Named(Cow::from("VAR")),
                 error: None,
                 treat_empty_as_unset: true
             })])),
@@ -603,7 +604,7 @@ mod tests {
 
         assert_eq!(
             evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
-                identifier: Identifier::Named("VAR")
+                identifier: Identifier::Named(Cow::from("VAR"))
             })])),
             Ok(String::from("4"))
         );

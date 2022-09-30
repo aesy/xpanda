@@ -1,9 +1,13 @@
+use std::borrow::Cow;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Token<'a> {
-    Text(&'a str),
-    Identifier(&'a str),
+    /// Any text outside of a param
+    Text(Cow<'a, str>),
+    /// The name of a named variable or environment variable
+    Identifier(Cow<'a, str>),
+    /// The index of a positional variable
     Index(usize),
     OpenBrace,
     CloseBrace,

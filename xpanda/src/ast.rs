@@ -2,7 +2,9 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Identifier<'a> {
-    Named(&'a str),
+    // $name
+    Named(Cow<'a, str>),
+    // $1
     Indexed(usize),
 }
 
@@ -17,32 +19,37 @@ impl Display for Identifier<'_> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Param<'a> {
+    // $identifier | ${identifier}
     Simple {
         identifier: Identifier<'a>,
     },
-    Length {
-        identifier: Identifier<'a>,
-    },
+    // ${identifier-default} | ${identifier:-default}
     WithDefault {
         identifier: Identifier<'a>,
         default: Box<Node<'a>>,
         treat_empty_as_unset: bool,
     },
+    // ${identifier+default} | ${identifier:+default}
     WithAlt {
         identifier: Identifier<'a>,
         alt: Box<Node<'a>>,
         treat_empty_as_unset: bool,
     },
+    // ${identifier?} | ${identifier:?} | ${identifier?error} | ${identifier:?error}
     WithError {
         identifier: Identifier<'a>,
-        error: Option<&'a str>,
+        error: Option<Cow<'a, str>>,
         treat_empty_as_unset: bool,
+    },
+    // ${#identifier}
+    Length {
+        identifier: Identifier<'a>,
     },
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Node<'a> {
-    Text(&'a str),
+    Text(Cow<'a, str>),
     Param(Param<'a>),
 }
 

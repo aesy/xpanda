@@ -51,3 +51,10 @@ Error messages can be omitted in which case a default message will be used:
 | `${VAR:?}` | error: `VAR is unset or empty` | error: `VAR is unset or empty` |
 
 Note that writing `$VAR?` (without braces) is probably a mistake as the question mark is then not evaluated as part of the pattern.
+
+## Escaping
+
+Patterns can be escaped with a preceding `$`. 
+
+* `$${VAR}` will yield the text `${VAR}`.
+* `${VAR-$$text}` will yield the text `$text` if `VAR` is unset.

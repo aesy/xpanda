@@ -35,6 +35,21 @@ impl<'a> StrRead<'a> {
         self.iter.peek().map(|(_, c)| *c)
     }
 
+    pub fn peek_count(&mut self, n: usize) -> &'a str {
+        let start = self.index;
+        let mut end = start;
+
+        for i in 1..=n {
+            if let Some((index, char)) = self.iter.peek_nth(i - 1) {
+                end = index + char.len_utf8();
+            } else {
+                break;
+            }
+        }
+
+        &self.input[start..end]
+    }
+
     pub fn consume_char(&mut self) -> Option<char> {
         let (i, c) = self.iter.next()?;
 
@@ -50,9 +65,9 @@ impl<'a> StrRead<'a> {
         Some(c)
     }
 
-    pub fn consume_while<P>(&mut self, mut predicate: P) -> &'a str
+    pub fn consume_while<P>(&mut self, predicate: P) -> &'a str
     where
-        P: FnMut(char) -> bool,
+        P: Fn(char) -> bool,
     {
         let start = self.index;
 
@@ -79,6 +94,14 @@ mod tests {
         let mut reader = StrRead::new("hi");
         assert_eq!(reader.peek_char(), Some('h'));
         assert_eq!(reader.peek_char(), Some('h'));
+    }
+
+    #[test]
+    fn peek_count() {
+        let mut reader = StrRead::new("hello");
+        assert_eq!(reader.peek_count(6), "hello");
+        assert_eq!(reader.peek_count(4), "hell");
+        assert_eq!(reader.peek_count(0), "");
     }
 
     #[test]
