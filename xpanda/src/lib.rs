@@ -131,7 +131,7 @@ impl Xpanda {
     /// ```
     /// use xpanda::Xpanda;
     ///
-    /// let mut xpanda = Xpanda::default();
+    /// let xpanda = Xpanda::default();
     /// assert_eq!(xpanda.expand("${1:-default}"), Ok(String::from("default")));
     /// ```
     pub fn expand(&self, input: &str) -> Result<String, Error> {

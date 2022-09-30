@@ -8,11 +8,13 @@ The following patterns/rules are supported:
 | `${param}`          | `$param` if set and non-empty, else empty                  |
 | `${param-pattern}`  | `$param` if set, else `pattern`                            |
 | `${param:-pattern}` | `$param` if set and non-empty, else `pattern`              |
-| `${param+pattern}`  | `pattern` if `$param` is set and non-empty, else empty     |
-| `${param:+pattern}` | `pattern` if `$param` is set, else empty                   |
+| `${param+pattern}`  | `pattern` if `param` is set and non-empty, else empty      |
+| `${param:+pattern}` | `pattern` if `param` is set, else empty                    |
 | `${param?text}`     | `$param` if set, else exit with error `text`               |
 | `${param:?text}`    | `$param` if set and non-empty, else exit with error `text` |
 | `${#param}`         | Character length of `$param` if set, else `0`              |
+| `${#}`              | Yields the number of positional variables/arguments        |
+| `${!param}`         | The value of `param` is evaluated as a parameter           |
 
 ## Examples
 
@@ -27,6 +29,7 @@ The following patterns/rules are supported:
 | `${VAR?message}`      | error: `message` |              ` ` |     `example` |
 | `${VAR:?message}`     | error: `message` | error: `message` |     `example` |
 | `${#VAR}`             |              `0` |              `0` |           `7` |
+| `${!VAR}`             |              ` ` |              ` ` |    `$example` |
 
 With `-u` set (CLI) or `no_unset = true` (API), the following rules take precedence:
 
@@ -35,6 +38,7 @@ With `-u` set (CLI) or `no_unset = true` (API), the following rules take precede
 | `$VAR`    |     error |
 | `${VAR}`  |     error |
 | `${#VAR}` |     error |
+| `${!VAR}` |     error |
 
 Default/Alternative values can also be patterns:
 

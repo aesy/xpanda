@@ -11,23 +11,32 @@ This document lists which patterns from other programs that are supported/unsupp
 
 ## POSIX shell & bash
 
-| Pattern                  | Description                                                |        Status |
-|--------------------------|:-----------------------------------------------------------|--------------:|
-| `$param`                 | `$param` if set, else empty                                |     SUPPORTED |
-| `${param}`               | `$param` if set and non-empty, else empty                  |     SUPPORTED |
-| `${param-pattern}`       | `$param` if set, else `pattern`                            |     SUPPORTED |
-| `${param:-pattern}`      | `$param` if set and non-empty, else `pattern`              |     SUPPORTED |
-| `${param=pattern}`       | `$param` and assign `pattern` to it if not set             | NOT SUPPORTED |
-| `${param=-pattern}`      | `$param` and assign `pattern to it if not set or empty     | NOT SUPPORTED |
-| `${param+pattern}`       | `pattern` if `$param` is set and non-empty, else empty     |     SUPPORTED |
-| `${param:+pattern}`      | `pattern` if `$param` is set, else empty                   |     SUPPORTED |
-| `${param?text}`          | `$param` if set, else exit with error `text`               |     SUPPORTED |
-| `${param:?text}`         | `$param` if set and non-empty, else exit with error `text` |     SUPPORTED |
-| `${#param}`              | Character length of `$param` if set, else `0`              |     SUPPORTED |
-| `${param#text}`          | `$param` with start trimmed of `text` (lazy)               | NOT SUPPORTED |
-| `${param##text}`         | `$param` with start trimmed of `text` (greedy)             | NOT SUPPORTED |
-| `${param%text}`          | `$param` with end trimmed of `text` (lazy)                 | NOT SUPPORTED |
-| `${param%%text}`         | `$param` with end trimmed of `text` (greedy)               | NOT SUPPORTED |
-| `${param:offset}`        |                                                            | NOT SUPPORTED |
-| `${param:offset:length}` |                                                            | NOT SUPPORTED |
-| `${!param}`              |                                                            | NOT SUPPORTED |
+| Pattern                  | Description                                                                                       |        Status |
+|--------------------------|:--------------------------------------------------------------------------------------------------|--------------:|
+| `$param`                 | yields the value of `param` if set, else nothing                                                  |     SUPPORTED |
+| `${param}`               | yields the value of `param` if set and non-empty, else nothing                                    |     SUPPORTED |
+| `${param-word}`          | yields the value of `param` if set, else `word`                                                   |     SUPPORTED |
+| `${param:-word}`         | yields the value of `param` if set and non-empty, else `word`                                     |     SUPPORTED |
+| `${param=word}`          | yields the value of `param` and assign `word` to it if not set                                    | NOT SUPPORTED |
+| `${param=-word}`         | yields the value of `param` and assign `word to it if not set or empty                            | NOT SUPPORTED |
+| `${param+word}`          | yields `word` if `param` is set and non-empty, else nothing                                       |     SUPPORTED |
+| `${param:+word}`         | yields `word` if `param` is set, else nothing                                                     |     SUPPORTED |
+| `${param?word}`          | yields the value of `param` if set, else exit with error `word`                                   |     SUPPORTED |
+| `${param:?word}`         | yields the value of `param` if set and non-empty, else exit with error `word`                     |     SUPPORTED |
+| `${#param}`              | yields the length of `param` if set, else `0`                                                     |     SUPPORTED |
+| `${#}`                   | yields the number of arguments                                                                    |     SUPPORTED |
+| `${!param}`              | yields the value of the value of `param`                                                          |     SUPPORTED |
+| `${param#pattern}`       | yields the value of `param` with the start trimmed of `pattern` (lazy)                            | NOT SUPPORTED |
+| `${param##pattern}`      | yields the value of `param` with the start trimmed of `pattern` (greedy)                          | NOT SUPPORTED |
+| `${param%pattern}`       | yields the value of `param` with the end trimmed of `pattern` (lazy)                              | NOT SUPPORTED |
+| `${param%%pattern}`      | yields the value of `param` with the end trimmed of `pattern` (greedy)                            | NOT SUPPORTED |
+| `${param:offset}`        | yields the value of `param` from index `offset` to the end                                        | NOT SUPPORTED |
+| `${param:offset:length}` | yields the value of `param` from index `offset` to `offset` + `length`                            | NOT SUPPORTED |
+| `${param^}`              | yields the value of `param` with the first letter in uppercase if set and non-empty, else nothing | NOT SUPPORTED |
+| `${param^^}`             | yields the value of `param` in all uppercase if set and non-empty, else nothing                   | NOT SUPPORTED |
+| `${param,}`              | yields the value of `param` with the first letter in lowercase if set and non-empty, else nothing | NOT SUPPORTED |
+| `${param,,}`             | yields the value of `param` in all lowercase if set and non-empty, else nothing                   | NOT SUPPORTED |
+
+Arrays such as `$@` are not supported.
+
+`$0` is equivalent with `$*`.

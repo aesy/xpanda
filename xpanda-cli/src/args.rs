@@ -4,9 +4,9 @@ use std::path::PathBuf;
 
 /// Unix shell-like parameter expansion/variable substitution.
 ///
-/// This program will process standard input and copy it to standard output with all variables
-/// expanded/substituted using the provided variables. If no variables are provided, then values
-/// are sourced from environment variables.
+/// This program will process some input and copy it to some output with all variables
+/// expanded/substituted using the provided variables. If no variables are provided, then
+/// values are sourced from environment variables.
 ///
 /// Variables can appear in the input in any of the following forms:
 /// $VAR                substituted with the corresponding value for `VAR` if set, otherwise ``.
@@ -30,6 +30,8 @@ use std::path::PathBuf;
 ///                     printed to standard error.
 /// ${#VAR}             substituted with the length of the corresponding value for `VAR` if set,
 ///                     otherwise `0`.
+/// ${#}                substituted with number of positional variables.
+/// ${!VAR}             substituted with the value of the variable named by the value of `VAR`.
 ///
 /// `VAR` above is a named variable. Positional variables are also supported and are passed as
 /// trailing arguments to the program (see the examples). They can be referenced using their
@@ -79,6 +81,7 @@ pub struct Args {
         long = "var-file",
         short = 'f',
         num_args = 1,
+        value_name = "FILE",
         value_hint = clap::ValueHint::FilePath,
         verbatim_doc_comment
     )]
@@ -88,8 +91,15 @@ pub struct Args {
     /// addition to any other provided variables. Named variables will always take precedence
     /// over environment variables though. This flag is implicitly true if no other variables
     /// are provided.
-    #[arg(long = "env-vars", short = 'e', verbatim_doc_comment)]
-    pub env_vars: bool,
+    #[arg(
+        long = "env-vars",
+        short = 'e',
+        num_args = 0..=1,
+        require_equals = true,
+        default_missing_value = "true",
+        verbatim_doc_comment
+    )]
+    pub env_vars: Option<bool>,
 
     /// Adds a named variable to source from. The value should be a key value pair separated
     /// by a `=`, e.g. `-v NAME=value`.
@@ -102,6 +112,7 @@ pub struct Args {
     #[arg(
         long = "var",
         short = 'v',
+        value_name = "VAR",
         num_args = 1,
         value_parser = read_named_arg,
         verbatim_doc_comment
@@ -114,6 +125,6 @@ pub struct Args {
     /// If any positional variables are provided then the default setting to source values
     /// from environment variables will be overridden. To continue sourcing from environment
     /// values as well, add the `--env-vars` flag.
-    #[arg(num_args = 0.., verbatim_doc_comment)]
+    #[arg(last = true, num_args = 0.., verbatim_doc_comment)]
     pub positional_vars: Vec<String>,
 }
