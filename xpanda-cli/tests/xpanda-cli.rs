@@ -5,7 +5,7 @@ use predicates::prelude::predicate::str::diff;
 fn simple_index() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("woop")
+        .args(&["--", "woop"])
         .write_stdin("$1")
         .assert()
         .success()
@@ -111,7 +111,7 @@ fn default_pattern() {
 fn default_named_no_empty() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("-v VAR=")
+        .args(&["-v", "VAR="])
         .write_stdin("${VAR:-default}")
         .assert()
         .success()
@@ -122,7 +122,7 @@ fn default_named_no_empty() {
 fn alt_index() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("woop")
+        .args(&["--", "woop"])
         .write_stdin("${1+alt}")
         .assert()
         .success()
@@ -156,7 +156,7 @@ fn alt_pattern() {
 fn alt_index_no_empty() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("")
+        .arg("--")
         .write_stdin("${1:+alt}")
         .assert()
         .success()
@@ -210,7 +210,7 @@ fn error_named() {
 fn error_index_no_empty() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("")
+        .arg("--")
         .write_stdin("${1:?msg}")
         .assert()
         .failure()
@@ -253,7 +253,7 @@ fn error_no_message_no_empty() {
 fn len_index() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .arg("four")
+        .args(&["--", "four"])
         .write_stdin("${#1}")
         .assert()
         .success()
@@ -275,7 +275,7 @@ fn len_named() {
 fn arity() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .args(&["one", "two"])
+        .args(&["--", "one", "two"])
         .write_stdin("${#}")
         .assert()
         .success()
@@ -287,7 +287,7 @@ fn ref_index() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "VAR=woop"])
-        .arg("VAR")
+        .args(&["--", "VAR"])
         .write_stdin("${!1}")
         .assert()
         .success()

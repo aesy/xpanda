@@ -127,4 +127,24 @@ pub struct Args {
     /// values as well, add the `--env-vars` flag.
     #[arg(last = true, num_args = 0.., verbatim_doc_comment)]
     pub positional_vars: Vec<String>,
+
+    /// Provide a path to read from. This overrides the default behaviour of reading from
+    /// standard input.
+    #[arg(
+        long = "input",
+        short = 'i',
+        value_hint = clap::ValueHint::FilePath,
+        verbatim_doc_comment
+    )]
+    pub input_file: Option<PathBuf>,
+
+    /// Provide a path to write to. This overrides the default behaviour of writing to
+    /// standard output.
+    #[arg(
+        long = "output",
+        short = 'o',
+        value_hint = clap::ValueHint::FilePath,
+        verbatim_doc_comment
+    )]
+    pub output_file: Option<PathBuf>,
 }
