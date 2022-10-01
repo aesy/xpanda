@@ -652,6 +652,23 @@
 <span id="652">652</span>
 <span id="653">653</span>
 <span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::str_read::StrRead</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::token::Token</span>;
 <span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
@@ -1302,6 +1319,23 @@
         <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::Colon</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::Dash</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::Text</span>(<span class="ident">Cow::from</span>(<span class="string">&quot;$woop$&quot;</span>))));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::CloseBrace</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">None</span>);
+    }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">multiline</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Lexer::new</span>(<span class="string">&quot;$1 woop\n${VAR}&quot;</span>);
+
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::DollarSign</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::Index</span>(<span class="number">1</span>)));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::Text</span>(<span class="ident">Cow::from</span>(<span class="string">&quot; woop\n&quot;</span>))));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::DollarSign</span>));
+        <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::OpenBrace</span>));
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">lexer</span>.<span class="ident">next_token</span>(),
+            <span class="prelude-val">Some</span>(<span class="ident">Token::Identifier</span>(<span class="ident">Cow::from</span>(<span class="string">&quot;VAR&quot;</span>)))
+        );
         <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">Some</span>(<span class="ident">Token::CloseBrace</span>));
         <span class="macro">assert_eq!</span>(<span class="ident">lexer</span>.<span class="ident">next_token</span>(), <span class="prelude-val">None</span>);
     }
