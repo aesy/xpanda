@@ -2,15 +2,20 @@
 
 [![Crate][crate-image]][crate-url]
 [![Build Status][github-actions-image]][github-actions-url]
+[![Test coverage][codecov-image]][codecov-url]
 [![MIT license][license-image]][license-url]
 
 [crate-image]: https://img.shields.io/crates/d/xpanda
 
 [crate-url]: https://crates.io/crates/xpanda
 
-[github-actions-image]: https://img.shields.io/github/workflow/status/aesy/xpanda/Continous%20Integration?style=flat-square
+[github-actions-image]: https://img.shields.io/github/workflow/status/aesy/xpanda/Continuous%20Integration?style=flat-square
 
 [github-actions-url]: https://github.com/aesy/xpanda/actions
+
+[codecov-image]: https://img.shields.io/codecov/c/github/aesy/xpanda?style=flat-square
+
+[codecov-url]: https://codecov.io/github/aesy/xpanda
 
 [license-image]: https://img.shields.io/github/license/aesy/xpanda?style=flat-square
 
