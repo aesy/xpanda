@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["Builder",""],["Error",""],["Xpanda","[`Xpanda`] substitutes the values of variables in strings similar to `envsubst` and `Bash parameter expansion`."]]};
