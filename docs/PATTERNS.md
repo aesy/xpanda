@@ -60,5 +60,7 @@ Note that writing `$VAR?` (without braces) is probably a mistake as the question
 
 Patterns can be escaped with a preceding `$`. 
 
-* `$${VAR}` will yield the text `${VAR}`.
-* `${VAR-$$text}` will yield the text `$text` if `VAR` is unset.
+| Input           |                             Output |
+|-----------------|-----------------------------------:|
+| `$${VAR}`       |                           `${VAR}` |
+| `${VAR-$$text}` | The text `$text` if `VAR` is unset |

@@ -55,6 +55,9 @@ use std::path::PathBuf;
 ///                                       with variables from `var_file`.
 /// `xpanda -v VAR=value < some_file`     output a copy of `some_file` with `$VAR` substituted with
 ///                                       `value` using `-v`.
+///
+/// The given input must be ASCII or UTF-8 encoded. Output is UTF-8 encoded and may be written
+/// in chunks.
 #[derive(Parser, Debug)]
 #[command(name = "Xpanda", version, verbatim_doc_comment)]
 pub struct Args {
@@ -133,16 +136,19 @@ pub struct Args {
     #[arg(
         long = "input",
         short = 'i',
+        value_name = "FILE",
         value_hint = clap::ValueHint::FilePath,
         verbatim_doc_comment
     )]
     pub input_file: Option<PathBuf>,
 
     /// Provide a path to write to. This overrides the default behaviour of writing to
-    /// standard output.
+    /// standard output. A new file is created if it doesn't already exists. Output is
+    /// appended to it if it already exists.
     #[arg(
         long = "output",
         short = 'o',
+        value_name = "FILE",
         value_hint = clap::ValueHint::FilePath,
         verbatim_doc_comment
     )]
