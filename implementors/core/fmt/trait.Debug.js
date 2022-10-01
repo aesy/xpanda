@@ -1,4 +1,3 @@
 (function() {var implementors = {};
 implementors["xpanda"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.64.0/core/fmt/trait.Debug.html\" title=\"trait core::fmt::Debug\">Debug</a> for <a class=\"struct\" href=\"xpanda/struct.Error.html\" title=\"struct xpanda::Error\">Error</a>","synthetic":false,"types":["xpanda::Error"]}];
-implementors["xpanda_cli"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.64.0/core/fmt/trait.Debug.html\" title=\"trait core::fmt::Debug\">Debug</a> for <a class=\"struct\" href=\"xpanda_cli/args/struct.Args.html\" title=\"struct xpanda_cli::args::Args\">Args</a>","synthetic":false,"types":["xpanda_cli::args::Args"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,1 +1,1 @@
-window.ALL_CRATES = ["xpanda","xpanda_cli"];
+window.ALL_CRATES = ["xpanda"];
