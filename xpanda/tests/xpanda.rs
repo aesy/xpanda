@@ -338,3 +338,58 @@ fn len_named() {
 
     assert_eq!(xpanda.expand(input), Ok(String::from("4")));
 }
+
+#[test]
+fn len_missing() {
+    let xpanda = Xpanda::default();
+    let input = "${#VAR}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("0")));
+}
+
+#[test]
+fn missing_close_brace() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR";
+
+    assert_eq!(
+        xpanda.expand(input),
+        Err(Error::new(
+            String::from("Invalid param, unexpected EOF"),
+            1,
+            6
+        ))
+    );
+}
+
+#[test]
+fn unexpected_token() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR-:def}";
+
+    assert_eq!(
+        xpanda.expand(input),
+        Err(Error::new(String::from("Unexpected token ':'"), 1, 8))
+    );
+}
+
+#[test]
+fn multiline() {
+    let positional_vars = vec![(String::from("wawawa"))];
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder()
+        .with_positional_vars(positional_vars)
+        .with_named_vars(named_vars)
+        .build();
+    let input = "line 1 $1\n${VAR} line 2";
+
+    assert_eq!(
+        xpanda.expand(input),
+        Ok(String::from("line 1 wawawa\nwoop line 2"))
+    );
+}

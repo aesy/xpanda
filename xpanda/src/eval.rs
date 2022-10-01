@@ -623,6 +623,20 @@ mod tests {
     }
 
     #[test]
+    fn len_missing() {
+        let positional_vars = Vec::new();
+        let named_vars = HashMap::new();
+        let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
+
+        assert_eq!(
+            evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
+                identifier: Identifier::Named(Cow::from("VAR"))
+            })])),
+            Ok(String::from("0"))
+        );
+    }
+
+    #[test]
     fn arity() {
         let positional_vars = vec![String::from("one"), String::from("two")];
         let named_vars = HashMap::new();

@@ -1,7 +1,7 @@
 #![allow(clippy::module_name_repetitions)]
 
 use std::collections::HashMap;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
@@ -44,7 +44,11 @@ pub fn read_input_file(path: &Path) -> Result<impl BufRead, String> {
 }
 
 pub fn read_output_file(path: &Path) -> Result<impl Write, String> {
-    File::open(path)
+    OpenOptions::new()
+        .write(true)
+        .create_new(!path.exists())
+        .append(true)
+        .open(path)
         .map(BufWriter::new)
         .map_err(|error| format!("Failed to open output file '{}': {}", path.display(), error))
 }

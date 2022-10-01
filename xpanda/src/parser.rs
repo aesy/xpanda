@@ -695,4 +695,23 @@ mod tests {
             })]))
         );
     }
+
+    #[test]
+    fn multiline() {
+        let mut lexer = Lexer::new("$1 woop\n${VAR}");
+        let mut parser = Parser::new(lexer);
+
+        assert_eq!(
+            parser.parse(),
+            Ok(Ast::new(vec![
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Indexed(1),
+                }),
+                Node::Text(Cow::from(" woop\n")),
+                Node::Param(Param::Simple {
+                    identifier: Identifier::Named(Cow::from("VAR"))
+                })
+            ]))
+        );
+    }
 }

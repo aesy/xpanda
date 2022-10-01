@@ -651,4 +651,21 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
+
+    #[test]
+    fn multiline() {
+        let mut lexer = Lexer::new("$1 woop\n${VAR}");
+
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::Index(1)));
+        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" woop\n"))));
+        assert_eq!(lexer.next_token(), Some(Token::DollarSign));
+        assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Identifier(Cow::from("VAR")))
+        );
+        assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
+        assert_eq!(lexer.next_token(), None);
+    }
 }
