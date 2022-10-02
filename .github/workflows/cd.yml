@@ -6,6 +6,57 @@ on:
       - "v*"
 
 jobs:
+  release:
+    name: Create release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - id: create_release
+        name: Create release
+        uses: actions/create-release@v1
+        with:
+          draft: false
+          prerelease: false
+          release_name: ${{ github.ref }}
+          tag_name: ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+  upload-artifact:
+    name: Upload ${{ matrix.target }} artifact
+    runs-on: ${{ matrix.os }}
+    needs: release
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            path: ./target/release/xpanda-cli.exe
+            name: xpanda.exe
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            path: ./target/release/xpanda-cli
+            name: xpanda
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Build project
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --target ${{ matrix.target }}
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ needs.release.outputs.upload_url }}
+          asset_path: ${{ matrix.path }}
+          asset_name: ${{ matrix.name }}
   publish:
     name: Publish
     runs-on: ubuntu-latest
@@ -20,4 +71,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: publish
-          args: --verbose --all-features --token ${{ secrets.CARGO_TOKEN }}
+          args: --package xpanda --all-features --token ${{ secrets.CARGO_TOKEN }}

@@ -1,9 +1,10 @@
 [package]
 name = "xpanda-cli"
-description = "Unix shell-like parameter expansion/variable substitution"
+description = "Command line interface for Unix shell-like parameter expansion/variable substitution"
 authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
 homepage = "https://github.com/aesy/xpanda"
-license-file = "LICENSE"
+repository = "https://github.com/aesy/xpanda"
+license-file = "../LICENSE"
 version = "0.1.0"
 edition = "2021"
 

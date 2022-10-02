@@ -1,5 +1,14 @@
 [package]
 name = "xpanda"
+description = "Unix shell-like parameter expansion/variable substitution"
+authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
+homepage = "https://github.com/aesy/xpanda"
+repository = "https://github.com/aesy/xpanda"
+documentation = "https://docs.rs/xpanda"
+readme = "README.md"
+license-file = "../LICENSE"
+categories = ["command-line-utilities", "template-engine", "text-processing"]
+keywords = ["environment", "variable", "substitutaion", "parameter", "expansion"]
 version = "0.1.0"
 edition = "2021"
 
