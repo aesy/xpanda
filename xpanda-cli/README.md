@@ -144,7 +144,7 @@ releases](https://github.com/aesy/xpanda/releases). Binaries for other platforms
 Example on how to download and install an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda
+curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda-linux-amd64 -o xpanda
 chmod +x xpanda
 sudo mv xpanda /usr/local/bin
 ```
@@ -154,7 +154,7 @@ sudo mv xpanda /usr/local/bin
 Example on how to download an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda.exe
+curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda-windows-amd64.exe -o xpanda.exe
 ```
 
 #### Build from source
@@ -165,6 +165,6 @@ To build the CLI, run the following command:
 cargo build --bin xpanda-cli --target <target> --release
 ```
 
-The resulting binary can be found in the repositories root directory under `target/release/` called `xpanda-cli`.
+The resulting binary can be found in the repositories root directory under `target/<target>/release/` called `xpanda-cli`.
 
 The `<target>` options can be found at [Rust's platform support page](https://doc.rust-lang.org/nightly/rustc/platform-support.html).

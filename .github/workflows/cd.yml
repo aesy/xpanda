@@ -57,6 +57,8 @@ jobs:
           upload_url: ${{ needs.release.outputs.upload_url }}
           asset_path: ${{ matrix.path }}
           asset_name: ${{ matrix.name }}
+          asset_content_type: application/octet-stream
+          overwrite: true
   publish:
     name: Publish
     runs-on: ubuntu-latest
