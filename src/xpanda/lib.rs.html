@@ -397,239 +397,6 @@ There is a single public struct (not counting errors and builders), [`Xpanda`], 
 contains a single method: `expand`. The expand method takes a string by reference and returns
 a copy of it with all variables expanded/substituted according to some patterns.
 
-Variables can appear in the input string in any of the following forms:
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Pattern&lt;/th&gt;
-      &lt;th&gt;Description&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;$VAR&lt;/td&gt;
-      &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR}&lt;/td&gt;
-      &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR-default}&lt;/td&gt;
-      &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;default&quot;.&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR:-default}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise
-        &quot;default&quot;.
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR+alternative}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set, otherwise &quot;&quot;.
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR:+alternative}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set and non-empty,
-        otherwise &quot;&quot;.
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR?}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an error.
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR?error}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an error with
-        the given message (in this case &quot;error&quot;).
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR?error}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise yields
-        an error with the given message (in this case &quot;error&quot;).
-      &lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${#VAR}&lt;/td&gt;
-      &lt;td&gt;
-        substituted with the length of the corresponding value for &#39;VAR&#39; if set, otherwise &quot;0&quot;.
-      &lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-`VAR` above is a named variable. Named variables can be provided using the builder:
-
-```rust
-use std::collections::HashMap;
-use xpanda::Xpanda;
-
-let named_vars = HashMap::new();
-let xpanda = xpanda::builder()
-    .with_named_vars(named_vars)
-    .build();
-```
-
-Positional variables are also supported and can be provided in the same way:
-
-```rust
-use xpanda::Xpanda;
-
-let xpanda = xpanda::builder()
-    .with_positional_vars(Vec::new())
-    .build();
-```
-
-Positional variables can be referenced using their index (starting at 1), for example, `$1`
-references the first positional variable, `$2` the second and so on. `$0` is a space concatenated
-string of all positional variables.
-
-Here are some examples and their output:
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Pattern&lt;/th&gt;
-      &lt;th&gt;VAR unset&lt;/th&gt;
-      &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;
-      &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;$VAR&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR}&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR-default}&lt;/td&gt;
-      &lt;td&gt;&quot;default&quot;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR:-default}&lt;/td&gt;
-      &lt;td&gt;&quot;default&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;default&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR+alternative}&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR:+alternative}&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR?message}&lt;/td&gt;
-      &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR:?message}&lt;/td&gt;
-      &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
-      &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${#VAR}&lt;/td&gt;
-      &lt;td&gt;&quot;0&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;0&quot;&lt;/td&gt;
-      &lt;td&gt;&quot;7&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${!VAR}&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;$example&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-Special rules take precedence when `no_unset` is `true`:
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Pattern&lt;/th&gt;
-      &lt;th&gt;VAR unset&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;$VAR&lt;/td&gt;
-      &lt;td&gt;error&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${VAR}&lt;/td&gt;
-      &lt;td&gt;error&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${#VAR}&lt;/td&gt;
-      &lt;td&gt;error&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;${!VAR}&lt;/td&gt;
-      &lt;td&gt;error&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-Default/Alternative values can also be variables:
-
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Pattern&lt;/th&gt;
-      &lt;th&gt;VAR unset&lt;/th&gt;
-      &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;
-      &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;
-      &lt;td&gt;`${VAR:-$DEF}`&lt;/td&gt;
-      &lt;td&gt;`$DEF`&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;&quot;example&quot;&lt;/td&gt;
-    &lt;/tr&gt;
-    &lt;tr&gt;
-      &lt;td&gt;`${VAR+${ALT:-alternative}}`&lt;/td&gt;
-      &lt;td&gt;&lt;/td&gt;
-      &lt;td&gt;`${ALT:-alternative}`&lt;/td&gt;
-      &lt;td&gt;${ALT:-alternative}&lt;/td&gt;
-    &lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-
-The `$` character is assumed to be the start of a variable. If the variable does not match
-any of the forms listed above, an error is returned. Variables can be escaped by prefixing them
-by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VAR-$$text}` which yields
-`$text` if `VAR` is unset.
-
 [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
 [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html
 [`Xpanda`]: struct.Xpanda.html
@@ -695,7 +462,7 @@ by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VA
 }
 
 <span class="kw">impl</span> <span class="ident">Builder</span> {
-    <span class="doccomment">/// With this flag set, missing variables without any default value will cause cause an error</span>
+    <span class="doccomment">/// With this flag set, missing variables without any default value will cause an error</span>
     <span class="doccomment">/// instead of omitting en empty string. Off by default.</span>
     <span class="attribute">#[<span class="ident">must_use</span>]</span>
     <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">no_unset</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">no_unset</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
@@ -758,6 +525,239 @@ by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VA
     }
 
     <span class="doccomment">/// Expands the given text by substituting the values of the variables inside it.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Variables can appear in any of the following forms:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// &lt;table&gt;</span>
+    <span class="doccomment">///   &lt;thead&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;Description&lt;/th&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/thead&gt;</span>
+    <span class="doccomment">///   &lt;tbody&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR-default}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;default&quot;.&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR:-default}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise</span>
+    <span class="doccomment">///         &quot;default&quot;.</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set, otherwise &quot;&quot;.</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set and non-empty,</span>
+    <span class="doccomment">///         otherwise &quot;&quot;.</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR?}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an error.</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR?error}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an error with</span>
+    <span class="doccomment">///         the given message (in this case &quot;error&quot;).</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR?error}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise yields</span>
+    <span class="doccomment">///         an error with the given message (in this case &quot;error&quot;).</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;</span>
+    <span class="doccomment">///         substituted with the length of the corresponding value for &#39;VAR&#39; if set, otherwise &quot;0&quot;.</span>
+    <span class="doccomment">///       &lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/tbody&gt;</span>
+    <span class="doccomment">/// &lt;/table&gt;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// `VAR` above is a named variable. Named variables can be provided using the builder:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use std::collections::HashMap;</span>
+    <span class="doccomment">/// use xpanda::Xpanda;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let named_vars = HashMap::new();</span>
+    <span class="doccomment">/// let xpanda = Xpanda::builder()</span>
+    <span class="doccomment">///     .with_named_vars(named_vars)</span>
+    <span class="doccomment">///     .build();</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Positional variables are also supported and can be provided in the same way:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// ```rust</span>
+    <span class="doccomment">/// use xpanda::Xpanda;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// let xpanda = Xpanda::builder()</span>
+    <span class="doccomment">///     .with_positional_vars(Vec::new())</span>
+    <span class="doccomment">///     .build();</span>
+    <span class="doccomment">/// ```</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Positional variables can be referenced using their index (starting at 1), for example, `$1`</span>
+    <span class="doccomment">/// references the first positional variable, `$2` the second and so on. `$0` is a space concatenated</span>
+    <span class="doccomment">/// string of all positional variables.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Here are some examples and their output:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// &lt;table&gt;</span>
+    <span class="doccomment">///   &lt;thead&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/thead&gt;</span>
+    <span class="doccomment">///   &lt;tbody&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR-default}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR:-default}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR?message}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR:?message}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;7&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${!VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;$example&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/tbody&gt;</span>
+    <span class="doccomment">/// &lt;/table&gt;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Special rules take precedence when [`Builder::no_unset`] is `true`:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// &lt;table&gt;</span>
+    <span class="doccomment">///   &lt;thead&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/thead&gt;</span>
+    <span class="doccomment">///   &lt;tbody&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${!VAR}&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/tbody&gt;</span>
+    <span class="doccomment">/// &lt;/table&gt;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Default/Alternative values can also be variables:</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// &lt;table&gt;</span>
+    <span class="doccomment">///   &lt;thead&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;</span>
+    <span class="doccomment">///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/thead&gt;</span>
+    <span class="doccomment">///   &lt;tbody&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;`${VAR:-$DEF}`&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;`$DEF`&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///     &lt;tr&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;`${VAR+${ALT:-alternative}}`&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;`${ALT:-alternative}`&lt;/td&gt;</span>
+    <span class="doccomment">///       &lt;td&gt;${ALT:-alternative}&lt;/td&gt;</span>
+    <span class="doccomment">///     &lt;/tr&gt;</span>
+    <span class="doccomment">///   &lt;/tbody&gt;</span>
+    <span class="doccomment">/// &lt;/table&gt;</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// The `$` character is assumed to be the start of a variable. If the variable does not match</span>
+    <span class="doccomment">/// any of the forms listed above, an error is returned. Variables can be escaped by prefixing them</span>
+    <span class="doccomment">/// by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VAR-$$text}` which yields</span>
+    <span class="doccomment">/// `$text` if `VAR` is unset.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// # Errors</span>
     <span class="doccomment">///</span>
