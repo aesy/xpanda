@@ -19,7 +19,7 @@ impl Error {
 pub struct Parser<'a> {
     lexer: Lexer<'a>,
     #[allow(clippy::option_option)]
-    peeked: Option<Option<Token<'a>>>,
+    peeked: Option<Option<Token>>,
 }
 
 impl<'a> Parser<'a> {
@@ -30,7 +30,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    pub fn parse(&mut self) -> Result<Ast<'a>, Error> {
+    pub fn parse(&mut self) -> Result<Ast, Error> {
         let mut nodes = Vec::new();
 
         while self.peek_token().is_some() {
@@ -42,14 +42,14 @@ impl<'a> Parser<'a> {
     }
 
     #[must_use]
-    fn peek_token(&mut self) -> Option<&Token<'a>> {
+    fn peek_token(&mut self) -> Option<&Token> {
         self.peeked
             .get_or_insert_with(|| self.lexer.next_token())
             .as_ref()
     }
 
     #[must_use]
-    fn next_token(&mut self) -> Option<Token<'a>> {
+    fn next_token(&mut self) -> Option<Token> {
         match self.peeked.take() {
             Some(option) => option,
             None => self.lexer.next_token(),
@@ -70,10 +70,10 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_node(&mut self) -> Result<Node<'a>, Error> {
+    fn parse_node(&mut self) -> Result<Node, Error> {
         match self.peek_token() {
             Some(Token::Text(_)) => Ok(Node::Text(
-                self.parse_text()?.unwrap_or_else(|| Cow::from("")),
+                self.parse_text()?.unwrap_or_else(|| String::from("")),
             )),
             Some(Token::DollarSign) => {
                 self.skip_token();
@@ -87,7 +87,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_param(&mut self) -> Result<Param<'a>, Error> {
+    fn parse_param(&mut self) -> Result<Param, Error> {
         match self.peek_token() {
             Some(Token::OpenBrace) => {
                 self.skip_token();
@@ -103,7 +103,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_len_or_arity_param(&mut self) -> Result<Param<'a>, Error> {
+    fn parse_len_or_arity_param(&mut self) -> Result<Param, Error> {
         self.expect_token(&Token::ExclamationMark)?;
 
         match self.peek_token() {
@@ -120,14 +120,14 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_ref_param(&mut self) -> Result<Param<'a>, Error> {
+    fn parse_ref_param(&mut self) -> Result<Param, Error> {
         self.expect_token(&Token::ExclamationMark)?;
         let identifier = self.parse_identifier()?;
         self.expect_token(&Token::CloseBrace)?;
         Ok(Param::Ref { identifier })
     }
 
-    fn parse_other_param(&mut self) -> Result<Param<'a>, Error> {
+    fn parse_other_param(&mut self) -> Result<Param, Error> {
         let identifier = self.parse_identifier()?;
         let mut treat_empty_as_unset = false;
         let mut token = self.next_token();
@@ -151,7 +151,7 @@ impl<'a> Parser<'a> {
             Some(Token::QuestionMark) => Param::WithError {
                 identifier,
                 error: match self.peek_token() {
-                    Some(Token::Text(_)) => self.parse_text()?.map(Cow::from),
+                    Some(Token::Text(_)) => self.parse_text()?.map(String::from),
                     _ => None,
                 },
                 treat_empty_as_unset,
@@ -170,12 +170,12 @@ impl<'a> Parser<'a> {
         Ok(param)
     }
 
-    fn parse_simple_param(&mut self) -> Result<Param<'a>, Error> {
+    fn parse_simple_param(&mut self) -> Result<Param, Error> {
         let identifier = self.parse_identifier()?;
         Ok(Param::Simple { identifier })
     }
 
-    fn parse_text(&mut self) -> Result<Option<Cow<'a, str>>, Error> {
+    fn parse_text(&mut self) -> Result<Option<String>, Error> {
         match self.next_token() {
             Some(Token::Text(text)) => Ok(Some(text)),
             Some(token) => Err(self.create_error(format!("Expected text, found {}", token))),
@@ -183,7 +183,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_identifier(&mut self) -> Result<Identifier<'a>, Error> {
+    fn parse_identifier(&mut self) -> Result<Identifier, Error> {
         match self.next_token() {
             Some(Token::Identifier(name)) => Ok(Identifier::Named(name)),
             Some(Token::Index(index)) => Ok(Identifier::Indexed(index)),
@@ -222,11 +222,11 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1),
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ]))
         );
     }
@@ -239,7 +239,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::Simple {
-                identifier: Identifier::Named(Cow::from("VAR"))
+                identifier: Identifier::Named(String::from("VAR"))
             })]))
         );
     }
@@ -252,11 +252,11 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("VAR")),
+                    identifier: Identifier::Named(String::from("VAR")),
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ]))
         );
     }
@@ -282,11 +282,11 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1),
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ]))
         );
     }
@@ -299,7 +299,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::Simple {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
             })]))
         );
     }
@@ -312,11 +312,11 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("VAR")),
+                    identifier: Identifier::Named(String::from("VAR")),
                 }),
-                Node::Text(Cow::from(" post")),
+                Node::Text(String::from(" post")),
             ]))
         );
     }
@@ -330,7 +330,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: false,
             })]))
         );
@@ -344,8 +344,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                identifier: Identifier::Named(String::from("VAR")),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: false,
             })]))
         );
@@ -359,9 +359,9 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("DEF")),
+                    identifier: Identifier::Named(String::from("DEF")),
                 })),
                 treat_empty_as_unset: false,
             })]))
@@ -377,7 +377,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: true,
             })]))
         );
@@ -391,8 +391,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                identifier: Identifier::Named(String::from("VAR")),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: true,
             })]))
         );
@@ -406,9 +406,9 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("DEF")),
+                    identifier: Identifier::Named(String::from("DEF")),
                 })),
                 treat_empty_as_unset: true,
             })]))
@@ -424,7 +424,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: false,
             })]))
         );
@@ -438,8 +438,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                identifier: Identifier::Named(String::from("VAR")),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: false,
             })]))
         );
@@ -453,9 +453,9 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("ALT")),
+                    identifier: Identifier::Named(String::from("ALT")),
                 })),
                 treat_empty_as_unset: false,
             })]))
@@ -471,7 +471,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: true,
             })]))
         );
@@ -485,8 +485,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                identifier: Identifier::Named(String::from("VAR")),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: true,
             })]))
         );
@@ -500,9 +500,9 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("ALT"))
+                    identifier: Identifier::Named(String::from("ALT"))
                 })),
                 treat_empty_as_unset: true
             })]))
@@ -518,7 +518,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some(Cow::from("msg")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: false
             })]))
         );
@@ -532,8 +532,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                error: Some(Cow::from("msg")),
+                identifier: Identifier::Named(String::from("VAR")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: false
             })]))
         );
@@ -548,7 +548,7 @@ mod tests {
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some(Cow::from("msg")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: true
             })]))
         );
@@ -562,8 +562,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                error: Some(Cow::from("msg")),
+                identifier: Identifier::Named(String::from("VAR")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: true
             })]))
         );
@@ -577,7 +577,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 error: None,
                 treat_empty_as_unset: false
             })]))
@@ -592,7 +592,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
+                identifier: Identifier::Named(String::from("VAR")),
                 error: None,
                 treat_empty_as_unset: true
             })]))
@@ -620,7 +620,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::Length {
-                identifier: Identifier::Named(Cow::from("VAR"))
+                identifier: Identifier::Named(String::from("VAR"))
             })]))
         );
     }
@@ -657,7 +657,7 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::Ref {
-                identifier: Identifier::Named(Cow::from("VAR"))
+                identifier: Identifier::Named(String::from("VAR"))
             })]))
         );
     }
@@ -669,7 +669,7 @@ mod tests {
 
         assert_eq!(
             parser.parse(),
-            Ok(Ast::new(vec![Node::Text(Cow::from("${VAR"))]))
+            Ok(Ast::new(vec![Node::Text(String::from("${VAR"))]))
         );
 
         let mut lexer = Lexer::new("$$VAR$$");
@@ -677,7 +677,7 @@ mod tests {
 
         assert_eq!(
             parser.parse(),
-            Ok(Ast::new(vec![Node::Text(Cow::from("$VAR$"))]))
+            Ok(Ast::new(vec![Node::Text(String::from("$VAR$"))]))
         );
     }
 
@@ -689,8 +689,8 @@ mod tests {
         assert_eq!(
             parser.parse(),
             Ok(Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                default: Box::new(Node::Text(Cow::from("$woop"))),
+                identifier: Identifier::Named(String::from("VAR")),
+                default: Box::new(Node::Text(String::from("$woop"))),
                 treat_empty_as_unset: true,
             })]))
         );
@@ -707,9 +707,9 @@ mod tests {
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1),
                 }),
-                Node::Text(Cow::from(" woop\n")),
+                Node::Text(String::from(" woop\n")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("VAR"))
+                    identifier: Identifier::Named(String::from("VAR"))
                 })
             ]))
         );

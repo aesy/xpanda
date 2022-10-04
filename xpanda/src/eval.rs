@@ -36,10 +36,10 @@ impl Evaluator {
         }
     }
 
-    pub fn eval(&self, ast: &Ast) -> Result<String, Error> {
+    pub fn eval(&self, ast: Ast) -> Result<String, Error> {
         let mut result = String::new();
 
-        for node in &ast.nodes {
+        for node in ast.nodes {
             let text = self.eval_node(node)?;
             result.push_str(&text);
         }
@@ -47,34 +47,34 @@ impl Evaluator {
         Ok(result)
     }
 
-    fn eval_node(&self, node: &Node) -> Result<String, Error> {
+    fn eval_node(&self, node: Node) -> Result<String, Error> {
         match node {
-            Node::Text(text) => Ok((*text).to_string()),
+            Node::Text(text) => Ok(text),
             Node::Param(param) => self.eval_param(param),
         }
     }
 
-    fn eval_param(&self, param: &Param) -> Result<String, Error> {
+    fn eval_param(&self, param: Param) -> Result<String, Error> {
         match param {
-            Param::Simple { identifier } => self.eval_simple_param(identifier),
+            Param::Simple { identifier } => self.eval_simple_param(&identifier),
             Param::WithDefault {
                 identifier,
                 default,
                 treat_empty_as_unset,
-            } => self.eval_default_param(identifier, default, *treat_empty_as_unset),
+            } => self.eval_default_param(&identifier, *default, treat_empty_as_unset),
             Param::WithAlt {
                 identifier,
                 alt,
                 treat_empty_as_unset,
-            } => self.eval_alt_param(identifier, alt, *treat_empty_as_unset),
+            } => self.eval_alt_param(&identifier, *alt, treat_empty_as_unset),
             Param::WithError {
                 identifier,
                 error,
                 treat_empty_as_unset,
-            } => self.eval_error_param(identifier, error.clone(), *treat_empty_as_unset),
-            Param::Length { identifier } => self.eval_length_param(identifier),
+            } => self.eval_error_param(&identifier, error, treat_empty_as_unset),
+            Param::Length { identifier } => self.eval_length_param(&identifier),
             Param::Arity => self.eval_arity_param(),
-            Param::Ref { identifier } => self.eval_ref_param(identifier),
+            Param::Ref { identifier } => self.eval_ref_param(&identifier),
         }
     }
 
@@ -95,7 +95,7 @@ impl Evaluator {
     fn eval_default_param(
         &self,
         identifier: &Identifier,
-        default: &Node,
+        default: Node,
         treat_empty_as_unset: bool,
     ) -> Result<String, Error> {
         self.eval_identifier(identifier)
@@ -106,7 +106,7 @@ impl Evaluator {
     fn eval_alt_param(
         &self,
         identifier: &Identifier,
-        alt: &Node,
+        alt: Node,
         treat_empty_as_unset: bool,
     ) -> Result<String, Error> {
         self.eval_identifier(identifier)
@@ -117,16 +117,14 @@ impl Evaluator {
     fn eval_error_param(
         &self,
         identifier: &Identifier,
-        error: Option<Cow<str>>,
+        error: Option<String>,
         treat_empty_as_unset: bool,
     ) -> Result<String, Error> {
         self.eval_identifier(identifier)
             .filter(|value| !(treat_empty_as_unset && value.is_empty()))
             .ok_or_else(|| {
-                let msg = error.map_or_else(
-                    || Self::error_message(identifier, treat_empty_as_unset),
-                    Cow::into_owned,
-                );
+                let msg =
+                    error.unwrap_or_else(|| Self::error_message(identifier, treat_empty_as_unset));
 
                 // TODO wrong line/col
                 Error::new(msg, 0, 0)
@@ -154,12 +152,12 @@ impl Evaluator {
 
     fn eval_ref_param(&self, identifier: &Identifier) -> Result<String, Error> {
         self.eval_simple_param(identifier)
-            .and_then(|name| self.eval_simple_param(&Identifier::Named(Cow::from(name))))
+            .and_then(|name| self.eval_simple_param(&Identifier::Named(name)))
     }
 
     fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
         match identifier {
-            Identifier::Named(name) => self.named_vars.get(name.as_ref()).cloned(),
+            Identifier::Named(name) => self.named_vars.get(name).cloned(),
             Identifier::Indexed(index) => {
                 if *index == 0 {
                     Some(self.positional_vars.join(" "))
@@ -190,7 +188,7 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Simple {
                 identifier: Identifier::Indexed(1)
             })])),
             Ok(String::from("woop"))
@@ -204,12 +202,12 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+            evaluator.eval(Ast::new(vec![
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1)
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ])),
             Ok(String::from("pre  post"))
         );
@@ -222,12 +220,12 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+            evaluator.eval(Ast::new(vec![
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
                     identifier: Identifier::Indexed(1),
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ])),
             Ok(String::from("pre woop post"))
         );
@@ -241,8 +239,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Simple {
-                identifier: Identifier::Named(Cow::from("VAR"))
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Simple {
+                identifier: Identifier::Named(String::from("VAR"))
             })])),
             Ok(String::from("woop"))
         );
@@ -255,12 +253,12 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+            evaluator.eval(Ast::new(vec![
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("VAR"))
+                    identifier: Identifier::Named(String::from("VAR"))
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ])),
             Ok(String::from("pre  post"))
         );
@@ -274,12 +272,12 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![
-                Node::Text(Cow::from("pre ")),
+            evaluator.eval(Ast::new(vec![
+                Node::Text(String::from("pre ")),
                 Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("VAR")),
+                    identifier: Identifier::Named(String::from("VAR")),
                 }),
-                Node::Text(Cow::from(" post"))
+                Node::Text(String::from(" post"))
             ])),
             Ok(String::from("pre woop post"))
         );
@@ -292,9 +290,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("default"))
@@ -308,9 +306,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                default: Box::new(Node::Text(Cow::from("default"))),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named(String::from("VAR")),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("default"))
@@ -325,10 +323,10 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named(String::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("DEF")),
+                    identifier: Identifier::Named(String::from("DEF")),
                 })),
                 treat_empty_as_unset: false,
             })])),
@@ -343,9 +341,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
                 identifier: Identifier::Indexed(1),
-                default: Box::new(Node::Text(Cow::from("default"))),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from("default"))
@@ -360,9 +358,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                default: Box::new(Node::Text(Cow::from("default"))),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named(String::from("VAR")),
+                default: Box::new(Node::Text(String::from("default"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from("default"))
@@ -378,10 +376,10 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithDefault {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithDefault {
+                identifier: Identifier::Named(String::from("VAR")),
                 default: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("DEF")),
+                    identifier: Identifier::Named(String::from("DEF")),
                 })),
                 treat_empty_as_unset: true,
             })])),
@@ -396,9 +394,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("alt"))
@@ -413,9 +411,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named(String::from("VAR")),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: false,
             })])),
             Ok(String::from("alt"))
@@ -431,10 +429,10 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named(String::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("ALT")),
+                    identifier: Identifier::Named(String::from("ALT")),
                 })),
                 treat_empty_as_unset: false,
             })])),
@@ -449,9 +447,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
                 identifier: Identifier::Indexed(1),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from(""))
@@ -466,9 +464,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                alt: Box::new(Node::Text(Cow::from("alt"))),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named(String::from("VAR")),
+                alt: Box::new(Node::Text(String::from("alt"))),
                 treat_empty_as_unset: true,
             })])),
             Ok(String::from(""))
@@ -484,10 +482,10 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithAlt {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithAlt {
+                identifier: Identifier::Named(String::from("VAR")),
                 alt: Box::new(Node::Param(Param::Simple {
-                    identifier: Identifier::Named(Cow::from("ALT"))
+                    identifier: Identifier::Named(String::from("ALT"))
                 })),
                 treat_empty_as_unset: true
             })])),
@@ -502,9 +500,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some(Cow::from("msg")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: false
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -518,9 +516,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                error: Some(Cow::from("msg")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named(String::from("VAR")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: false
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -535,9 +533,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
                 identifier: Identifier::Indexed(1),
-                error: Some(Cow::from("msg")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: true
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -551,9 +549,9 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
-                error: Some(Cow::from("msg")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named(String::from("VAR")),
+                error: Some(String::from("msg")),
                 treat_empty_as_unset: true
             })])),
             Err(Error::new(String::from("msg"), 0, 0))
@@ -567,8 +565,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named(String::from("VAR")),
                 error: None,
                 treat_empty_as_unset: false
             })])),
@@ -584,8 +582,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::WithError {
-                identifier: Identifier::Named(Cow::from("VAR")),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::WithError {
+                identifier: Identifier::Named(String::from("VAR")),
                 error: None,
                 treat_empty_as_unset: true
             })])),
@@ -600,7 +598,7 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Length {
                 identifier: Identifier::Indexed(1)
             })])),
             Ok(String::from("4"))
@@ -615,8 +613,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
-                identifier: Identifier::Named(Cow::from("VAR"))
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Length {
+                identifier: Identifier::Named(String::from("VAR"))
             })])),
             Ok(String::from("4"))
         );
@@ -629,8 +627,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Length {
-                identifier: Identifier::Named(Cow::from("VAR"))
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Length {
+                identifier: Identifier::Named(String::from("VAR"))
             })])),
             Ok(String::from("0"))
         );
@@ -643,7 +641,7 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Arity)])),
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Arity)])),
             Ok(String::from("2"))
         );
     }
@@ -656,7 +654,7 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Ref {
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Ref {
                 identifier: Identifier::Indexed(1)
             })])),
             Ok(String::from("woop"))
@@ -672,8 +670,8 @@ mod tests {
         let mut evaluator = Evaluator::new(false, positional_vars, named_vars);
 
         assert_eq!(
-            evaluator.eval(&Ast::new(vec![Node::Param(Param::Ref {
-                identifier: Identifier::Named(Cow::from("VAR1"))
+            evaluator.eval(Ast::new(vec![Node::Param(Param::Ref {
+                identifier: Identifier::Named(String::from("VAR1"))
             })])),
             Ok(String::from("woop"))
         );

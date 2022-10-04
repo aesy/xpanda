@@ -4,7 +4,7 @@ use std::borrow::Cow;
 
 pub struct Lexer<'a> {
     reader: StrRead<'a>,
-    previous_token: Option<Token<'a>>,
+    previous_token: Option<Token>,
     nesting_level: usize,
 }
 
@@ -17,7 +17,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next_token(&mut self) -> Option<Token<'a>> {
+    pub fn next_token(&mut self) -> Option<Token> {
         let is_param = self.nesting_level > 0 || self.previous_token == Some(Token::DollarSign);
 
         let token = if is_param {
@@ -52,7 +52,7 @@ impl<'a> Lexer<'a> {
         self.reader.col()
     }
 
-    fn read_text(&mut self) -> Option<Token<'a>> {
+    fn read_text(&mut self) -> Option<Token> {
         let mut slices = Vec::new();
 
         loop {
@@ -75,15 +75,13 @@ impl<'a> Lexer<'a> {
 
         if slices.is_empty() {
             None
-        } else if slices.len() == 1 {
-            Some(Token::Text(Cow::from(slices[0])))
         } else {
             let text = String::from_iter(slices);
-            Some(Token::Text(Cow::from(text)))
+            Some(Token::Text(text))
         }
     }
 
-    fn read_param(&mut self) -> Option<Token<'a>> {
+    fn read_param(&mut self) -> Option<Token> {
         let next_char = self.reader.peek_char()?;
         let can_be_identifier = matches!(
             self.previous_token,
@@ -136,7 +134,7 @@ impl<'a> Lexer<'a> {
                 let text = self
                     .reader
                     .consume_while(|c| c.is_alphanumeric() || c == '_');
-                Token::Identifier(Cow::from(text))
+                Token::Identifier(String::from(text))
             },
             _ => {
                 if is_escaped {
@@ -149,7 +147,7 @@ impl<'a> Lexer<'a> {
                     return None;
                 }
 
-                Token::Text(Cow::from(text))
+                Token::Text(String::from(text))
             },
         };
 
@@ -174,10 +172,10 @@ mod tests {
     fn simple_index_text() {
         let mut lexer = Lexer::new("pre $1 post");
 
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("pre "))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("pre "))));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" post"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from(" post"))));
         assert_eq!(lexer.next_token(), None);
     }
 
@@ -188,7 +186,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), None);
     }
@@ -197,13 +195,13 @@ mod tests {
     fn simple_named_text() {
         let mut lexer = Lexer::new("pre $VAR post");
 
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("pre "))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("pre "))));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" post"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from(" post"))));
         assert_eq!(lexer.next_token(), None);
     }
 
@@ -222,12 +220,12 @@ mod tests {
     fn braced_index_text() {
         let mut lexer = Lexer::new("pre ${1} post");
 
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("pre "))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("pre "))));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" post"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from(" post"))));
         assert_eq!(lexer.next_token(), None);
     }
 
@@ -239,7 +237,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -249,15 +247,15 @@ mod tests {
     fn braced_named_text() {
         let mut lexer = Lexer::new("pre ${VAR} post");
 
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("pre "))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("pre "))));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" post"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from(" post"))));
         assert_eq!(lexer.next_token(), None);
     }
 
@@ -269,7 +267,10 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::Dash));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("default"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from("default")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -282,10 +283,13 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Dash));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("default"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from("default")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -298,13 +302,13 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Dash));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("DEF")))
+            Some(Token::Identifier(String::from("DEF")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -319,7 +323,10 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Dash));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("default"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from("default")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -332,11 +339,14 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Dash));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("default"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from("default")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -349,14 +359,14 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Dash));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("DEF")))
+            Some(Token::Identifier(String::from("DEF")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -370,7 +380,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::Plus));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("alt"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("alt"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -383,10 +393,10 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Plus));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("alt"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("alt"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -399,13 +409,13 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Plus));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("ALT")))
+            Some(Token::Identifier(String::from("ALT")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -420,7 +430,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Plus));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("alt"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("alt"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -433,11 +443,11 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Plus));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("alt"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("alt"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -450,14 +460,14 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Plus));
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("ALT")))
+            Some(Token::Identifier(String::from("ALT")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -471,7 +481,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("msg"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("msg"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -484,10 +494,10 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("msg"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("msg"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -501,7 +511,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("msg"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("msg"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -514,11 +524,11 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("msg"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("msg"))));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -531,7 +541,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
@@ -546,7 +556,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::QuestionMark));
@@ -575,7 +585,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::PoundSign));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -613,7 +623,7 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::ExclamationMark));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
@@ -625,13 +635,13 @@ mod tests {
 
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Text(Cow::from("pre ${VAR post")))
+            Some(Token::Text(String::from("pre ${VAR post")))
         );
         assert_eq!(lexer.next_token(), None);
 
         let mut lexer = Lexer::new("$$VAR$$");
 
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("$VAR$"))));
+        assert_eq!(lexer.next_token(), Some(Token::Text(String::from("$VAR$"))));
         assert_eq!(lexer.next_token(), None);
     }
 
@@ -643,11 +653,14 @@ mod tests {
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::Colon));
         assert_eq!(lexer.next_token(), Some(Token::Dash));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from("$woop$"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from("$woop$")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);
     }
@@ -658,12 +671,15 @@ mod tests {
 
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::Index(1)));
-        assert_eq!(lexer.next_token(), Some(Token::Text(Cow::from(" woop\n"))));
+        assert_eq!(
+            lexer.next_token(),
+            Some(Token::Text(String::from(" woop\n")))
+        );
         assert_eq!(lexer.next_token(), Some(Token::DollarSign));
         assert_eq!(lexer.next_token(), Some(Token::OpenBrace));
         assert_eq!(
             lexer.next_token(),
-            Some(Token::Identifier(Cow::from("VAR")))
+            Some(Token::Identifier(String::from("VAR")))
         );
         assert_eq!(lexer.next_token(), Some(Token::CloseBrace));
         assert_eq!(lexer.next_token(), None);

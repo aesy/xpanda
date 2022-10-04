@@ -384,7 +384,7 @@ impl Xpanda {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse()?;
-        let result = self.evaluator.eval(&ast)?;
+        let result = self.evaluator.eval(ast)?;
 
         Ok(result)
     }
