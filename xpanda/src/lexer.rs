@@ -33,11 +33,11 @@ impl<'a> Lexer<'a> {
             }
         };
 
-        match token {
-            Some(Token::OpenBrace) => self.nesting_level += 1,
-            Some(Token::CloseBrace) => self.nesting_level -= 1,
-            _ => {},
-        }
+        self.nesting_level = match token {
+            Some(Token::OpenBrace) => self.nesting_level.saturating_add(1),
+            Some(Token::CloseBrace) => self.nesting_level.saturating_sub(1),
+            _ => self.nesting_level,
+        };
 
         self.previous_token = token.clone();
 
