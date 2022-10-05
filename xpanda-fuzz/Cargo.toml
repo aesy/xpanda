@@ -1,0 +1,19 @@
+[package]
+name = "xpanda-fuzz"
+publish = false
+version = "0.0.0"
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+xpanda = { path = "../xpanda" }
+libfuzzer-sys = "0.4.4"
+
+[[bin]]
+name = "fuzz_input"
+path = "targets/fuzz_input.rs"
+bench = false
+test = false
+doc = false

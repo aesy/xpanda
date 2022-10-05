@@ -52,7 +52,7 @@ Also check out the readme of the submodule that you are interested in:
 
 #### Prerequisites
 
-* [Rust 1.63+](https://www.rust-lang.org/tools/install)
+* [Rust Stable 1.60.0+](https://www.rust-lang.org/tools/install)
 * [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 
 #### Build
@@ -65,6 +65,8 @@ $ cargo build
 
 #### Test
 
+##### Linting
+
 This project uses [rustfmt](https://github.com/rust-lang/rustfmt) for formatting and 
 [clippy](https://github.com/rust-lang/rust-clippy) for linting. Run them with:
 
@@ -73,10 +75,35 @@ $ cargo fmt
 $ cargo clippy
 ```
 
+##### Unit/Integration/Doc Testing 
+
 All code that goes into master must pass all tests. To run all tests, use:
 
 ```sh
 $ cargo test
+```
+
+##### Benchmarking 
+
+Benchmarks can be ran using:
+
+```sh
+$ cargo bench
+```
+
+##### Fuzz Testing 
+
+And fuzz testing, located in the `xpanda-fuzz` directory, can be ran using the 
+[cargo-fuzz](https://github.com/rust-fuzz/cargo-fuzz) tool, which has to be installed first:
+
+```sh
+$ cargo install cargo-fuzz 
+```
+
+It must then be ran using the [nightly channel](https://rust-lang.github.io/rustup/concepts/channels.html):  
+
+```sh
+$ cargo +nightly fuzz run fuzz_input --fuzz-dir xpanda-fuzz
 ```
 
 ## Contribute

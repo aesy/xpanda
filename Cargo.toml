@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "xpanda",
-    "xpanda-cli"
+    "xpanda-cli",
+    "xpanda-fuzz"
 ]
 
 [profile.release]
