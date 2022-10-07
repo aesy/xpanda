@@ -38,15 +38,19 @@
 <span id="38">38</span>
 <span id="39">39</span>
 <span id="40">40</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::borrow::Cow</span>;
-<span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="ident">Display</span>, <span class="ident">Formatter</span>};
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident">std::fmt</span>::{<span class="self">self</span>, <span class="ident">Display</span>, <span class="ident">Formatter</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Any text outside of a param</span>
-    <span class="ident">Text</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">str</span><span class="op">&gt;</span>),
+    <span class="ident">Text</span>(<span class="ident">String</span>),
     <span class="doccomment">/// The name of a named variable or environment variable</span>
-    <span class="ident">Identifier</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">str</span><span class="op">&gt;</span>),
+    <span class="ident">Identifier</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>),
     <span class="doccomment">/// The index of a positional variable</span>
     <span class="ident">Index</span>(<span class="ident">usize</span>),
     <span class="ident">OpenBrace</span>,
@@ -58,23 +62,29 @@
     <span class="ident">QuestionMark</span>,
     <span class="ident">PoundSign</span>,
     <span class="ident">ExclamationMark</span>,
+    <span class="ident">Comma</span>,
+    <span class="ident">Caret</span>,
+    <span class="ident">Tilde</span>,
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Token::Text</span>(<span class="ident">text</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">text</span>),
-            <span class="ident">Token::Identifier</span>(<span class="ident">name</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">name</span>),
-            <span class="ident">Token::Index</span>(<span class="ident">index</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">index</span>),
-            <span class="ident">Token::OpenBrace</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;{{&#39;&quot;</span>),
-            <span class="ident">Token::CloseBrace</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;}}&#39;&quot;</span>),
-            <span class="ident">Token::DollarSign</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;$&#39;&quot;</span>),
-            <span class="ident">Token::Colon</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;:&#39;&quot;</span>),
-            <span class="ident">Token::Dash</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;-&#39;&quot;</span>),
-            <span class="ident">Token::Plus</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;+&#39;&quot;</span>),
-            <span class="ident">Token::QuestionMark</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;?&#39;&quot;</span>),
-            <span class="ident">Token::PoundSign</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;#&#39;&quot;</span>),
-            <span class="ident">Token::ExclamationMark</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;!&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Text</span>(<span class="ident">text</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">text</span>),
+            <span class="ident"><span class="self">Self</span>::Identifier</span>(<span class="ident">name</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;{}\&quot;&quot;</span>, <span class="ident">name</span>),
+            <span class="ident"><span class="self">Self</span>::Index</span>(<span class="ident">index</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">index</span>),
+            <span class="ident"><span class="self">Self</span>::OpenBrace</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;{{&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::CloseBrace</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;}}&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::DollarSign</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;$&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Colon</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;:&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Dash</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;-&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Plus</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;+&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::QuestionMark</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;?&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::PoundSign</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;#&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::ExclamationMark</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;!&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Comma</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;,&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Caret</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;^&#39;&quot;</span>),
+            <span class="ident"><span class="self">Self</span>::Tilde</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;&#39;~&#39;&quot;</span>),
         }
     }
 }
