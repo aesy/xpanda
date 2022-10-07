@@ -1,7 +1,9 @@
 [workspace]
 members = [
     "xpanda",
-    "xpanda-cli",
+    "xpanda-cli"
+]
+exclude = [
     "xpanda-fuzz"
 ]
 
