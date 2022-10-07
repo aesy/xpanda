@@ -1,12 +1,11 @@
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Token {
+pub enum Token<'a> {
     /// Any text outside of a param
     Text(String),
     /// The name of a named variable or environment variable
-    Identifier(String),
+    Identifier(&'a str),
     /// The index of a positional variable
     Index(usize),
     OpenBrace,
@@ -20,8 +19,8 @@ pub enum Token {
     ExclamationMark,
 }
 
-impl Display for Token {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+impl Display for Token<'_> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Self::Text(text) => write!(f, "\"{}\"", text),
             Self::Identifier(name) => write!(f, "\"{}\"", name),

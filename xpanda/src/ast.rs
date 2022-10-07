@@ -1,16 +1,15 @@
-use std::borrow::Cow;
-use std::fmt::{Display, Formatter};
+use std::fmt::{self, Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Identifier {
+pub enum Identifier<'a> {
     // $name
-    Named(String),
+    Named(&'a str),
     // $1
     Indexed(usize),
 }
 
-impl Display for Identifier {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
+impl Display for Identifier<'_> {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self {
             Self::Named(name) => write!(f, "{}", name),
             Self::Indexed(index) => write!(f, "{}", index),
@@ -19,54 +18,54 @@ impl Display for Identifier {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Param {
+pub enum Param<'a> {
     // $identifier | ${identifier}
     Simple {
-        identifier: Identifier,
+        identifier: Identifier<'a>,
     },
     // ${identifier-default} | ${identifier:-default}
     WithDefault {
-        identifier: Identifier,
-        default: Box<Node>,
+        identifier: Identifier<'a>,
+        default: Box<Node<'a>>,
         treat_empty_as_unset: bool,
     },
     // ${identifier+default} | ${identifier:+default}
     WithAlt {
-        identifier: Identifier,
-        alt: Box<Node>,
+        identifier: Identifier<'a>,
+        alt: Box<Node<'a>>,
         treat_empty_as_unset: bool,
     },
     // ${identifier?} | ${identifier:?} | ${identifier?error} | ${identifier:?error}
     WithError {
-        identifier: Identifier,
+        identifier: Identifier<'a>,
         error: Option<String>,
         treat_empty_as_unset: bool,
     },
     // ${#identifier}
     Length {
-        identifier: Identifier,
+        identifier: Identifier<'a>,
     },
     // ${#}
     Arity,
     // ${!identifier}
     Ref {
-        identifier: Identifier,
+        identifier: Identifier<'a>,
     },
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub enum Node {
+pub enum Node<'a> {
     Text(String),
-    Param(Param),
+    Param(Param<'a>),
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Ast {
-    pub nodes: Vec<Node>,
+pub struct Ast<'a> {
+    pub nodes: Vec<Node<'a>>,
 }
 
-impl Ast {
-    pub fn new(nodes: Vec<Node>) -> Self {
+impl<'a> Ast<'a> {
+    pub fn new(nodes: Vec<Node<'a>>) -> Self {
         Self { nodes }
     }
 }

@@ -1,10 +1,9 @@
 use crate::str_read::StrRead;
 use crate::token::Token;
-use std::borrow::Cow;
 
 pub struct Lexer<'a> {
     reader: StrRead<'a>,
-    previous_token: Option<Token>,
+    previous_token: Option<Token<'a>>,
     nesting_level: usize,
 }
 
@@ -52,7 +51,7 @@ impl<'a> Lexer<'a> {
         self.reader.col()
     }
 
-    fn read_text(&mut self) -> Option<Token> {
+    fn read_text(&mut self) -> Option<Token<'a>> {
         let mut slices = Vec::new();
 
         loop {
@@ -81,7 +80,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn read_param(&mut self) -> Option<Token> {
+    fn read_param(&mut self) -> Option<Token<'a>> {
         let next_char = self.reader.peek_char()?;
         let can_be_identifier = matches!(
             self.previous_token,
@@ -134,7 +133,7 @@ impl<'a> Lexer<'a> {
                 let text = self
                     .reader
                     .consume_while(|c| c.is_alphanumeric() || c == '_');
-                Token::Identifier(String::from(text))
+                Token::Identifier(text)
             },
             _ => {
                 if is_escaped {

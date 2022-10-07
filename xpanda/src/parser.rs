@@ -42,14 +42,14 @@ impl<'a> Parser<'a> {
     }
 
     #[must_use]
-    fn peek_token(&mut self) -> Option<&Token> {
+    fn peek_token(&mut self) -> Option<&Token<'a>> {
         self.peeked
             .get_or_insert_with(|| self.lexer.next_token())
             .as_ref()
     }
 
     #[must_use]
-    fn next_token(&mut self) -> Option<Token> {
+    fn next_token(&mut self) -> Option<Token<'a>> {
         match self.peeked.take() {
             Some(option) => option,
             None => self.lexer.next_token(),
@@ -60,7 +60,7 @@ impl<'a> Parser<'a> {
         self.next_token();
     }
 
-    fn expect_token(&mut self, expected: &Token) -> Result<(), Error> {
+    fn expect_token(&mut self, expected: &Token<'a>) -> Result<(), Error> {
         match self.next_token() {
             Some(expected) => Ok(()),
             Some(unexpected) => {
@@ -70,7 +70,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_node(&mut self) -> Result<Node, Error> {
+    fn parse_node(&mut self) -> Result<Node<'a>, Error> {
         match self.peek_token() {
             Some(Token::Text(_)) => Ok(Node::Text(
                 self.parse_text()?.unwrap_or_else(|| String::from("")),
@@ -87,7 +87,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_param(&mut self) -> Result<Param, Error> {
+    fn parse_param(&mut self) -> Result<Param<'a>, Error> {
         match self.peek_token() {
             Some(Token::OpenBrace) => {
                 self.skip_token();
@@ -103,7 +103,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_len_or_arity_param(&mut self) -> Result<Param, Error> {
+    fn parse_len_or_arity_param(&mut self) -> Result<Param<'a>, Error> {
         self.expect_token(&Token::ExclamationMark)?;
 
         match self.peek_token() {
@@ -120,7 +120,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_ref_param(&mut self) -> Result<Param, Error> {
+    fn parse_ref_param(&mut self) -> Result<Param<'a>, Error> {
         self.expect_token(&Token::ExclamationMark)?;
         let identifier = self.parse_identifier()?;
         self.expect_token(&Token::CloseBrace)?;
@@ -170,7 +170,7 @@ impl<'a> Parser<'a> {
         Ok(param)
     }
 
-    fn parse_simple_param(&mut self) -> Result<Param, Error> {
+    fn parse_simple_param(&mut self) -> Result<Param<'a>, Error> {
         let identifier = self.parse_identifier()?;
         Ok(Param::Simple { identifier })
     }
@@ -183,7 +183,7 @@ impl<'a> Parser<'a> {
         }
     }
 
-    fn parse_identifier(&mut self) -> Result<Identifier, Error> {
+    fn parse_identifier(&mut self) -> Result<Identifier<'a>, Error> {
         match self.next_token() {
             Some(Token::Identifier(name)) => Ok(Identifier::Named(name)),
             Some(Token::Index(index)) => Ok(Identifier::Indexed(index)),
