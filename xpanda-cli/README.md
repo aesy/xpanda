@@ -11,9 +11,8 @@ xpanda --help
 ```
 Unix shell-like parameter expansion/variable substitution.
 
-This program will process some input and copy it to some output with all variables
-expanded/substituted using the provided variables. If no variables are provided, then
-values are sourced from environment variables.
+This program will process text from a file or standard input and copy it to standard output
+or a file with all variables expanded/substituted using the provided variables.
 
 Variables can appear in the input in any of the following forms:
 $VAR                substituted with the corresponding value for `VAR` if set, otherwise ``.
@@ -39,6 +38,18 @@ ${#VAR}             substituted with the length of the corresponding value for `
                     otherwise `0`.
 ${#}                substituted with number of positional variables.
 ${!VAR}             substituted with the value of the variable named by the value of `VAR`.
+${VAR^}             substituted with the value of the variable named by the value of `VAR`,
+                    with the first character uppercased.
+${VAR^^}            substituted with the value of the variable named by the value of `VAR`,
+                    with all characters uppercased.
+${VAR,}             substituted with the value of the variable named by the value of `VAR`,
+                    with the first character lowercased.
+${VAR,,}            substituted with the value of the variable named by the value of `VAR`,
+                    with all characters lowercased.
+${VAR~}             substituted with the value of the variable named by the value of `VAR`,
+                    with the casing of the first character reversed.
+${VAR~~}            substituted with the value of the variable named by the value of `VAR`,
+                    with the casing of all characters reversed.
 
 `VAR` above is a named variable. Positional variables are also supported and are passed as
 trailing arguments to the program (see the examples). They can be referenced using their
@@ -64,7 +75,7 @@ EXAMPLES:
                                       `value` using `-v`.
 
 The given input must be ASCII or UTF-8 encoded. Output is UTF-8 encoded and may be written
-in chunks.
+in chunks. If no variables are provided, then values are sourced from environment variables.
 
 Usage: xpanda-cli [OPTIONS] [-- [POSITIONAL_VARS]...]
 

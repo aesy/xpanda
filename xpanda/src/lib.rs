@@ -153,7 +153,9 @@ impl Xpanda {
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR-default}</td>
-    ///       <td>substituted with the corresponding value for 'VAR' if set, otherwise "default".</td>
+    ///       <td>
+    ///         substituted with the corresponding value for 'VAR' if set, otherwise "default".
+    ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:-default}</td>
@@ -165,40 +167,85 @@ impl Xpanda {
     ///     <tr>
     ///       <td>${VAR+alternative}</td>
     ///       <td>
-    ///         substituted with "alternative" if the corresponding value for 'VAR' is set, otherwise "".
+    ///         substituted with "alternative" if the corresponding value for 'VAR' is set,
+    ///         otherwise "".
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:+alternative}</td>
     ///       <td>
-    ///         substituted with "alternative" if the corresponding value for 'VAR' is set and non-empty,
-    ///         otherwise "".
+    ///         substituted with "alternative" if the corresponding value for 'VAR' is set and
+    ///         non-empty, otherwise "".
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR?}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an error.
+    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an
+    ///         error.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR?error}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an error with
-    ///         the given message (in this case "error").
+    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an
+    ///         error with the given message (in this case "error").
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR?error}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set and non-empty, otherwise yields
-    ///         an error with the given message (in this case "error").
+    ///         substituted with the corresponding value for 'VAR' if set and non-empty, otherwise
+    ///         yields an error with the given message (in this case "error").
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${#VAR}</td>
     ///       <td>
-    ///         substituted with the length of the corresponding value for 'VAR' if set, otherwise "0".
+    ///         substituted with the length of the corresponding value for 'VAR' if set, otherwise
+    ///         "0".
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         first character uppercased.
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^^}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with all
+    ///         characters uppercased.
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         first character lowercased.
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,,}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with all
+    ///         characters lowercased.
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         casing of the first character reversed.
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~~}</td>
+    ///       <td>
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         casing of all characters reversed.
     ///       </td>
     ///     </tr>
     ///   </tbody>
@@ -302,6 +349,42 @@ impl Xpanda {
     ///       <td></td>
     ///       <td>$example</td>
     ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"Example"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^^}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"EXAMPLE"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"example"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,,}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"example"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"Example"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~~}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"EXAMPLE"</td>
+    ///     </tr>
     ///   </tbody>
     /// </table>
     ///
@@ -329,6 +412,30 @@ impl Xpanda {
     ///     </tr>
     ///     <tr>
     ///       <td>${!VAR}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR^^}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR,,}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR~~}</td>
     ///       <td>error</td>
     ///     </tr>
     ///   </tbody>

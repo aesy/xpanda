@@ -1,4 +1,4 @@
-use crate::ast::{Ast, Identifier, Node, Param};
+use crate::ast::{Ast, Identifier, Modifier, Node, Param};
 use crate::parser::{self, Parser};
 use crate::position::Position;
 use std::collections::HashMap;
@@ -55,7 +55,13 @@ impl Evaluator {
 
     fn eval_param(&self, param: Param) -> Result<String, Error> {
         match param {
-            Param::Simple { identifier } => self.eval_simple_param(&identifier),
+            Param::Simple {
+                identifier,
+                modifier,
+            } => modifier.map_or_else(
+                || self.eval_simple_param(&identifier),
+                |modifier| self.eval_param_with_modifier(&identifier, &modifier),
+            ),
             Param::WithDefault {
                 identifier,
                 default,
@@ -92,6 +98,64 @@ impl Evaluator {
             },
             Ok,
         )
+    }
+
+    fn eval_param_with_modifier(
+        &self,
+        identifier: &Identifier,
+        modifier: &Modifier,
+    ) -> Result<String, Error> {
+        self.eval_simple_param(identifier)
+            .map(|string| match modifier {
+                Modifier::Upper { all } => {
+                    if *all {
+                        string.to_uppercase()
+                    } else {
+                        let mut chars = string.chars();
+                        match chars.next() {
+                            Some(char) => char.to_uppercase().collect::<String>() + chars.as_str(),
+                            None => String::new(),
+                        }
+                    }
+                },
+                Modifier::Lower { all } => {
+                    if *all {
+                        string.to_lowercase()
+                    } else {
+                        let mut chars = string.chars();
+                        match chars.next() {
+                            Some(char) => char.to_lowercase().collect::<String>() + chars.as_str(),
+                            None => String::new(),
+                        }
+                    }
+                },
+                Modifier::Reverse { all } => {
+                    if *all {
+                        string
+                            .chars()
+                            .map(|char| {
+                                if char.is_uppercase() {
+                                    char.to_lowercase().to_string()
+                                } else {
+                                    char.to_uppercase().to_string()
+                                }
+                            })
+                            .collect()
+                    } else {
+                        let mut chars = string.chars();
+                        match chars.next() {
+                            Some(char) => {
+                                if char.is_uppercase() {
+                                    char.to_lowercase().collect::<String>() + chars.as_str()
+                                } else {
+                                    char.to_uppercase().collect::<String>() + chars.as_str()
+                                }
+                            },
+                            None => String::new(),
+                        }
+                    }
+                },
+            })
     }
 
     fn eval_default_param(

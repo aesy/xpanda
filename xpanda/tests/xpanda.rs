@@ -457,6 +457,96 @@ fn multiline() {
 }
 
 #[test]
+fn uppercase_first() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR^}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("Woop")));
+}
+
+#[test]
+fn uppercase_first_empty() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from(""));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR^}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("")));
+}
+
+#[test]
+fn uppercase_all() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR^^}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("WOOP")));
+}
+
+#[test]
+fn lowercase_first() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("WOOP"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR,}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("wOOP")));
+}
+
+#[test]
+fn lowercase_first_empty() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from(""));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR,}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("")));
+}
+
+#[test]
+fn lowercase_all() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("WOOP"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR,,}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("woop")));
+}
+
+#[test]
+fn reverse_case_first() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("wOoP"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR~}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("WOoP")));
+}
+
+#[test]
+fn reverse_case_first_empty() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from(""));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR~}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("")));
+}
+
+#[test]
+fn reverse_case_all() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("wOoP"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR~~}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("WoOp")));
+}
+
+#[test]
 fn syntax_error() {
     let mut named_vars = HashMap::new();
     named_vars.insert(String::from("VAR"), String::from("wOoP"));

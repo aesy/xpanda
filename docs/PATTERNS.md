@@ -2,19 +2,25 @@
 
 The following patterns/rules are supported:
 
-| Pattern             | Description                                                |
-|---------------------|:-----------------------------------------------------------|
-| `$param`            | `$param` if set, else empty                                |
-| `${param}`          | `$param` if set and non-empty, else empty                  |
-| `${param-pattern}`  | `$param` if set, else `pattern`                            |
-| `${param:-pattern}` | `$param` if set and non-empty, else `pattern`              |
-| `${param+pattern}`  | `pattern` if `param` is set and non-empty, else empty      |
-| `${param:+pattern}` | `pattern` if `param` is set, else empty                    |
-| `${param?text}`     | `$param` if set, else exit with error `text`               |
-| `${param:?text}`    | `$param` if set and non-empty, else exit with error `text` |
-| `${#param}`         | Character length of `$param` if set, else `0`              |
-| `${#}`              | Yields the number of positional variables/arguments        |
-| `${!param}`         | The value of `param` is evaluated as a parameter           |
+| Pattern                  | Description                                                            |
+|--------------------------|:-----------------------------------------------------------------------|
+| `$param`                 | `$param` if set, else empty                                            |
+| `${param}`               | `$param` if set and non-empty, else empty                              |
+| `${param-pattern}`       | `$param` if set, else `pattern`                                        |
+| `${param:-pattern}`      | `$param` if set and non-empty, else `pattern`                          |
+| `${param+pattern}`       | `pattern` if `param` is set and non-empty, else empty                  |
+| `${param:+pattern}`      | `pattern` if `param` is set, else empty                                |
+| `${param?text}`          | `$param` if set, else exit with error `text`                           |
+| `${param:?text}`         | `$param` if set and non-empty, else exit with error `text`             |
+| `${#param}`              | Character length of `$param` if set, else `0`                          |
+| `${#}`                   | Yields the number of positional variables/arguments                    |
+| `${!param}`              | The value of `param` is evaluated as a parameter                       |
+| `${param^}`              | `$param` with the first character uppercased if set, else empty        |
+| `${param^^}`             | `$param` with all characters uppercased if set, else empty             |
+| `${param,}`              | `$param` with the first character lowercased if set, else empty        |
+| `${param,,}`             | `$param` with all characters lowercased if set, else empty             |
+| `${param~}`              | `$param` with the first characters' case reversed if set, else empty   |
+| `${param~~}`             | `$param` with all characters case reversed if set, else empty          |
 
 ## Examples
 
@@ -30,15 +36,27 @@ The following patterns/rules are supported:
 | `${VAR:?message}`     | error: `message` | error: `message` |     `example` |
 | `${#VAR}`             |              `0` |              `0` |           `7` |
 | `${!VAR}`             |              ` ` |              ` ` |    `$example` |
+| `${VAR^}`             |              ` ` |              ` ` |     `Example` |
+| `${VAR^^}`            |              ` ` |              ` ` |     `EXAMPLE` |
+| `${VAR,}`             |              ` ` |              ` ` |     `example` |
+| `${VAR,,}`            |              ` ` |              ` ` |     `example` |
+| `${VAR~}`             |              ` ` |              ` ` |     `Example` |
+| `${VAR~~}`            |              ` ` |              ` ` |     `EXAMPLE` |
 
 With `-u` set (CLI) or `no_unset = true` (API), the following rules take precedence:
 
-| Pattern   | VAR unset |
-|-----------|----------:|
-| `$VAR`    |     error |
-| `${VAR}`  |     error |
-| `${#VAR}` |     error |
-| `${!VAR}` |     error |
+| Pattern      | VAR unset |
+|--------------|----------:|
+| `$VAR`       |     error |
+| `${VAR}`     |     error |
+| `${#VAR}`    |     error |
+| `${!VAR}`    |     error |
+| `${VAR^}`    |     error |
+| `${VAR^^}`   |     error |
+| `${VAR,}`    |     error |
+| `${VAR,,}`   |     error |
+| `${VAR~}`    |     error |
+| `${VAR~~}`   |     error |
 
 Default/Alternative values can also be patterns:
 

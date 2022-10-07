@@ -121,6 +121,18 @@ impl<'a> Lexer<'a> {
                 self.reader.consume_char();
                 Token::PoundSign
             },
+            ',' => {
+                self.reader.consume_char();
+                Token::Comma
+            },
+            '^' => {
+                self.reader.consume_char();
+                Token::Caret
+            },
+            '~' => {
+                self.reader.consume_char();
+                Token::Tilde
+            },
             c if can_be_identifier && c.is_numeric() => {
                 let text = self.reader.consume_while(char::is_numeric);
                 let number = text.parse().unwrap_or(0);

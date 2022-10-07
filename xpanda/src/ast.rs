@@ -18,10 +18,24 @@ impl Display for Identifier<'_> {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+pub enum Modifier {
+    // ${identifier^} | ${identifier^^}
+    Upper { all: bool },
+    // ${identifier,} | ${identifier,,}
+    Lower { all: bool },
+    // ${identifier~} | ${identifier~~}
+    Reverse { all: bool },
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Param<'a> {
     // $identifier | ${identifier}
+    // ${identifier^} | ${identifier^^}
+    // ${identifier,} | ${identifier,,}
+    // ${identifier~} | ${identifier~~}
     Simple {
         identifier: Identifier<'a>,
+        modifier: Option<Modifier>,
     },
     // ${identifier-default} | ${identifier:-default}
     WithDefault {

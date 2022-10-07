@@ -17,6 +17,9 @@ pub enum Token<'a> {
     QuestionMark,
     PoundSign,
     ExclamationMark,
+    Comma,
+    Caret,
+    Tilde,
 }
 
 impl Display for Token<'_> {
@@ -34,6 +37,9 @@ impl Display for Token<'_> {
             Self::QuestionMark => write!(f, "'?'"),
             Self::PoundSign => write!(f, "'#'"),
             Self::ExclamationMark => write!(f, "'!'"),
+            Self::Comma => write!(f, "','"),
+            Self::Caret => write!(f, "'^'"),
+            Self::Tilde => write!(f, "'~'"),
         }
     }
 }
