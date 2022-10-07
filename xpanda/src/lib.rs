@@ -20,12 +20,14 @@ mod eval;
 mod forward_peekable;
 mod lexer;
 mod parser;
+mod position;
 mod str_read;
 mod token;
 
 use crate::eval::Evaluator;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
+use crate::position::Position;
 use std::collections::HashMap;
 use std::env;
 
@@ -38,28 +40,24 @@ pub struct Error {
 
 impl Error {
     #[must_use]
-    pub const fn new(message: String, line: usize, col: usize) -> Self {
-        Self { message, line, col }
+    pub const fn new(message: String, position: &Position) -> Self {
+        Self {
+            message,
+            line: position.line,
+            col: position.col,
+        }
     }
 }
 
 impl From<parser::Error> for Error {
     fn from(error: parser::Error) -> Self {
-        Self {
-            message: error.message,
-            line: error.line,
-            col: error.col,
-        }
+        Self::new(error.message, &error.position)
     }
 }
 
 impl From<eval::Error> for Error {
     fn from(error: eval::Error) -> Self {
-        Self {
-            message: error.message,
-            line: error.line,
-            col: error.col,
-        }
+        Self::new(error.message, &Position::default())
     }
 }
 

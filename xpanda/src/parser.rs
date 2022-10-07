@@ -1,25 +1,24 @@
 use crate::ast::{Ast, Identifier, Node, Param};
-use crate::lexer::Lexer;
+use crate::forward_peekable::{ForwardPeekable, IteratorExt};
+use crate::lexer::{self, Lexer};
+use crate::position::Position;
 use crate::token::Token;
-use std::borrow::Cow;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Error {
     pub message: String,
-    pub line: usize,
-    pub col: usize,
+    pub position: Position,
 }
 
 impl Error {
-    const fn new(message: String, line: usize, col: usize) -> Self {
-        Self { message, line, col }
+    const fn new(message: String, position: Position) -> Self {
+        Self { message, position }
     }
 }
 
 pub struct Parser<'a> {
-    lexer: Lexer<'a>,
-    #[allow(clippy::option_option)]
-    peeked: Option<Option<Token>>,
+    iter: ForwardPeekable<lexer::IterMut<'a>>,
+    position: Option<Position>,
 }
 
 impl<'a> Parser<'a> {

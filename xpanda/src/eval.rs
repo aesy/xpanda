@@ -1,18 +1,17 @@
 use crate::ast::{Ast, Identifier, Node, Param};
 use crate::parser::{self, Parser};
-use std::borrow::Cow;
+use crate::position::Position;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Error {
     pub message: String,
-    pub line: usize,
-    pub col: usize,
+    pub position: Position,
 }
 
 impl Error {
-    const fn new(message: String, line: usize, col: usize) -> Self {
-        Self { message, line, col }
+    const fn new(message: String, position: Position) -> Self {
+        Self { message, position }
     }
 }
 
@@ -83,7 +82,10 @@ impl Evaluator {
             || {
                 if self.no_unset {
                     // TODO wrong line/col
-                    Err(Error::new(Self::error_message(identifier, false), 0, 0))
+                    Err(Error::new(
+                        Self::error_message(identifier, false),
+                        Position::default(),
+                    ))
                 } else {
                     Ok(String::from(""))
                 }
@@ -127,7 +129,7 @@ impl Evaluator {
                     error.unwrap_or_else(|| Self::error_message(identifier, treat_empty_as_unset));
 
                 // TODO wrong line/col
-                Error::new(msg, 0, 0)
+                Error::new(msg, Position::default())
             })
     }
 
@@ -136,7 +138,10 @@ impl Evaluator {
             || {
                 if self.no_unset {
                     // TODO wrong line/col
-                    Err(Error::new(Self::error_message(identifier, false), 0, 0))
+                    Err(Error::new(
+                        Self::error_message(identifier, false),
+                        Position::default(),
+                    ))
                 } else {
                     Ok(String::from("0"))
                 }

@@ -40,15 +40,7 @@ impl<'a> Lexer<'a> {
 
         self.previous_token = token.clone();
 
-        token
-    }
-
-    pub const fn line(&self) -> usize {
-        self.reader.line()
-    }
-
-    pub const fn col(&self) -> usize {
-        self.reader.col()
+        token.map(|token| (token, self.reader.position().clone()))
     }
 
     fn read_text(&mut self) -> Option<Token<'a>> {

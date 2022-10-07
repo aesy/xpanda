@@ -1,10 +1,9 @@
 use crate::forward_peekable::{ForwardPeekable, IteratorExt};
+use crate::position::Position;
 use std::str::CharIndices;
 
 pub struct StrRead<'a> {
-    index: usize,
-    line: usize,
-    col: usize,
+    position: Position,
     input: &'a str,
     iter: ForwardPeekable<CharIndices<'a>>,
 }
@@ -13,22 +12,15 @@ impl<'a> StrRead<'a> {
     #[must_use]
     pub fn new(input: &'a str) -> Self {
         Self {
-            index: 0,
-            line: 1,
-            col: 1,
+            position: Position::default(),
             input,
             iter: input.char_indices().forward_peekable(),
         }
     }
 
     #[must_use]
-    pub const fn line(&self) -> usize {
-        self.line
-    }
-
-    #[must_use]
-    pub const fn col(&self) -> usize {
-        self.col
+    pub const fn position(&self) -> &Position {
+        &self.position
     }
 
     pub fn peek_char(&mut self) -> Option<char> {
@@ -36,7 +28,7 @@ impl<'a> StrRead<'a> {
     }
 
     pub fn peek_count(&mut self, n: usize) -> &'a str {
-        let start = self.index;
+        let start = self.position.index;
         let mut end = start;
 
         for i in 1..=n {
@@ -53,13 +45,13 @@ impl<'a> StrRead<'a> {
     pub fn consume_char(&mut self) -> Option<char> {
         let (i, c) = self.iter.next()?;
 
-        self.index = i + c.len_utf8();
+        self.position.index = i + c.len_utf8();
 
         if c == '\n' {
-            self.line += 1;
-            self.col = 1;
+            self.position.line += 1;
+            self.position.col = 1;
         } else {
-            self.col += 1;
+            self.position.col += 1;
         }
 
         Some(c)
@@ -69,7 +61,7 @@ impl<'a> StrRead<'a> {
     where
         P: Fn(char) -> bool,
     {
-        let start = self.index;
+        let start = self.position.index;
 
         while let Some(c) = self.peek_char() {
             if !predicate(c) {
@@ -79,7 +71,7 @@ impl<'a> StrRead<'a> {
             self.consume_char();
         }
 
-        let end = self.index;
+        let end = self.position.index;
 
         &self.input[start..end]
     }
