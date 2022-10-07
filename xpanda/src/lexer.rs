@@ -1,3 +1,4 @@
+use crate::position::Position;
 use crate::str_read::StrRead;
 use crate::token::Token;
 
@@ -16,7 +17,11 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn next_token(&mut self) -> Option<Token> {
+    pub const fn into_iter(mut self) -> IterMut<'a> {
+        IterMut::new(self)
+    }
+
+    pub fn next_token(&mut self) -> Option<(Token<'a>, Position)> {
         let is_param = self.nesting_level > 0 || self.previous_token == Some(Token::DollarSign);
 
         let token = if is_param {
@@ -143,5 +148,23 @@ impl<'a> Lexer<'a> {
         };
 
         Some(token)
+    }
+}
+
+pub struct IterMut<'a> {
+    lexer: Lexer<'a>,
+}
+
+impl<'a> IterMut<'a> {
+    const fn new(lexer: Lexer<'a>) -> Self {
+        Self { lexer }
+    }
+}
+
+impl<'a> Iterator for IterMut<'a> {
+    type Item = (Token<'a>, Position);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.lexer.next_token()
     }
 }

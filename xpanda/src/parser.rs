@@ -22,14 +22,14 @@ pub struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub const fn new(lexer: Lexer<'a>) -> Self {
+    pub fn new(lexer: Lexer<'a>) -> Self {
         Self {
-            lexer,
-            peeked: None,
+            iter: lexer.into_iter().forward_peekable(),
+            position: None,
         }
     }
 
-    pub fn parse(&mut self) -> Result<Ast, Error> {
+    pub fn parse(&mut self) -> Result<Ast<'a>, Error> {
         let mut nodes = Vec::new();
 
         while self.peek_token().is_some() {
@@ -42,16 +42,16 @@ impl<'a> Parser<'a> {
 
     #[must_use]
     fn peek_token(&mut self) -> Option<&Token<'a>> {
-        self.peeked
-            .get_or_insert_with(|| self.lexer.next_token())
-            .as_ref()
+        self.iter.peek().map(|(token, _)| token)
     }
 
     #[must_use]
     fn next_token(&mut self) -> Option<Token<'a>> {
-        match self.peeked.take() {
-            Some(option) => option,
-            None => self.lexer.next_token(),
+        if let Some((token, position)) = self.iter.next() {
+            self.position = Some(position);
+            Some(token)
+        } else {
+            None
         }
     }
 
