@@ -38,8 +38,23 @@ fn simple_index_no_unset() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("'1' is unset"), 0, 0))
+        Err(Error {
+            message: String::from("'1' is unset"),
+            line: 1,
+            col: 1
+        })
     );
+}
+
+#[test]
+fn simple_index_all() {
+    let positional_vars = vec![String::from("first"), String::from("second")];
+    let xpanda = Xpanda::builder()
+        .with_positional_vars(positional_vars)
+        .build();
+    let input = "$0";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("first second")));
 }
 
 #[test]
@@ -77,7 +92,11 @@ fn simple_named_no_unset() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("'VAR' is unset"), 0, 0))
+        Err(Error {
+            message: String::from("'VAR' is unset"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -252,7 +271,11 @@ fn error_index() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("msg"), 0, 0))
+        Err(Error {
+            message: String::from("msg"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -263,7 +286,11 @@ fn error_named() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("msg"), 0, 0))
+        Err(Error {
+            message: String::from("msg"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -277,7 +304,11 @@ fn error_index_no_empty() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("msg"), 0, 0))
+        Err(Error {
+            message: String::from("msg"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -290,7 +321,11 @@ fn error_named_no_empty() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("msg"), 0, 0))
+        Err(Error {
+            message: String::from("msg"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -301,7 +336,11 @@ fn error_no_message() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("'VAR' is unset"), 0, 0))
+        Err(Error {
+            message: String::from("'VAR' is unset"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -314,7 +353,11 @@ fn error_no_message_no_empty() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("'VAR' is unset or empty"), 0, 0))
+        Err(Error {
+            message: String::from("'VAR' is unset or empty"),
+            line: 1,
+            col: 1
+        })
     );
 }
 
@@ -348,6 +391,21 @@ fn len_missing() {
 }
 
 #[test]
+fn len_no_unset() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    let input = "${#VAR}";
+
+    assert_eq!(
+        xpanda.expand(input),
+        Err(Error {
+            message: String::from("'VAR' is unset"),
+            line: 1,
+            col: 1
+        })
+    );
+}
+
+#[test]
 fn missing_close_brace() {
     let mut named_vars = HashMap::new();
     named_vars.insert(String::from("VAR"), String::from("woop"));
@@ -356,11 +414,11 @@ fn missing_close_brace() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(
-            String::from("Invalid param, unexpected EOF"),
-            1,
-            6
-        ))
+        Err(Error {
+            message: String::from("Invalid param, unexpected EOF"),
+            line: 1,
+            col: 6
+        })
     );
 }
 
@@ -373,7 +431,11 @@ fn unexpected_token() {
 
     assert_eq!(
         xpanda.expand(input),
-        Err(Error::new(String::from("Unexpected token ':'"), 1, 8))
+        Err(Error {
+            message: String::from("Unexpected token ':'"),
+            line: 1,
+            col: 7
+        })
     );
 }
 
@@ -391,5 +453,53 @@ fn multiline() {
     assert_eq!(
         xpanda.expand(input),
         Ok(String::from("line 1 wawawa\nwoop line 2"))
+    );
+}
+
+#[test]
+fn syntax_error() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("wOoP"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+
+    assert_eq!(
+        xpanda.expand("${VAR"),
+        Err(Error {
+            message: String::from("Invalid param, unexpected EOF"),
+            line: 1,
+            col: 6,
+        })
+    );
+    assert_eq!(
+        xpanda.expand("${VAR-"),
+        Err(Error {
+            message: String::from("Unexpected EOF"),
+            line: 1,
+            col: 7,
+        })
+    );
+    assert_eq!(
+        xpanda.expand("${VAR "),
+        Err(Error {
+            message: String::from("Invalid param, unexpected token \" \""),
+            line: 1,
+            col: 6,
+        })
+    );
+    assert_eq!(
+        xpanda.expand("${#"),
+        Err(Error {
+            message: String::from("Expected identifier or close brace, found EOF"),
+            line: 1,
+            col: 4,
+        })
+    );
+    assert_eq!(
+        xpanda.expand("${VAR-:def}"),
+        Err(Error {
+            message: String::from("Unexpected token ':'"),
+            line: 1,
+            col: 7,
+        })
     );
 }

@@ -5,7 +5,7 @@ use std::fs;
 use uuid::Uuid;
 
 #[test]
-fn simple_index() {
+fn positional_var_success() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["--", "woop"])
@@ -16,91 +16,7 @@ fn simple_index() {
 }
 
 #[test]
-fn simple_index_missing() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("$1")
-        .assert()
-        .success()
-        .stdout(diff(""));
-}
-
-#[test]
-fn simple_index_no_unset() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .arg("-u")
-        .write_stdin("$1")
-        .assert()
-        .failure()
-        .stderr(diff("1:0 '1' is unset"));
-}
-
-#[test]
-fn simple_named() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR=woop"])
-        .write_stdin("$VAR")
-        .assert()
-        .success()
-        .stdout(diff("woop"));
-}
-
-#[test]
-fn simple_named_missing() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("$VAR")
-        .assert()
-        .success()
-        .stdout(diff(""));
-}
-
-#[test]
-fn simple_named_no_unset() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .arg("-u")
-        .write_stdin("$VAR")
-        .assert()
-        .failure()
-        .stderr(diff("1:0 'VAR' is unset"));
-}
-
-#[test]
-fn simple_env() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .env("VAR", "woop")
-        .write_stdin("$VAR")
-        .assert()
-        .success()
-        .stdout(diff("woop"));
-}
-
-#[test]
-fn default_index() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("${1-default}")
-        .assert()
-        .success()
-        .stdout(diff("default"));
-}
-
-#[test]
-fn default_named() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("${VAR-default}")
-        .assert()
-        .success()
-        .stdout(diff("default"));
-}
-
-#[test]
-fn default_pattern() {
+fn named_var_success() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "DEF=woop"])
@@ -111,181 +27,60 @@ fn default_pattern() {
 }
 
 #[test]
-fn default_named_no_empty() {
+fn no_unset_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
-        .args(&["-v", "VAR="])
-        .write_stdin("${VAR:-default}")
-        .assert()
-        .success()
-        .stdout(diff("default"));
-}
-
-#[test]
-fn alt_index() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["--", "woop"])
-        .write_stdin("${1+alt}")
-        .assert()
-        .success()
-        .stdout(diff("alt"));
-}
-
-#[test]
-fn alt_named() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR=woop"])
-        .write_stdin("${VAR+alt}")
-        .assert()
-        .success()
-        .stdout(diff("alt"));
-}
-
-#[test]
-fn alt_pattern() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR=woop"])
-        .args(&["-v", "ALT=wawawa"])
-        .write_stdin("${VAR+$ALT}")
-        .assert()
-        .success()
-        .stdout(diff("wawawa"));
-}
-
-#[test]
-fn alt_index_no_empty() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .arg("--")
-        .write_stdin("${1:+alt}")
-        .assert()
-        .success()
-        .stdout(diff(""));
-}
-
-#[test]
-fn alt_named_no_empty() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR="])
-        .write_stdin("${VAR:+alt}")
-        .assert()
-        .success()
-        .stdout(diff(""));
-}
-
-#[test]
-fn alt_pattern_no_empty() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR="])
-        .args(&["-v", "ALT=wawawa"])
-        .write_stdin("${VAR:+$ALT}")
-        .assert()
-        .success()
-        .stdout(diff(""));
-}
-
-#[test]
-fn error_index() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("${1?msg}")
+        .arg("-u")
+        .write_stdin("$VAR")
         .assert()
         .failure()
-        .stderr(diff("1:0 msg"));
+        .stderr(diff("1:1 'VAR' is unset"));
 }
 
 #[test]
-fn error_named() {
+fn env_var_success() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .env("VAR", "woop")
+        .write_stdin("$VAR")
+        .assert()
+        .success()
+        .stdout(diff("woop"));
+}
+
+#[test]
+fn var_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .write_stdin("${VAR?msg}")
         .assert()
         .failure()
-        .stderr(diff("1:0 msg"));
+        .stderr(diff("1:1 msg"));
 }
 
 #[test]
-fn error_index_no_empty() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .arg("--")
-        .write_stdin("${1:?msg}")
-        .assert()
-        .failure()
-        .stderr(diff("1:0 msg"));
-}
-
-#[test]
-fn error_named_no_empty() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR="])
-        .write_stdin("${VAR:?msg}")
-        .assert()
-        .failure()
-        .stderr(diff("1:0 msg"));
-}
-
-#[test]
-fn error_no_message() {
+fn var_unset_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .write_stdin("${VAR?}")
         .assert()
         .failure()
-        .stderr(diff("1:0 'VAR' is unset"));
+        .stderr(diff("1:1 'VAR' is unset"));
 }
 
 #[test]
-fn error_no_message_no_empty() {
+fn var_unset_or_empty_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "VAR="])
         .write_stdin("${VAR:?}")
         .assert()
         .failure()
-        .stderr(diff("1:0 'VAR' is unset or empty"));
+        .stderr(diff("1:1 'VAR' is unset or empty"));
 }
 
 #[test]
-fn len_index() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["--", "four"])
-        .write_stdin("${#1}")
-        .assert()
-        .success()
-        .stdout(diff("4"));
-}
-
-#[test]
-fn len_named() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR=four"])
-        .write_stdin("${#VAR}")
-        .assert()
-        .success()
-        .stdout(diff("4"));
-}
-
-#[test]
-fn len_missing() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .write_stdin("${#VAR}")
-        .assert()
-        .success()
-        .stdout(diff("0"));
-}
-
-#[test]
-fn arity() {
+fn arity_success() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["--", "one", "two"])
@@ -296,7 +91,7 @@ fn arity() {
 }
 
 #[test]
-fn ref_index() {
+fn ref_success() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "VAR=woop"])
@@ -308,19 +103,7 @@ fn ref_index() {
 }
 
 #[test]
-fn ref_named() {
-    Command::cargo_bin("xpanda-cli")
-        .unwrap()
-        .args(&["-v", "VAR1=VAR2"])
-        .args(&["-v", "VAR2=woop"])
-        .write_stdin("${!VAR1}")
-        .assert()
-        .success()
-        .stdout(diff("woop"));
-}
-
-#[test]
-fn input_file() {
+fn input_file_success() {
     let mut file = temp_dir();
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-input");
     fs::write(&file, "$VAR").unwrap();
@@ -335,7 +118,7 @@ fn input_file() {
 }
 
 #[test]
-fn output_file() {
+fn output_file_success() {
     let mut file = temp_dir();
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-output");
 
@@ -353,7 +136,7 @@ fn output_file() {
 }
 
 #[test]
-fn var_file() {
+fn var_file_success() {
     let mut file = temp_dir();
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-vars");
     fs::write(&file, "VAR=woop").unwrap();
@@ -368,7 +151,7 @@ fn var_file() {
 }
 
 #[test]
-fn missing_close_brace() {
+fn unexpected_eof_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "VAR=woop"])
@@ -379,18 +162,18 @@ fn missing_close_brace() {
 }
 
 #[test]
-fn unexpected_token() {
+fn unexpected_token_error() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "VAR=woop"])
         .write_stdin("${VAR-:def}")
         .assert()
         .failure()
-        .stderr(diff("1:8 Unexpected token ':'"));
+        .stderr(diff("1:7 Unexpected token ':'"));
 }
 
 #[test]
-fn multiline() {
+fn multiline_success() {
     Command::cargo_bin("xpanda-cli")
         .unwrap()
         .args(&["-v", "DEF=def"])
