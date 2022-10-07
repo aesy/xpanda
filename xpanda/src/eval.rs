@@ -152,12 +152,12 @@ impl Evaluator {
 
     fn eval_ref_param(&self, identifier: &Identifier) -> Result<String, Error> {
         self.eval_simple_param(identifier)
-            .and_then(|name| self.eval_simple_param(&Identifier::Named(name)))
+            .and_then(|name| self.eval_simple_param(&Identifier::Named(&name)))
     }
 
     fn eval_identifier(&self, identifier: &Identifier) -> Option<String> {
         match identifier {
-            Identifier::Named(name) => self.named_vars.get(name).cloned(),
+            Identifier::Named(name) => self.named_vars.get(*name).cloned(),
             Identifier::Indexed(index) => {
                 if *index == 0 {
                     Some(self.positional_vars.join(" "))
