@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -505,490 +505,490 @@ a copy of it with all variables expanded/substituted according to some patterns.
 [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
 [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html
 [`Xpanda`]: struct.Xpanda.html
-*/</span>
+*/
 
-<span class="attribute">#![<span class="ident">deny</span>(<span class="ident">clippy::all</span>)]</span>
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">clippy::pedantic</span>, <span class="ident">clippy::nursery</span>)]</span>
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">unused</span>)]</span>
+</span><span class="attribute">#![deny(clippy::all)]
+#![warn(clippy::pedantic, clippy::nursery)]
+#![allow(unused)]
 
-<span class="kw">mod</span> <span class="ident">ast</span>;
-<span class="kw">mod</span> <span class="ident">eval</span>;
-<span class="kw">mod</span> <span class="ident">forward_peekable</span>;
-<span class="kw">mod</span> <span class="ident">lexer</span>;
-<span class="kw">mod</span> <span class="ident">parser</span>;
-<span class="kw">mod</span> <span class="ident">position</span>;
-<span class="kw">mod</span> <span class="ident">str_read</span>;
-<span class="kw">mod</span> <span class="ident">token</span>;
+</span><span class="kw">mod </span>ast;
+<span class="kw">mod </span>eval;
+<span class="kw">mod </span>forward_peekable;
+<span class="kw">mod </span>lexer;
+<span class="kw">mod </span>parser;
+<span class="kw">mod </span>position;
+<span class="kw">mod </span>str_read;
+<span class="kw">mod </span>token;
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::eval::Evaluator</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lexer::Lexer</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser::Parser</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::position::Position</span>;
-<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
-<span class="kw">use</span> <span class="ident">std::env</span>;
+<span class="kw">use </span><span class="kw">crate</span>::eval::Evaluator;
+<span class="kw">use </span><span class="kw">crate</span>::lexer::Lexer;
+<span class="kw">use </span><span class="kw">crate</span>::parser::Parser;
+<span class="kw">use </span><span class="kw">crate</span>::position::Position;
+<span class="kw">use </span>std::collections::HashMap;
+<span class="kw">use </span>std::env;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Error</span> {
-    <span class="kw">pub</span> <span class="ident">message</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">line</span>: <span class="ident">usize</span>,
-    <span class="kw">pub</span> <span class="ident">col</span>: <span class="ident">usize</span>,
+<span class="attribute">#[derive(Debug, Clone, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>Error {
+    <span class="kw">pub </span>message: String,
+    <span class="kw">pub </span>line: usize,
+    <span class="kw">pub </span>col: usize,
 }
 
-<span class="kw">impl</span> <span class="ident">Error</span> {
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">message</span>: <span class="ident">String</span>, <span class="ident">position</span>: <span class="kw-2">&amp;</span><span class="ident">Position</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">message</span>,
-            <span class="ident">line</span>: <span class="ident">position</span>.<span class="ident">line</span>,
-            <span class="ident">col</span>: <span class="ident">position</span>.<span class="ident">col</span>,
+<span class="kw">impl </span>Error {
+    <span class="attribute">#[must_use]
+    </span><span class="kw">pub const fn </span>new(message: String, position: <span class="kw-2">&amp;</span>Position) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            message,
+            line: position.line,
+            col: position.col,
         }
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">parser::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">error</span>: <span class="ident">parser::Error</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">error</span>.<span class="ident">message</span>, <span class="kw-2">&amp;</span><span class="ident">error</span>.<span class="ident">position</span>)
+<span class="kw">impl </span>From&lt;parser::Error&gt; <span class="kw">for </span>Error {
+    <span class="kw">fn </span>from(error: parser::Error) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(error.message, <span class="kw-2">&amp;</span>error.position)
     }
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">eval::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">error</span>: <span class="ident">eval::Error</span>) -&gt; <span class="self">Self</span> {
-        <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">error</span>.<span class="ident">message</span>, <span class="kw-2">&amp;</span><span class="ident">Position::default</span>())
+<span class="kw">impl </span>From&lt;eval::Error&gt; <span class="kw">for </span>Error {
+    <span class="kw">fn </span>from(error: eval::Error) -&gt; <span class="self">Self </span>{
+        <span class="self">Self</span>::new(error.message, <span class="kw-2">&amp;</span>Position::default())
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Builder</span> {
-    <span class="ident">no_unset</span>: <span class="ident">bool</span>,
-    <span class="ident">positional_vars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="ident">named_vars</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Default)]
+</span><span class="kw">pub struct </span>Builder {
+    no_unset: bool,
+    positional_vars: Vec&lt;String&gt;,
+    named_vars: HashMap&lt;String, String&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">Builder</span> {
-    <span class="doccomment">/// With this flag set, missing variables without any default value will cause an error</span>
-    <span class="doccomment">/// instead of omitting en empty string. Off by default.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">no_unset</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">no_unset</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">no_unset</span> <span class="op">=</span> <span class="ident">no_unset</span>;
-        <span class="self">self</span>
-    }
+<span class="kw">impl </span>Builder {
+    <span class="doccomment">/// With this flag set, missing variables without any default value will cause an error
+    /// instead of omitting en empty string. Off by default.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub const fn </span>no_unset(<span class="kw-2">mut </span><span class="self">self</span>, no_unset: bool) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.no_unset = no_unset;
+        <span class="self">self
+    </span>}
 
-    <span class="doccomment">/// Adds all environment variables as named variables.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_env_vars</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">named_vars</span>.<span class="ident">extend</span>(<span class="ident">env::vars</span>());
-        <span class="self">self</span>
-    }
+    <span class="doccomment">/// Adds all environment variables as named variables.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>with_env_vars(<span class="kw-2">mut </span><span class="self">self</span>) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.named_vars.extend(env::vars());
+        <span class="self">self
+    </span>}
 
-    <span class="doccomment">/// Adds the given map values as named variables.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_named_vars</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">vars</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">named_vars</span>.<span class="ident">extend</span>(<span class="ident">vars</span>);
-        <span class="self">self</span>
-    }
+    <span class="doccomment">/// Adds the given map values as named variables.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>with_named_vars(<span class="kw-2">mut </span><span class="self">self</span>, vars: HashMap&lt;String, String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.named_vars.extend(vars);
+        <span class="self">self
+    </span>}
 
-    <span class="doccomment">/// Adds the given strings as positional variables.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_positional_vars</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">vars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">self</span>.<span class="ident">positional_vars</span>.<span class="ident">extend</span>(<span class="ident">vars</span>);
-        <span class="self">self</span>
-    }
+    <span class="doccomment">/// Adds the given strings as positional variables.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>with_positional_vars(<span class="kw-2">mut </span><span class="self">self</span>, vars: Vec&lt;String&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">self</span>.positional_vars.extend(vars);
+        <span class="self">self
+    </span>}
 
-    <span class="doccomment">/// Builds a new [`Xpanda`] instance.</span>
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="ident">Xpanda</span> {
-        <span class="ident">Xpanda::new</span>(<span class="self">self</span>)
+    <span class="doccomment">/// Builds a new [`Xpanda`] instance.
+    </span><span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>build(<span class="self">self</span>) -&gt; Xpanda {
+        Xpanda::new(<span class="self">self</span>)
     }
 }
 
-<span class="doccomment">/// [`Xpanda`] substitutes the values of variables in strings similar to [`envsubst`] and</span>
-<span class="doccomment">/// [`Bash parameter expansion`].</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html</span>
-<span class="doccomment">/// [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Xpanda</span> {
-    <span class="ident">evaluator</span>: <span class="ident">Evaluator</span>,
+<span class="doccomment">/// [`Xpanda`] substitutes the values of variables in strings similar to [`envsubst`] and
+/// [`Bash parameter expansion`].
+///
+/// [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
+/// [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
+</span><span class="attribute">#[derive(Default)]
+</span><span class="kw">pub struct </span>Xpanda {
+    evaluator: Evaluator,
 }
 
-<span class="kw">impl</span> <span class="ident">Xpanda</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">builder</span>: <span class="ident">Builder</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">evaluator</span>: <span class="ident">Evaluator::new</span>(
-                <span class="ident">builder</span>.<span class="ident">no_unset</span>,
-                <span class="ident">builder</span>.<span class="ident">positional_vars</span>,
-                <span class="ident">builder</span>.<span class="ident">named_vars</span>,
+<span class="kw">impl </span>Xpanda {
+    <span class="kw">fn </span>new(builder: Builder) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            evaluator: Evaluator::new(
+                builder.no_unset,
+                builder.positional_vars,
+                builder.named_vars,
             ),
         }
     }
 
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">builder</span>() -&gt; <span class="ident">Builder</span> {
-        <span class="ident">Builder::default</span>()
+    <span class="attribute">#[must_use]
+    </span><span class="kw">pub fn </span>builder() -&gt; Builder {
+        Builder::default()
     }
 
-    <span class="doccomment">/// Expands the given text by substituting the values of the variables inside it.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Variables can appear in any of the following forms:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// &lt;table&gt;</span>
-    <span class="doccomment">///   &lt;thead&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;Description&lt;/th&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/thead&gt;</span>
-    <span class="doccomment">///   &lt;tbody&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR-default}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;default&quot;.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR:-default}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise</span>
-    <span class="doccomment">///         &quot;default&quot;.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set,</span>
-    <span class="doccomment">///         otherwise &quot;&quot;.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set and</span>
-    <span class="doccomment">///         non-empty, otherwise &quot;&quot;.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR?}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an</span>
-    <span class="doccomment">///         error.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR?error}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an</span>
-    <span class="doccomment">///         error with the given message (in this case &quot;error&quot;).</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR?error}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise</span>
-    <span class="doccomment">///         yields an error with the given message (in this case &quot;error&quot;).</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the length of the corresponding value for &#39;VAR&#39; if set, otherwise</span>
-    <span class="doccomment">///         &quot;0&quot;.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with the</span>
-    <span class="doccomment">///         first character uppercased.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with all</span>
-    <span class="doccomment">///         characters uppercased.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with the</span>
-    <span class="doccomment">///         first character lowercased.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with all</span>
-    <span class="doccomment">///         characters lowercased.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with the</span>
-    <span class="doccomment">///         casing of the first character reversed.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;</span>
-    <span class="doccomment">///         substituted with the value of the variable named by the value of `VAR`, with the</span>
-    <span class="doccomment">///         casing of all characters reversed.</span>
-    <span class="doccomment">///       &lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/tbody&gt;</span>
-    <span class="doccomment">/// &lt;/table&gt;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// `VAR` above is a named variable. Named variables can be provided using the builder:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use std::collections::HashMap;</span>
-    <span class="doccomment">/// use xpanda::Xpanda;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let named_vars = HashMap::new();</span>
-    <span class="doccomment">/// let xpanda = Xpanda::builder()</span>
-    <span class="doccomment">///     .with_named_vars(named_vars)</span>
-    <span class="doccomment">///     .build();</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Positional variables are also supported and can be provided in the same way:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```rust</span>
-    <span class="doccomment">/// use xpanda::Xpanda;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let xpanda = Xpanda::builder()</span>
-    <span class="doccomment">///     .with_positional_vars(Vec::new())</span>
-    <span class="doccomment">///     .build();</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Positional variables can be referenced using their index (starting at 1), for example, `$1`</span>
-    <span class="doccomment">/// references the first positional variable, `$2` the second and so on. `$0` is a space concatenated</span>
-    <span class="doccomment">/// string of all positional variables.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Here are some examples and their output:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// &lt;table&gt;</span>
-    <span class="doccomment">///   &lt;thead&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/thead&gt;</span>
-    <span class="doccomment">///   &lt;tbody&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR-default}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR:-default}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR?message}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR:?message}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;7&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${!VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;$example&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;Example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;EXAMPLE&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;Example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;EXAMPLE&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/tbody&gt;</span>
-    <span class="doccomment">/// &lt;/table&gt;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Special rules take precedence when [`Builder::no_unset`] is `true`:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// &lt;table&gt;</span>
-    <span class="doccomment">///   &lt;thead&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/thead&gt;</span>
-    <span class="doccomment">///   &lt;tbody&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;$VAR&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${#VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${!VAR}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR^^}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR,,}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${VAR~~}&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;error&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/tbody&gt;</span>
-    <span class="doccomment">/// &lt;/table&gt;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Default/Alternative values can also be variables:</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// &lt;table&gt;</span>
-    <span class="doccomment">///   &lt;thead&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;Pattern&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR unset&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;</span>
-    <span class="doccomment">///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/thead&gt;</span>
-    <span class="doccomment">///   &lt;tbody&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;`${VAR:-$DEF}`&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;`$DEF`&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///     &lt;tr&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;`${VAR+${ALT:-alternative}}`&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;`${ALT:-alternative}`&lt;/td&gt;</span>
-    <span class="doccomment">///       &lt;td&gt;${ALT:-alternative}&lt;/td&gt;</span>
-    <span class="doccomment">///     &lt;/tr&gt;</span>
-    <span class="doccomment">///   &lt;/tbody&gt;</span>
-    <span class="doccomment">/// &lt;/table&gt;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// The `$` character is assumed to be the start of a variable. If the variable does not match</span>
-    <span class="doccomment">/// any of the forms listed above, an error is returned. Variables can be escaped by prefixing them</span>
-    <span class="doccomment">/// by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VAR-$$text}` which yields</span>
-    <span class="doccomment">/// `$text` if `VAR` is unset.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Errors</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// Returns [`Err`] if the given string is badly formatted and cannot be parsed.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// # Examples</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// ```</span>
-    <span class="doccomment">/// use xpanda::Xpanda;</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// let xpanda = Xpanda::default();</span>
-    <span class="doccomment">/// assert_eq!(xpanda.expand(&quot;${1:-default}&quot;), Ok(String::from(&quot;default&quot;)));</span>
-    <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">lexer</span> <span class="op">=</span> <span class="ident">Lexer::new</span>(<span class="ident">input</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">parser</span> <span class="op">=</span> <span class="ident">Parser::new</span>(<span class="ident">lexer</span>);
-        <span class="kw">let</span> <span class="ident">ast</span> <span class="op">=</span> <span class="ident">parser</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">evaluator</span>.<span class="ident">eval</span>(<span class="ident">ast</span>)<span class="question-mark">?</span>;
+    <span class="doccomment">/// Expands the given text by substituting the values of the variables inside it.
+    ///
+    /// Variables can appear in any of the following forms:
+    ///
+    /// &lt;table&gt;
+    ///   &lt;thead&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;th&gt;Pattern&lt;/th&gt;
+    ///       &lt;th&gt;Description&lt;/th&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/thead&gt;
+    ///   &lt;tbody&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;$VAR&lt;/td&gt;
+    ///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR}&lt;/td&gt;
+    ///       &lt;td&gt;substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;&quot;.&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR-default}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise &quot;default&quot;.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR:-default}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise
+    ///         &quot;default&quot;.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set,
+    ///         otherwise &quot;&quot;.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with &quot;alternative&quot; if the corresponding value for &#39;VAR&#39; is set and
+    ///         non-empty, otherwise &quot;&quot;.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR?}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an
+    ///         error.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR?error}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the corresponding value for &#39;VAR&#39; if set, otherwise yields an
+    ///         error with the given message (in this case &quot;error&quot;).
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR?error}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the corresponding value for &#39;VAR&#39; if set and non-empty, otherwise
+    ///         yields an error with the given message (in this case &quot;error&quot;).
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${#VAR}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the length of the corresponding value for &#39;VAR&#39; if set, otherwise
+    ///         &quot;0&quot;.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         first character uppercased.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^^}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with all
+    ///         characters uppercased.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         first character lowercased.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,,}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with all
+    ///         characters lowercased.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         casing of the first character reversed.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~~}&lt;/td&gt;
+    ///       &lt;td&gt;
+    ///         substituted with the value of the variable named by the value of `VAR`, with the
+    ///         casing of all characters reversed.
+    ///       &lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/tbody&gt;
+    /// &lt;/table&gt;
+    ///
+    /// `VAR` above is a named variable. Named variables can be provided using the builder:
+    ///
+    /// ```rust
+    /// use std::collections::HashMap;
+    /// use xpanda::Xpanda;
+    ///
+    /// let named_vars = HashMap::new();
+    /// let xpanda = Xpanda::builder()
+    ///     .with_named_vars(named_vars)
+    ///     .build();
+    /// ```
+    ///
+    /// Positional variables are also supported and can be provided in the same way:
+    ///
+    /// ```rust
+    /// use xpanda::Xpanda;
+    ///
+    /// let xpanda = Xpanda::builder()
+    ///     .with_positional_vars(Vec::new())
+    ///     .build();
+    /// ```
+    ///
+    /// Positional variables can be referenced using their index (starting at 1), for example, `$1`
+    /// references the first positional variable, `$2` the second and so on. `$0` is a space concatenated
+    /// string of all positional variables.
+    ///
+    /// Here are some examples and their output:
+    ///
+    /// &lt;table&gt;
+    ///   &lt;thead&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;th&gt;Pattern&lt;/th&gt;
+    ///       &lt;th&gt;VAR unset&lt;/th&gt;
+    ///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;
+    ///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/thead&gt;
+    ///   &lt;tbody&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;$VAR&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR-default}&lt;/td&gt;
+    ///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR:-default}&lt;/td&gt;
+    ///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;default&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR+alternative}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR:+alternative}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;alternative&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR?message}&lt;/td&gt;
+    ///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR:?message}&lt;/td&gt;
+    ///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
+    ///       &lt;td&gt;error: &quot;message&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${#VAR}&lt;/td&gt;
+    ///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;0&quot;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;7&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${!VAR}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;$example&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;Example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^^}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;EXAMPLE&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,,}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;Example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~~}&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;EXAMPLE&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/tbody&gt;
+    /// &lt;/table&gt;
+    ///
+    /// Special rules take precedence when [`Builder::no_unset`] is `true`:
+    ///
+    /// &lt;table&gt;
+    ///   &lt;thead&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;th&gt;Pattern&lt;/th&gt;
+    ///       &lt;th&gt;VAR unset&lt;/th&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/thead&gt;
+    ///   &lt;tbody&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;$VAR&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${#VAR}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${!VAR}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR^^}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR,,}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;${VAR~~}&lt;/td&gt;
+    ///       &lt;td&gt;error&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/tbody&gt;
+    /// &lt;/table&gt;
+    ///
+    /// Default/Alternative values can also be variables:
+    ///
+    /// &lt;table&gt;
+    ///   &lt;thead&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;th&gt;Pattern&lt;/th&gt;
+    ///       &lt;th&gt;VAR unset&lt;/th&gt;
+    ///       &lt;th&gt;VAR=&quot;&quot;&lt;/th&gt;
+    ///       &lt;th&gt;VAR=&quot;example&quot;&lt;/th&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/thead&gt;
+    ///   &lt;tbody&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;`${VAR:-$DEF}`&lt;/td&gt;
+    ///       &lt;td&gt;`$DEF`&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;&quot;example&quot;&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///     &lt;tr&gt;
+    ///       &lt;td&gt;`${VAR+${ALT:-alternative}}`&lt;/td&gt;
+    ///       &lt;td&gt;&lt;/td&gt;
+    ///       &lt;td&gt;`${ALT:-alternative}`&lt;/td&gt;
+    ///       &lt;td&gt;${ALT:-alternative}&lt;/td&gt;
+    ///     &lt;/tr&gt;
+    ///   &lt;/tbody&gt;
+    /// &lt;/table&gt;
+    ///
+    /// The `$` character is assumed to be the start of a variable. If the variable does not match
+    /// any of the forms listed above, an error is returned. Variables can be escaped by prefixing them
+    /// by an additional &#39;$&#39;, for example: `$$VAR` which yields `$VAR` and `${VAR-$$text}` which yields
+    /// `$text` if `VAR` is unset.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Err`] if the given string is badly formatted and cannot be parsed.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use xpanda::Xpanda;
+    ///
+    /// let xpanda = Xpanda::default();
+    /// assert_eq!(xpanda.expand(&quot;${1:-default}&quot;), Ok(String::from(&quot;default&quot;)));
+    /// ```
+    </span><span class="kw">pub fn </span>expand(<span class="kw-2">&amp;</span><span class="self">self</span>, input: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="kw">let </span>lexer = Lexer::new(input);
+        <span class="kw">let </span><span class="kw-2">mut </span>parser = Parser::new(lexer);
+        <span class="kw">let </span>ast = parser.parse()<span class="question-mark">?</span>;
+        <span class="kw">let </span>result = <span class="self">self</span>.evaluator.eval(ast)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
+        <span class="prelude-val">Ok</span>(result)
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

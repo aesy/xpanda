@@ -1,3 +1,3 @@
-(function() {var implementors = {};
-implementors["xpanda"] = [{"text":"impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Error.html\" title=\"struct xpanda::Error\">Error</a>","synthetic":true,"types":["xpanda::Error"]},{"text":"impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Builder.html\" title=\"struct xpanda::Builder\">Builder</a>","synthetic":true,"types":["xpanda::Builder"]},{"text":"impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Xpanda.html\" title=\"struct xpanda::Xpanda\">Xpanda</a>","synthetic":true,"types":["xpanda::Xpanda"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"xpanda":[["impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Error.html\" title=\"struct xpanda::Error\">Error</a>",1,["xpanda::Error"]],["impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Builder.html\" title=\"struct xpanda::Builder\">Builder</a>",1,["xpanda::Builder"]],["impl Freeze for <a class=\"struct\" href=\"xpanda/struct.Xpanda.html\" title=\"struct xpanda::Xpanda\">Xpanda</a>",1,["xpanda::Xpanda"]]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

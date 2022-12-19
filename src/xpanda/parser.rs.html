@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/parser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/parser.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>parser.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -268,275 +268,275 @@
 <span id="268">268</span>
 <span id="269">269</span>
 <span id="270">270</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ast</span>::{<span class="ident">Ast</span>, <span class="ident">Identifier</span>, <span class="ident">Modifier</span>, <span class="ident">Node</span>, <span class="ident">Param</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::forward_peekable</span>::{<span class="ident">ForwardPeekable</span>, <span class="ident">IteratorExt</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::lexer</span>::{<span class="self">self</span>, <span class="ident">Lexer</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::position::Position</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::token::Token</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ast::{Ast, Identifier, Modifier, Node, Param};
+<span class="kw">use </span><span class="kw">crate</span>::forward_peekable::{ForwardPeekable, IteratorExt};
+<span class="kw">use </span><span class="kw">crate</span>::lexer::{<span class="self">self</span>, Lexer};
+<span class="kw">use </span><span class="kw">crate</span>::position::Position;
+<span class="kw">use </span><span class="kw">crate</span>::token::Token;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Error</span> {
-    <span class="kw">pub</span> <span class="ident">message</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">position</span>: <span class="ident">Position</span>,
+<span class="attribute">#[derive(Debug, Clone, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>Error {
+    <span class="kw">pub </span>message: String,
+    <span class="kw">pub </span>position: Position,
 }
 
-<span class="kw">impl</span> <span class="ident">Error</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">message</span>: <span class="ident">String</span>, <span class="ident">position</span>: <span class="ident">Position</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">message</span>, <span class="ident">position</span> }
+<span class="kw">impl </span>Error {
+    <span class="kw">const fn </span>new(message: String, position: Position) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ message, position }
     }
 }
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Parser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="ident">iter</span>: <span class="ident">ForwardPeekable</span><span class="op">&lt;</span><span class="ident">lexer::IterMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">position</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Position</span><span class="op">&gt;</span>,
+<span class="kw">pub struct </span>Parser&lt;<span class="lifetime">&#39;a</span>&gt; {
+    iter: ForwardPeekable&lt;lexer::IterMut&lt;<span class="lifetime">&#39;a</span>&gt;&gt;,
+    position: <span class="prelude-ty">Option</span>&lt;Position&gt;,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Parser</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">lexer</span>: <span class="ident">Lexer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">iter</span>: <span class="ident">lexer</span>.<span class="ident">into_iter</span>().<span class="ident">forward_peekable</span>(),
-            <span class="ident">position</span>: <span class="prelude-val">None</span>,
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Parser&lt;<span class="lifetime">&#39;a</span>&gt; {
+    <span class="kw">pub fn </span>new(lexer: Lexer&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            iter: lexer.into_iter().forward_peekable(),
+            position: <span class="prelude-val">None</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Ast</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nodes</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+    <span class="kw">pub fn </span>parse(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Ast&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>nodes = Vec::new();
 
-        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">peek_token</span>().<span class="ident">is_some</span>() {
-            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parse_node</span>()<span class="question-mark">?</span>;
-            <span class="ident">nodes</span>.<span class="ident">push</span>(<span class="ident">node</span>);
+        <span class="kw">while </span><span class="self">self</span>.peek_token().is_some() {
+            <span class="kw">let </span>node = <span class="self">self</span>.parse_node()<span class="question-mark">?</span>;
+            nodes.push(node);
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Ast::new</span>(<span class="ident">nodes</span>))
+        <span class="prelude-val">Ok</span>(Ast::new(nodes))
     }
 
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">peek_token</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">peek</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">token</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">token</span>)
+    <span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>peek_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>Token&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="self">self</span>.iter.peek().map(|(token, <span class="kw">_</span>)| token)
     }
 
-    <span class="attribute">#[<span class="ident">must_use</span>]</span>
-    <span class="kw">fn</span> <span class="ident">next_token</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">token</span>, <span class="ident">position</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>() {
-            <span class="self">self</span>.<span class="ident">position</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">position</span>);
-            <span class="prelude-val">Some</span>(<span class="ident">token</span>)
-        } <span class="kw">else</span> {
-            <span class="prelude-val">None</span>
-        }
+    <span class="attribute">#[must_use]
+    </span><span class="kw">fn </span>next_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span>&lt;Token&lt;<span class="lifetime">&#39;a</span>&gt;&gt; {
+        <span class="kw">if let </span><span class="prelude-val">Some</span>((token, position)) = <span class="self">self</span>.iter.next() {
+            <span class="self">self</span>.position = <span class="prelude-val">Some</span>(position);
+            <span class="prelude-val">Some</span>(token)
+        } <span class="kw">else </span>{
+            <span class="prelude-val">None
+        </span>}
     }
 
-    <span class="kw">fn</span> <span class="ident">skip_token</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-        <span class="self">self</span>.<span class="ident">next_token</span>();
+    <span class="kw">fn </span>skip_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.next_token();
     }
 
-    <span class="kw">fn</span> <span class="ident">expect_token</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="ident">Token</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">next_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">expected</span>) =&gt; <span class="prelude-val">Ok</span>(()),
-            <span class="prelude-val">Some</span>(<span class="ident">unexpected</span>) =&gt; {
-                <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Expected {}, found {}&quot;</span>, <span class="ident">expected</span>, <span class="ident">unexpected</span>)))
+    <span class="kw">fn </span>expect_token(<span class="kw-2">&amp;mut </span><span class="self">self</span>, expected: <span class="kw-2">&amp;</span>Token&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;(), Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.next_token() {
+            <span class="prelude-val">Some</span>(expected) =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="prelude-val">Some</span>(unexpected) =&gt; {
+                <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="macro">format!</span>(<span class="string">&quot;Expected {}, found {}&quot;</span>, expected, unexpected)))
             },
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Expected {}, found EOF&quot;</span>, <span class="ident">expected</span>))),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="macro">format!</span>(<span class="string">&quot;Expected {}, found EOF&quot;</span>, expected))),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_node</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Node</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Text</span>(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Node::Text</span>(
-                <span class="self">self</span>.<span class="ident">parse_text</span>()<span class="question-mark">?</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">String::from</span>(<span class="string">&quot;&quot;</span>)),
+    <span class="kw">fn </span>parse_node(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Node&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.peek_token() {
+            <span class="prelude-val">Some</span>(Token::Text(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Ok</span>(Node::Text(
+                <span class="self">self</span>.parse_text()<span class="question-mark">?</span>.unwrap_or_else(|| String::from(<span class="string">&quot;&quot;</span>)),
             )),
-            <span class="prelude-val">Some</span>(<span class="ident">Token::DollarSign</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">skip_token</span>();
-                <span class="prelude-val">Ok</span>(<span class="ident">Node::Param</span>(<span class="self">self</span>.<span class="ident">parse_param</span>()<span class="question-mark">?</span>))
+            <span class="prelude-val">Some</span>(Token::DollarSign) =&gt; {
+                <span class="self">self</span>.skip_token();
+                <span class="prelude-val">Ok</span>(Node::Param(<span class="self">self</span>.parse_param()<span class="question-mark">?</span>))
             },
-            <span class="prelude-val">Some</span>(<span class="ident">token</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Unexpected token {}&quot;</span>, <span class="ident">token</span>);
-                <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="ident">msg</span>))
+            <span class="prelude-val">Some</span>(token) =&gt; {
+                <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;Unexpected token {}&quot;</span>, token);
+                <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(msg))
             },
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Unexpected EOF&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Unexpected EOF&quot;</span>)),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">Token::OpenBrace</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">skip_token</span>();
+    <span class="kw">fn </span>parse_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.peek_token() {
+            <span class="prelude-val">Some</span>(Token::OpenBrace) =&gt; {
+                <span class="self">self</span>.skip_token();
 
-                <span class="kw">let</span> <span class="ident">param</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-                    <span class="prelude-val">Some</span>(<span class="ident">Token::PoundSign</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_len_or_arity_param</span>(),
-                    <span class="prelude-val">Some</span>(<span class="ident">Token::ExclamationMark</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_ref_param</span>(),
+                <span class="kw">let </span>param = <span class="kw">match </span><span class="self">self</span>.peek_token() {
+                    <span class="prelude-val">Some</span>(Token::PoundSign) =&gt; <span class="self">self</span>.parse_len_or_arity_param(),
+                    <span class="prelude-val">Some</span>(Token::ExclamationMark) =&gt; <span class="self">self</span>.parse_ref_param(),
                     <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {
-                        <span class="kw">let</span> <span class="ident">identifier</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parse_identifier</span>()<span class="question-mark">?</span>;
+                        <span class="kw">let </span>identifier = <span class="self">self</span>.parse_identifier()<span class="question-mark">?</span>;
 
-                        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-                            <span class="prelude-val">Some</span>(<span class="ident">Token::Caret</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_uppercase_param</span>(<span class="ident">identifier</span>),
-                            <span class="prelude-val">Some</span>(<span class="ident">Token::Comma</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_lowercase_param</span>(<span class="ident">identifier</span>),
-                            <span class="prelude-val">Some</span>(<span class="ident">Token::Tilde</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_reverse_case_param</span>(<span class="ident">identifier</span>),
-                            <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="self">self</span>.<span class="ident">parse_default_alt_error_or_sub_param</span>(<span class="ident">identifier</span>),
-                            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Invalid param, unexpected EOF&quot;</span>)),
+                        <span class="kw">match </span><span class="self">self</span>.peek_token() {
+                            <span class="prelude-val">Some</span>(Token::Caret) =&gt; <span class="self">self</span>.parse_uppercase_param(identifier),
+                            <span class="prelude-val">Some</span>(Token::Comma) =&gt; <span class="self">self</span>.parse_lowercase_param(identifier),
+                            <span class="prelude-val">Some</span>(Token::Tilde) =&gt; <span class="self">self</span>.parse_reverse_case_param(identifier),
+                            <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="self">self</span>.parse_default_alt_error_or_sub_param(identifier),
+                            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Invalid param, unexpected EOF&quot;</span>)),
                         }
                     },
-                    <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Expected param, found EOF&quot;</span>)),
+                    <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Expected param, found EOF&quot;</span>)),
                 }<span class="question-mark">?</span>;
 
-                <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::CloseBrace</span>)<span class="question-mark">?</span>;
+                <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::CloseBrace)<span class="question-mark">?</span>;
 
-                <span class="prelude-val">Ok</span>(<span class="ident">param</span>)
+                <span class="prelude-val">Ok</span>(param)
             },
-            <span class="kw">_</span> =&gt; <span class="self">self</span>.<span class="ident">parse_simple_param</span>(),
+            <span class="kw">_ </span>=&gt; <span class="self">self</span>.parse_simple_param(),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_len_or_arity_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::ExclamationMark</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>parse_len_or_arity_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::ExclamationMark)<span class="question-mark">?</span>;
 
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">Token::CloseBrace</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Param::Arity</span>),
-            <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Param::Length</span> {
-                <span class="ident">identifier</span>: <span class="self">self</span>.<span class="ident">parse_identifier</span>()<span class="question-mark">?</span>,
+        <span class="kw">match </span><span class="self">self</span>.peek_token() {
+            <span class="prelude-val">Some</span>(Token::CloseBrace) =&gt; <span class="prelude-val">Ok</span>(Param::Arity),
+            <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(Param::Length {
+                identifier: <span class="self">self</span>.parse_identifier()<span class="question-mark">?</span>,
             }),
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Expected identifier or close brace, found EOF&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Expected identifier or close brace, found EOF&quot;</span>)),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_ref_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::ExclamationMark</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>parse_ref_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::ExclamationMark)<span class="question-mark">?</span>;
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Param::Ref</span> {
-            <span class="ident">identifier</span>: <span class="self">self</span>.<span class="ident">parse_identifier</span>()<span class="question-mark">?</span>,
+        <span class="prelude-val">Ok</span>(Param::Ref {
+            identifier: <span class="self">self</span>.parse_identifier()<span class="question-mark">?</span>,
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_default_alt_error_or_sub_param</span>(
-        <span class="kw-2">&amp;mut</span> <span class="self">self</span>,
-        <span class="ident">identifier</span>: <span class="ident">Identifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">treat_empty_as_unset</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">peek_token</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Colon</span>) {
-            <span class="self">self</span>.<span class="ident">skip_token</span>();
-            <span class="bool-val">true</span>
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        };
+    <span class="kw">fn </span>parse_default_alt_error_or_sub_param(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        identifier: Identifier&lt;<span class="lifetime">&#39;a</span>&gt;,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">let </span>treat_empty_as_unset = <span class="kw">if </span><span class="self">self</span>.peek_token() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Token::Colon) {
+            <span class="self">self</span>.skip_token();
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>};
 
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-            <span class="comment">// TODO Sub if is integer or paren</span>
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Dash</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">skip_token</span>();
+        <span class="kw">match </span><span class="self">self</span>.peek_token() {
+            <span class="comment">// TODO Sub if is integer or paren
+            </span><span class="prelude-val">Some</span>(Token::Dash) =&gt; {
+                <span class="self">self</span>.skip_token();
 
-                <span class="prelude-val">Ok</span>(<span class="ident">Param::WithDefault</span> {
-                    <span class="ident">identifier</span>,
-                    <span class="ident">default</span>: <span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">parse_node</span>()<span class="question-mark">?</span>),
-                    <span class="ident">treat_empty_as_unset</span>,
+                <span class="prelude-val">Ok</span>(Param::WithDefault {
+                    identifier,
+                    default: Box::new(<span class="self">self</span>.parse_node()<span class="question-mark">?</span>),
+                    treat_empty_as_unset,
                 })
             },
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Plus</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">skip_token</span>();
+            <span class="prelude-val">Some</span>(Token::Plus) =&gt; {
+                <span class="self">self</span>.skip_token();
 
-                <span class="prelude-val">Ok</span>(<span class="ident">Param::WithAlt</span> {
-                    <span class="ident">identifier</span>,
-                    <span class="ident">alt</span>: <span class="ident">Box::new</span>(<span class="self">self</span>.<span class="ident">parse_node</span>()<span class="question-mark">?</span>),
-                    <span class="ident">treat_empty_as_unset</span>,
+                <span class="prelude-val">Ok</span>(Param::WithAlt {
+                    identifier,
+                    alt: Box::new(<span class="self">self</span>.parse_node()<span class="question-mark">?</span>),
+                    treat_empty_as_unset,
                 })
             },
-            <span class="prelude-val">Some</span>(<span class="ident">Token::QuestionMark</span>) =&gt; {
-                <span class="self">self</span>.<span class="ident">skip_token</span>();
+            <span class="prelude-val">Some</span>(Token::QuestionMark) =&gt; {
+                <span class="self">self</span>.skip_token();
 
-                <span class="prelude-val">Ok</span>(<span class="ident">Param::WithError</span> {
-                    <span class="ident">identifier</span>,
-                    <span class="ident">error</span>: <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peek_token</span>() {
-                        <span class="prelude-val">Some</span>(<span class="ident">Token::Text</span>(<span class="kw">_</span>)) =&gt; <span class="self">self</span>.<span class="ident">parse_text</span>()<span class="question-mark">?</span>,
-                        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
+                <span class="prelude-val">Ok</span>(Param::WithError {
+                    identifier,
+                    error: <span class="kw">match </span><span class="self">self</span>.peek_token() {
+                        <span class="prelude-val">Some</span>(Token::Text(<span class="kw">_</span>)) =&gt; <span class="self">self</span>.parse_text()<span class="question-mark">?</span>,
+                        <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
                     },
-                    <span class="ident">treat_empty_as_unset</span>,
+                    treat_empty_as_unset,
                 })
             },
-            <span class="prelude-val">Some</span>(<span class="ident">Token::CloseBrace</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Param::Simple</span> {
-                <span class="ident">identifier</span>,
-                <span class="ident">modifier</span>: <span class="prelude-val">None</span>,
+            <span class="prelude-val">Some</span>(Token::CloseBrace) =&gt; <span class="prelude-val">Ok</span>(Param::Simple {
+                identifier,
+                modifier: <span class="prelude-val">None</span>,
             }),
-            <span class="prelude-val">Some</span>(<span class="ident">token</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Invalid param, unexpected token {}&quot;</span>, <span class="ident">token</span>);
-                <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="ident">msg</span>))
+            <span class="prelude-val">Some</span>(token) =&gt; {
+                <span class="kw">let </span>msg = <span class="macro">format!</span>(<span class="string">&quot;Invalid param, unexpected token {}&quot;</span>, token);
+                <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(msg))
             },
-            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Invalid param, unexpected EOF&quot;</span>)),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Invalid param, unexpected EOF&quot;</span>)),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_uppercase_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="ident">Identifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Caret</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>parse_uppercase_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>, identifier: Identifier&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::Caret)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">all</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">peek_token</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Caret</span>) {
-            <span class="self">self</span>.<span class="ident">skip_token</span>();
-            <span class="bool-val">true</span>
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        };
+        <span class="kw">let </span>all = <span class="kw">if </span><span class="self">self</span>.peek_token() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Token::Caret) {
+            <span class="self">self</span>.skip_token();
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>};
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Param::Simple</span> {
-            <span class="ident">identifier</span>,
-            <span class="ident">modifier</span>: <span class="prelude-val">Some</span>(<span class="ident">Modifier::Upper</span> { <span class="ident">all</span> }),
+        <span class="prelude-val">Ok</span>(Param::Simple {
+            identifier,
+            modifier: <span class="prelude-val">Some</span>(Modifier::Upper { all }),
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_lowercase_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="ident">Identifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Comma</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>parse_lowercase_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>, identifier: Identifier&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::Comma)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">all</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">peek_token</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Comma</span>) {
-            <span class="self">self</span>.<span class="ident">skip_token</span>();
-            <span class="bool-val">true</span>
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        };
+        <span class="kw">let </span>all = <span class="kw">if </span><span class="self">self</span>.peek_token() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Token::Comma) {
+            <span class="self">self</span>.skip_token();
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>};
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Param::Simple</span> {
-            <span class="ident">identifier</span>,
-            <span class="ident">modifier</span>: <span class="prelude-val">Some</span>(<span class="ident">Modifier::Lower</span> { <span class="ident">all</span> }),
+        <span class="prelude-val">Ok</span>(Param::Simple {
+            identifier,
+            modifier: <span class="prelude-val">Some</span>(Modifier::Lower { all }),
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_reverse_case_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="ident">Identifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">expect_token</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Tilde</span>)<span class="question-mark">?</span>;
+    <span class="kw">fn </span>parse_reverse_case_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>, identifier: Identifier&lt;<span class="lifetime">&#39;a</span>&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="self">self</span>.expect_token(<span class="kw-2">&amp;</span>Token::Tilde)<span class="question-mark">?</span>;
 
-        <span class="kw">let</span> <span class="ident">all</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">peek_token</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">Token::Tilde</span>) {
-            <span class="self">self</span>.<span class="ident">skip_token</span>();
-            <span class="bool-val">true</span>
-        } <span class="kw">else</span> {
-            <span class="bool-val">false</span>
-        };
+        <span class="kw">let </span>all = <span class="kw">if </span><span class="self">self</span>.peek_token() == <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>Token::Tilde) {
+            <span class="self">self</span>.skip_token();
+            <span class="bool-val">true
+        </span>} <span class="kw">else </span>{
+            <span class="bool-val">false
+        </span>};
 
-        <span class="prelude-val">Ok</span>(<span class="ident">Param::Simple</span> {
-            <span class="ident">identifier</span>,
-            <span class="ident">modifier</span>: <span class="prelude-val">Some</span>(<span class="ident">Modifier::Reverse</span> { <span class="ident">all</span> }),
+        <span class="prelude-val">Ok</span>(Param::Simple {
+            identifier,
+            modifier: <span class="prelude-val">Some</span>(Modifier::Reverse { all }),
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_simple_param</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Param</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">identifier</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parse_identifier</span>()<span class="question-mark">?</span>;
-        <span class="prelude-val">Ok</span>(<span class="ident">Param::Simple</span> {
-            <span class="ident">identifier</span>,
-            <span class="ident">modifier</span>: <span class="prelude-val">None</span>,
+    <span class="kw">fn </span>parse_simple_param(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Param&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">let </span>identifier = <span class="self">self</span>.parse_identifier()<span class="question-mark">?</span>;
+        <span class="prelude-val">Ok</span>(Param::Simple {
+            identifier,
+            modifier: <span class="prelude-val">None</span>,
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_text</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">next_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Text</span>(<span class="ident">text</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">text</span>)),
-            <span class="prelude-val">Some</span>(<span class="ident">token</span>) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Expected text, found {}&quot;</span>, <span class="ident">token</span>))),
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+    <span class="kw">fn </span>parse_text(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="prelude-ty">Option</span>&lt;String&gt;, Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.next_token() {
+            <span class="prelude-val">Some</span>(Token::Text(text)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(text)),
+            <span class="prelude-val">Some</span>(token) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="macro">format!</span>(<span class="string">&quot;Expected text, found {}&quot;</span>, token))),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_identifier</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Identifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="self">self</span>.<span class="ident">next_token</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Identifier</span>(<span class="ident">name</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Identifier::Named</span>(<span class="ident">name</span>)),
-            <span class="prelude-val">Some</span>(<span class="ident">Token::Index</span>(<span class="ident">index</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Identifier::Indexed</span>(<span class="ident">index</span>)),
-            <span class="prelude-val">Some</span>(<span class="ident">token</span>) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Expected identifier, found {}&quot;</span>, <span class="ident">token</span>))),
-            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">create_error</span>(<span class="string">&quot;Expected identifier, found EOF&quot;</span>)),
+    <span class="kw">fn </span>parse_identifier(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;Identifier&lt;<span class="lifetime">&#39;a</span>&gt;, Error&gt; {
+        <span class="kw">match </span><span class="self">self</span>.next_token() {
+            <span class="prelude-val">Some</span>(Token::Identifier(name)) =&gt; <span class="prelude-val">Ok</span>(Identifier::Named(name)),
+            <span class="prelude-val">Some</span>(Token::Index(index)) =&gt; <span class="prelude-val">Ok</span>(Identifier::Indexed(index)),
+            <span class="prelude-val">Some</span>(token) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="macro">format!</span>(<span class="string">&quot;Expected identifier, found {}&quot;</span>, token))),
+            <span class="prelude-val">None </span>=&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.create_error(<span class="string">&quot;Expected identifier, found EOF&quot;</span>)),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">create_error</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="ident">Error</span> {
-        <span class="ident">Error::new</span>(<span class="ident">msg</span>.<span class="ident">into</span>(), <span class="self">self</span>.<span class="ident">position</span>.<span class="ident">take</span>().<span class="ident">unwrap_or_default</span>())
+    <span class="kw">fn </span>create_error(<span class="kw-2">&amp;mut </span><span class="self">self</span>, msg: <span class="kw">impl </span>Into&lt;String&gt;) -&gt; Error {
+        Error::new(msg.into(), <span class="self">self</span>.position.take().unwrap_or_default())
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>

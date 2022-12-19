@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/eval.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eval.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `xpanda/src/eval.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>eval.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../xpanda/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -245,252 +245,252 @@
 <span id="245">245</span>
 <span id="246">246</span>
 <span id="247">247</span>
-</pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ast</span>::{<span class="ident">Ast</span>, <span class="ident">Identifier</span>, <span class="ident">Modifier</span>, <span class="ident">Node</span>, <span class="ident">Param</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::parser</span>::{<span class="self">self</span>, <span class="ident">Parser</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::position::Position</span>;
-<span class="kw">use</span> <span class="ident">std::collections::HashMap</span>;
+</pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::ast::{Ast, Identifier, Modifier, Node, Param};
+<span class="kw">use </span><span class="kw">crate</span>::parser::{<span class="self">self</span>, Parser};
+<span class="kw">use </span><span class="kw">crate</span>::position::Position;
+<span class="kw">use </span>std::collections::HashMap;
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Error</span> {
-    <span class="kw">pub</span> <span class="ident">message</span>: <span class="ident">String</span>,
-    <span class="kw">pub</span> <span class="ident">position</span>: <span class="ident">Position</span>,
+<span class="attribute">#[derive(Debug, Clone, Eq, PartialEq)]
+</span><span class="kw">pub struct </span>Error {
+    <span class="kw">pub </span>message: String,
+    <span class="kw">pub </span>position: Position,
 }
 
-<span class="kw">impl</span> <span class="ident">Error</span> {
-    <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">message</span>: <span class="ident">String</span>, <span class="ident">position</span>: <span class="ident">Position</span>) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> { <span class="ident">message</span>, <span class="ident">position</span> }
+<span class="kw">impl </span>Error {
+    <span class="kw">const fn </span>new(message: String, position: Position) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{ message, position }
     }
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Evaluator</span> {
-    <span class="ident">no_unset</span>: <span class="ident">bool</span>,
-    <span class="ident">positional_vars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-    <span class="ident">named_vars</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
+<span class="attribute">#[derive(Default)]
+</span><span class="kw">pub struct </span>Evaluator {
+    no_unset: bool,
+    positional_vars: Vec&lt;String&gt;,
+    named_vars: HashMap&lt;String, String&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">Evaluator</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
-        <span class="ident">no_unset</span>: <span class="ident">bool</span>,
-        <span class="ident">positional_vars</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-        <span class="ident">named_vars</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">String</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="self">Self</span> {
-        <span class="self">Self</span> {
-            <span class="ident">no_unset</span>,
-            <span class="ident">positional_vars</span>,
-            <span class="ident">named_vars</span>,
+<span class="kw">impl </span>Evaluator {
+    <span class="kw">pub fn </span>new(
+        no_unset: bool,
+        positional_vars: Vec&lt;String&gt;,
+        named_vars: HashMap&lt;String, String&gt;,
+    ) -&gt; <span class="self">Self </span>{
+        <span class="self">Self </span>{
+            no_unset,
+            positional_vars,
+            named_vars,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eval</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ast</span>: <span class="ident">Ast</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::new</span>();
+    <span class="kw">pub fn </span>eval(<span class="kw-2">&amp;</span><span class="self">self</span>, ast: Ast) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="kw">let </span><span class="kw-2">mut </span>result = String::new();
 
-        <span class="kw">for</span> <span class="ident">node</span> <span class="kw">in</span> <span class="ident">ast</span>.<span class="ident">nodes</span> {
-            <span class="kw">let</span> <span class="ident">text</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">eval_node</span>(<span class="ident">node</span>)<span class="question-mark">?</span>;
-            <span class="ident">result</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">text</span>);
+        <span class="kw">for </span>node <span class="kw">in </span>ast.nodes {
+            <span class="kw">let </span>text = <span class="self">self</span>.eval_node(node)<span class="question-mark">?</span>;
+            result.push_str(<span class="kw-2">&amp;</span>text);
         }
 
-        <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
+        <span class="prelude-val">Ok</span>(result)
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_node</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">node</span>: <span class="ident">Node</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">node</span> {
-            <span class="ident">Node::Text</span>(<span class="ident">text</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">text</span>),
-            <span class="ident">Node::Param</span>(<span class="ident">param</span>) =&gt; <span class="self">self</span>.<span class="ident">eval_param</span>(<span class="ident">param</span>),
+    <span class="kw">fn </span>eval_node(<span class="kw-2">&amp;</span><span class="self">self</span>, node: Node) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="kw">match </span>node {
+            Node::Text(text) =&gt; <span class="prelude-val">Ok</span>(text),
+            Node::Param(param) =&gt; <span class="self">self</span>.eval_param(param),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_param</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">param</span>: <span class="ident">Param</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">param</span> {
-            <span class="ident">Param::Simple</span> {
-                <span class="ident">identifier</span>,
-                <span class="ident">modifier</span>,
-            } =&gt; <span class="ident">modifier</span>.<span class="ident">map_or_else</span>(
-                <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eval_simple_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>),
-                <span class="op">|</span><span class="ident">modifier</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eval_param_with_modifier</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>, <span class="kw-2">&amp;</span><span class="ident">modifier</span>),
+    <span class="kw">fn </span>eval_param(<span class="kw-2">&amp;</span><span class="self">self</span>, param: Param) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="kw">match </span>param {
+            Param::Simple {
+                identifier,
+                modifier,
+            } =&gt; modifier.map_or_else(
+                || <span class="self">self</span>.eval_simple_param(<span class="kw-2">&amp;</span>identifier),
+                |modifier| <span class="self">self</span>.eval_param_with_modifier(<span class="kw-2">&amp;</span>identifier, <span class="kw-2">&amp;</span>modifier),
             ),
-            <span class="ident">Param::WithDefault</span> {
-                <span class="ident">identifier</span>,
-                <span class="ident">default</span>,
-                <span class="ident">treat_empty_as_unset</span>,
-            } =&gt; <span class="self">self</span>.<span class="ident">eval_default_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>, <span class="kw-2">*</span><span class="ident">default</span>, <span class="ident">treat_empty_as_unset</span>),
-            <span class="ident">Param::WithAlt</span> {
-                <span class="ident">identifier</span>,
-                <span class="ident">alt</span>,
-                <span class="ident">treat_empty_as_unset</span>,
-            } =&gt; <span class="self">self</span>.<span class="ident">eval_alt_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>, <span class="kw-2">*</span><span class="ident">alt</span>, <span class="ident">treat_empty_as_unset</span>),
-            <span class="ident">Param::WithError</span> {
-                <span class="ident">identifier</span>,
-                <span class="ident">error</span>,
-                <span class="ident">treat_empty_as_unset</span>,
-            } =&gt; <span class="self">self</span>.<span class="ident">eval_error_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>, <span class="ident">error</span>, <span class="ident">treat_empty_as_unset</span>),
-            <span class="ident">Param::Length</span> { <span class="ident">identifier</span> } =&gt; <span class="self">self</span>.<span class="ident">eval_length_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>),
-            <span class="ident">Param::Arity</span> =&gt; <span class="self">self</span>.<span class="ident">eval_arity_param</span>(),
-            <span class="ident">Param::Ref</span> { <span class="ident">identifier</span> } =&gt; <span class="self">self</span>.<span class="ident">eval_ref_param</span>(<span class="kw-2">&amp;</span><span class="ident">identifier</span>),
+            Param::WithDefault {
+                identifier,
+                default,
+                treat_empty_as_unset,
+            } =&gt; <span class="self">self</span>.eval_default_param(<span class="kw-2">&amp;</span>identifier, <span class="kw-2">*</span>default, treat_empty_as_unset),
+            Param::WithAlt {
+                identifier,
+                alt,
+                treat_empty_as_unset,
+            } =&gt; <span class="self">self</span>.eval_alt_param(<span class="kw-2">&amp;</span>identifier, <span class="kw-2">*</span>alt, treat_empty_as_unset),
+            Param::WithError {
+                identifier,
+                error,
+                treat_empty_as_unset,
+            } =&gt; <span class="self">self</span>.eval_error_param(<span class="kw-2">&amp;</span>identifier, error, treat_empty_as_unset),
+            Param::Length { identifier } =&gt; <span class="self">self</span>.eval_length_param(<span class="kw-2">&amp;</span>identifier),
+            Param::Arity =&gt; <span class="self">self</span>.eval_arity_param(),
+            Param::Ref { identifier } =&gt; <span class="self">self</span>.eval_ref_param(<span class="kw-2">&amp;</span>identifier),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_simple_param</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_identifier</span>(<span class="ident">identifier</span>).<span class="ident">map_or_else</span>(
-            <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">no_unset</span> {
-                    <span class="comment">// TODO wrong line/col</span>
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
-                        <span class="ident"><span class="self">Self</span>::error_message</span>(<span class="ident">identifier</span>, <span class="bool-val">false</span>),
-                        <span class="ident">Position::default</span>(),
+    <span class="kw">fn </span>eval_simple_param(<span class="kw-2">&amp;</span><span class="self">self</span>, identifier: <span class="kw-2">&amp;</span>Identifier) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_identifier(identifier).map_or_else(
+            || {
+                <span class="kw">if </span><span class="self">self</span>.no_unset {
+                    <span class="comment">// TODO wrong line/col
+                    </span><span class="prelude-val">Err</span>(Error::new(
+                        <span class="self">Self</span>::error_message(identifier, <span class="bool-val">false</span>),
+                        Position::default(),
                     ))
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;&quot;</span>))
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Ok</span>(String::from(<span class="string">&quot;&quot;</span>))
                 }
             },
             <span class="prelude-val">Ok</span>,
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_param_with_modifier</span>(
+    <span class="kw">fn </span>eval_param_with_modifier(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>,
-        <span class="ident">modifier</span>: <span class="kw-2">&amp;</span><span class="ident">Modifier</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_simple_param</span>(<span class="ident">identifier</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">string</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">modifier</span> {
-                <span class="ident">Modifier::Upper</span> { <span class="ident">all</span> } =&gt; {
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">all</span> {
-                        <span class="ident">string</span>.<span class="ident">to_uppercase</span>()
-                    } <span class="kw">else</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">chars</span>();
-                        <span class="kw">match</span> <span class="ident">chars</span>.<span class="ident">next</span>() {
-                            <span class="prelude-val">Some</span>(<span class="ident">char</span>) =&gt; <span class="ident">char</span>.<span class="ident">to_uppercase</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">chars</span>.<span class="ident">as_str</span>(),
-                            <span class="prelude-val">None</span> =&gt; <span class="ident">String::new</span>(),
+        identifier: <span class="kw-2">&amp;</span>Identifier,
+        modifier: <span class="kw-2">&amp;</span>Modifier,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_simple_param(identifier)
+            .map(|string| <span class="kw">match </span>modifier {
+                Modifier::Upper { all } =&gt; {
+                    <span class="kw">if </span><span class="kw-2">*</span>all {
+                        string.to_uppercase()
+                    } <span class="kw">else </span>{
+                        <span class="kw">let </span><span class="kw-2">mut </span>chars = string.chars();
+                        <span class="kw">match </span>chars.next() {
+                            <span class="prelude-val">Some</span>(char) =&gt; char.to_uppercase().collect::&lt;String&gt;() + chars.as_str(),
+                            <span class="prelude-val">None </span>=&gt; String::new(),
                         }
                     }
                 },
-                <span class="ident">Modifier::Lower</span> { <span class="ident">all</span> } =&gt; {
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">all</span> {
-                        <span class="ident">string</span>.<span class="ident">to_lowercase</span>()
-                    } <span class="kw">else</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">chars</span>();
-                        <span class="kw">match</span> <span class="ident">chars</span>.<span class="ident">next</span>() {
-                            <span class="prelude-val">Some</span>(<span class="ident">char</span>) =&gt; <span class="ident">char</span>.<span class="ident">to_lowercase</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">chars</span>.<span class="ident">as_str</span>(),
-                            <span class="prelude-val">None</span> =&gt; <span class="ident">String::new</span>(),
+                Modifier::Lower { all } =&gt; {
+                    <span class="kw">if </span><span class="kw-2">*</span>all {
+                        string.to_lowercase()
+                    } <span class="kw">else </span>{
+                        <span class="kw">let </span><span class="kw-2">mut </span>chars = string.chars();
+                        <span class="kw">match </span>chars.next() {
+                            <span class="prelude-val">Some</span>(char) =&gt; char.to_lowercase().collect::&lt;String&gt;() + chars.as_str(),
+                            <span class="prelude-val">None </span>=&gt; String::new(),
                         }
                     }
                 },
-                <span class="ident">Modifier::Reverse</span> { <span class="ident">all</span> } =&gt; {
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">all</span> {
-                        <span class="ident">string</span>
-                            .<span class="ident">chars</span>()
-                            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">char</span><span class="op">|</span> {
-                                <span class="kw">if</span> <span class="ident">char</span>.<span class="ident">is_uppercase</span>() {
-                                    <span class="ident">char</span>.<span class="ident">to_lowercase</span>().<span class="ident">to_string</span>()
-                                } <span class="kw">else</span> {
-                                    <span class="ident">char</span>.<span class="ident">to_uppercase</span>().<span class="ident">to_string</span>()
+                Modifier::Reverse { all } =&gt; {
+                    <span class="kw">if </span><span class="kw-2">*</span>all {
+                        string
+                            .chars()
+                            .map(|char| {
+                                <span class="kw">if </span>char.is_uppercase() {
+                                    char.to_lowercase().to_string()
+                                } <span class="kw">else </span>{
+                                    char.to_uppercase().to_string()
                                 }
                             })
-                            .<span class="ident">collect</span>()
-                    } <span class="kw">else</span> {
-                        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">chars</span> <span class="op">=</span> <span class="ident">string</span>.<span class="ident">chars</span>();
-                        <span class="kw">match</span> <span class="ident">chars</span>.<span class="ident">next</span>() {
-                            <span class="prelude-val">Some</span>(<span class="ident">char</span>) =&gt; {
-                                <span class="kw">if</span> <span class="ident">char</span>.<span class="ident">is_uppercase</span>() {
-                                    <span class="ident">char</span>.<span class="ident">to_lowercase</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">chars</span>.<span class="ident">as_str</span>()
-                                } <span class="kw">else</span> {
-                                    <span class="ident">char</span>.<span class="ident">to_uppercase</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() <span class="op">+</span> <span class="ident">chars</span>.<span class="ident">as_str</span>()
+                            .collect()
+                    } <span class="kw">else </span>{
+                        <span class="kw">let </span><span class="kw-2">mut </span>chars = string.chars();
+                        <span class="kw">match </span>chars.next() {
+                            <span class="prelude-val">Some</span>(char) =&gt; {
+                                <span class="kw">if </span>char.is_uppercase() {
+                                    char.to_lowercase().collect::&lt;String&gt;() + chars.as_str()
+                                } <span class="kw">else </span>{
+                                    char.to_uppercase().collect::&lt;String&gt;() + chars.as_str()
                                 }
                             },
-                            <span class="prelude-val">None</span> =&gt; <span class="ident">String::new</span>(),
+                            <span class="prelude-val">None </span>=&gt; String::new(),
                         }
                     }
                 },
             })
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_default_param</span>(
+    <span class="kw">fn </span>eval_default_param(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>,
-        <span class="ident">default</span>: <span class="ident">Node</span>,
-        <span class="ident">treat_empty_as_unset</span>: <span class="ident">bool</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_identifier</span>(<span class="ident">identifier</span>)
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="op">!</span>(<span class="ident">treat_empty_as_unset</span> <span class="op">&amp;&amp;</span> <span class="ident">value</span>.<span class="ident">is_empty</span>()))
-            .<span class="ident">map_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eval_node</span>(<span class="ident">default</span>), <span class="prelude-val">Ok</span>)
+        identifier: <span class="kw-2">&amp;</span>Identifier,
+        default: Node,
+        treat_empty_as_unset: bool,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset &amp;&amp; value.is_empty()))
+            .map_or_else(|| <span class="self">self</span>.eval_node(default), <span class="prelude-val">Ok</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_alt_param</span>(
+    <span class="kw">fn </span>eval_alt_param(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>,
-        <span class="ident">alt</span>: <span class="ident">Node</span>,
-        <span class="ident">treat_empty_as_unset</span>: <span class="ident">bool</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_identifier</span>(<span class="ident">identifier</span>)
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="op">!</span>(<span class="ident">treat_empty_as_unset</span> <span class="op">&amp;&amp;</span> <span class="ident">value</span>.<span class="ident">is_empty</span>()))
-            .<span class="ident">map_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;&quot;</span>)), <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eval_node</span>(<span class="ident">alt</span>))
+        identifier: <span class="kw-2">&amp;</span>Identifier,
+        alt: Node,
+        treat_empty_as_unset: bool,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset &amp;&amp; value.is_empty()))
+            .map_or_else(|| <span class="prelude-val">Ok</span>(String::from(<span class="string">&quot;&quot;</span>)), |<span class="kw">_</span>| <span class="self">self</span>.eval_node(alt))
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_error_param</span>(
+    <span class="kw">fn </span>eval_error_param(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-        <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>,
-        <span class="ident">error</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-        <span class="ident">treat_empty_as_unset</span>: <span class="ident">bool</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_identifier</span>(<span class="ident">identifier</span>)
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="op">!</span>(<span class="ident">treat_empty_as_unset</span> <span class="op">&amp;&amp;</span> <span class="ident">value</span>.<span class="ident">is_empty</span>()))
-            .<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-                <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span>
-                    <span class="ident">error</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::error_message</span>(<span class="ident">identifier</span>, <span class="ident">treat_empty_as_unset</span>));
+        identifier: <span class="kw-2">&amp;</span>Identifier,
+        error: <span class="prelude-ty">Option</span>&lt;String&gt;,
+        treat_empty_as_unset: bool,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_identifier(identifier)
+            .filter(|value| !(treat_empty_as_unset &amp;&amp; value.is_empty()))
+            .ok_or_else(|| {
+                <span class="kw">let </span>msg =
+                    error.unwrap_or_else(|| <span class="self">Self</span>::error_message(identifier, treat_empty_as_unset));
 
-                <span class="comment">// TODO wrong line/col</span>
-                <span class="ident">Error::new</span>(<span class="ident">msg</span>, <span class="ident">Position::default</span>())
+                <span class="comment">// TODO wrong line/col
+                </span>Error::new(msg, Position::default())
             })
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_length_param</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_identifier</span>(<span class="ident">identifier</span>).<span class="ident">map_or_else</span>(
-            <span class="op">|</span><span class="op">|</span> {
-                <span class="kw">if</span> <span class="self">self</span>.<span class="ident">no_unset</span> {
-                    <span class="comment">// TODO wrong line/col</span>
-                    <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
-                        <span class="ident"><span class="self">Self</span>::error_message</span>(<span class="ident">identifier</span>, <span class="bool-val">false</span>),
-                        <span class="ident">Position::default</span>(),
+    <span class="kw">fn </span>eval_length_param(<span class="kw-2">&amp;</span><span class="self">self</span>, identifier: <span class="kw-2">&amp;</span>Identifier) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_identifier(identifier).map_or_else(
+            || {
+                <span class="kw">if </span><span class="self">self</span>.no_unset {
+                    <span class="comment">// TODO wrong line/col
+                    </span><span class="prelude-val">Err</span>(Error::new(
+                        <span class="self">Self</span>::error_message(identifier, <span class="bool-val">false</span>),
+                        Position::default(),
                     ))
-                } <span class="kw">else</span> {
-                    <span class="prelude-val">Ok</span>(<span class="ident">String::from</span>(<span class="string">&quot;0&quot;</span>))
+                } <span class="kw">else </span>{
+                    <span class="prelude-val">Ok</span>(String::from(<span class="string">&quot;0&quot;</span>))
                 }
             },
-            <span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">value</span>.<span class="ident">len</span>().<span class="ident">to_string</span>()),
+            |value| <span class="prelude-val">Ok</span>(value.len().to_string()),
         )
     }
 
-    <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::unnecessary_wraps</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">eval_arity_param</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">positional_vars</span>.<span class="ident">len</span>().<span class="ident">to_string</span>())
+    <span class="attribute">#[allow(clippy::unnecessary_wraps)]
+    </span><span class="kw">fn </span>eval_arity_param(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="prelude-val">Ok</span>(<span class="self">self</span>.positional_vars.len().to_string())
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_ref_param</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
-        <span class="self">self</span>.<span class="ident">eval_simple_param</span>(<span class="ident">identifier</span>)
-            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">name</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">eval_simple_param</span>(<span class="kw-2">&amp;</span><span class="ident">Identifier::Named</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>)))
+    <span class="kw">fn </span>eval_ref_param(<span class="kw-2">&amp;</span><span class="self">self</span>, identifier: <span class="kw-2">&amp;</span>Identifier) -&gt; <span class="prelude-ty">Result</span>&lt;String, Error&gt; {
+        <span class="self">self</span>.eval_simple_param(identifier)
+            .and_then(|name| <span class="self">self</span>.eval_simple_param(<span class="kw-2">&amp;</span>Identifier::Named(<span class="kw-2">&amp;</span>name)))
     }
 
-    <span class="kw">fn</span> <span class="ident">eval_identifier</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
-        <span class="kw">match</span> <span class="ident">identifier</span> {
-            <span class="ident">Identifier::Named</span>(<span class="ident">name</span>) =&gt; <span class="self">self</span>.<span class="ident">named_vars</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">name</span>).<span class="ident">cloned</span>(),
-            <span class="ident">Identifier::Indexed</span>(<span class="ident">index</span>) =&gt; {
-                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">index</span> <span class="op">==</span> <span class="number">0</span> {
-                    <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">positional_vars</span>.<span class="ident">join</span>(<span class="string">&quot; &quot;</span>))
-                } <span class="kw">else</span> {
-                    <span class="self">self</span>.<span class="ident">positional_vars</span>.<span class="ident">get</span>(<span class="ident">index</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">cloned</span>()
+    <span class="kw">fn </span>eval_identifier(<span class="kw-2">&amp;</span><span class="self">self</span>, identifier: <span class="kw-2">&amp;</span>Identifier) -&gt; <span class="prelude-ty">Option</span>&lt;String&gt; {
+        <span class="kw">match </span>identifier {
+            Identifier::Named(name) =&gt; <span class="self">self</span>.named_vars.get(<span class="kw-2">*</span>name).cloned(),
+            Identifier::Indexed(index) =&gt; {
+                <span class="kw">if </span><span class="kw-2">*</span>index == <span class="number">0 </span>{
+                    <span class="prelude-val">Some</span>(<span class="self">self</span>.positional_vars.join(<span class="string">&quot; &quot;</span>))
+                } <span class="kw">else </span>{
+                    <span class="self">self</span>.positional_vars.get(index - <span class="number">1</span>).cloned()
                 }
             },
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">error_message</span>(<span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">Identifier</span>, <span class="ident">treat_empty_as_unset</span>: <span class="ident">bool</span>) -&gt; <span class="ident">String</span> {
-        <span class="kw">if</span> <span class="ident">treat_empty_as_unset</span> {
-            <span class="macro">format!</span>(<span class="string">&quot;&#39;{}&#39; is unset or empty&quot;</span>, <span class="ident">identifier</span>)
-        } <span class="kw">else</span> {
-            <span class="macro">format!</span>(<span class="string">&quot;&#39;{}&#39; is unset&quot;</span>, <span class="ident">identifier</span>)
+    <span class="kw">fn </span>error_message(identifier: <span class="kw-2">&amp;</span>Identifier, treat_empty_as_unset: bool) -&gt; String {
+        <span class="kw">if </span>treat_empty_as_unset {
+            <span class="macro">format!</span>(<span class="string">&quot;&#39;{}&#39; is unset or empty&quot;</span>, identifier)
+        } <span class="kw">else </span>{
+            <span class="macro">format!</span>(<span class="string">&quot;&#39;{}&#39; is unset&quot;</span>, identifier)
         }
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
