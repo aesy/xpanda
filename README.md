@@ -19,7 +19,7 @@
 
 [docs-url]: https://docs.rs/xpanda
 
-[github-actions-image]: https://img.shields.io/github/workflow/status/aesy/xpanda/Continuous%20Integration?style=flat-square
+[github-actions-image]: https://img.shields.io/github/actions/workflow/status/aesy/xpanda/ci.yml?branch=master&style=flat-square
 
 [github-actions-url]: https://github.com/aesy/xpanda/actions
 
