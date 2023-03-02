@@ -77,13 +77,20 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     fn read_param(&mut self) -> Option<Token<'a>> {
         let next_char = self.reader.peek_char()?;
         let can_be_identifier = matches!(
             self.previous_token,
             Some(Token::DollarSign | Token::OpenBrace | Token::PoundSign | Token::ExclamationMark)
         );
-        let mut is_escaped = self.reader.peek_count(2) == "$$";
+        let in_brackets = matches!(self.previous_token, Some(Token::OpenBrace));
+        let is_escaped = self.reader.peek_count(2) == "$$";
+
+        if in_brackets {
+            self.reader.consume_while(|c| c == ' ');
+        }
+
         let token = match next_char {
             '$' if !is_escaped => {
                 self.reader.consume_char();
@@ -136,12 +143,22 @@ impl<'a> Lexer<'a> {
             c if can_be_identifier && c.is_numeric() => {
                 let text = self.reader.consume_while(char::is_numeric);
                 let number = text.parse().unwrap_or(0);
+
+                if in_brackets {
+                    self.reader.consume_while(|c| c == ' ');
+                }
+
                 Token::Index(number)
             },
             c if can_be_identifier && (c.is_alphanumeric() || c == '_') => {
                 let text = self
                     .reader
                     .consume_while(|c| c.is_alphanumeric() || c == '_');
+
+                if in_brackets {
+                    self.reader.consume_while(|c| c == ' ');
+                }
+
                 Token::Identifier(text)
             },
             _ => {
