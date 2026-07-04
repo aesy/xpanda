@@ -1,6 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="[`Xpanda`] substitutes the values of variables in strings similar to `envsubst` and `Bash parameter expansion`."><meta name="keywords" content="rust, rustlang, rust-lang, Xpanda"><title>Xpanda in xpanda - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../normalize.css"><link rel="stylesheet" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../ayu.css" disabled><link rel="stylesheet" href="../dark.css" disabled><link rel="stylesheet" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../xpanda/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div></a><h2 class="location"><a href="#">Xpanda</a></h2><div class="sidebar-elems"><section><h3><a href="#implementations">Methods</a></h3><ul class="block"><li><a href="#method.builder">builder</a></li><li><a href="#method.expand">expand</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block"><li><a href="#impl-Default-for-Xpanda">Default</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block"><li><a href="#impl-RefUnwindSafe-for-Xpanda">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Xpanda">Send</a></li><li><a href="#impl-Sync-for-Xpanda">Sync</a></li><li><a href="#impl-Unpin-for-Xpanda">Unpin</a></li><li><a href="#impl-UnwindSafe-for-Xpanda">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block"><li><a href="#impl-Any-for-Xpanda">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-Xpanda">Borrow&lt;T&gt;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-Xpanda">BorrowMut&lt;T&gt;</a></li><li><a href="#impl-From%3CT%3E-for-Xpanda">From&lt;T&gt;</a></li><li><a href="#impl-Into%3CU%3E-for-Xpanda">Into&lt;U&gt;</a></li><li><a href="#impl-TryFrom%3CU%3E-for-Xpanda">TryFrom&lt;U&gt;</a></li><li><a href="#impl-TryInto%3CU%3E-for-Xpanda">TryInto&lt;U&gt;</a></li></ul></section><h2><a href="index.html">In xpanda</a></h2></div></nav><main><div class="width-limiter"><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main-content" class="content"><div class="main-heading"><h1 class="fqn">Struct <a href="index.html">xpanda</a>::<wbr><a class="struct" href="#">Xpanda</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></h1><span class="out-of-band"><a class="srclink" href="../src/xpanda/lib.rs.html#114-116">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="item-decl"><pre class="rust struct"><code>pub struct Xpanda { /* private fields */ }</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><a href="struct.Xpanda.html" title="Xpanda"><code>Xpanda</code></a> substitutes the values of variables in strings similar to <a href="https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html"><code>envsubst</code></a> and
-<a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html"><code>Bash parameter expansion</code></a>.</p>
-</div></details><h2 id="implementations" class="small-section-header">Implementations<a href="#implementations" class="anchor"></a></h2><div id="implementations-list"><details class="rustdoc-toggle implementors-toggle" open><summary><section id="impl-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="../src/xpanda/lib.rs.html#118-496">source</a><a href="#impl-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></summary><div class="impl-items"><section id="method.builder" class="method has-srclink"><a class="srclink rightside" href="../src/xpanda/lib.rs.html#130-132">source</a><h4 class="code-header">pub fn <a href="#method.builder" class="fnname">builder</a>() -&gt; <a class="struct" href="struct.Builder.html" title="struct xpanda::Builder">Builder</a></h4></section><details class="rustdoc-toggle method-toggle" open><summary><section id="method.expand" class="method has-srclink"><a class="srclink rightside" href="../src/xpanda/lib.rs.html#488-495">source</a><h4 class="code-header">pub fn <a href="#method.expand" class="fnname">expand</a>(&amp;self, input: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.66.0/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.66.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.66.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="struct" href="struct.Error.html" title="struct xpanda::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Expands the given text by substituting the values of the variables inside it.</p>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`Xpanda` substitutes the values of variables in strings similar to `envsubst` and `Bash parameter expansion`."><title>Xpanda in xpanda - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2"href="../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../static.files/rustdoc-17e0aaed.css"><meta name="rustdoc-vars" data-root-path="../" data-static-root-path="../static.files/" data-current-crate="xpanda" data-themes="" data-resource-suffix="" data-rustdoc-version="1.96.1 (31fca3adb 2026-06-26)" data-channel="1.96.1" data-search-js="search-b5634cc7.js" data-stringdex-js="stringdex-2da4960a.js" data-settings-js="settings-170eb4bf.js" ><script src="../static.files/storage-41dd4d93.js"></script><script defer src="sidebar-items.js"></script><script defer src="../static.files/main-5013f961.js"></script><noscript><link rel="stylesheet" href="../static.files/noscript-f7c3ffd8.css"></noscript><link rel="alternate icon" type="image/png" href="../static.files/favicon-32x32-eab170b8.png"><link rel="icon" type="image/svg+xml" href="../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><a class="skip-main-content" href="#main-content">Skip to main content</a><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><rustdoc-topbar><h2><a href="#">Xpanda</a></h2></rustdoc-topbar><nav class="sidebar"><div class="sidebar-crate"><h2><a href="../xpanda/index.html">xpanda</a><span class="version">0.1.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Xpanda</a></h2><h3><a href="#implementations">Associated Functions</a></h3><ul class="block method"><li><a href="#method.builder" title="builder">builder</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.expand" title="expand">expand</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Default-for-Xpanda" title="Default">Default</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-Xpanda" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-Xpanda" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Send-for-Xpanda" title="Send">Send</a></li><li><a href="#impl-Sync-for-Xpanda" title="Sync">Sync</a></li><li><a href="#impl-Unpin-for-Xpanda" title="Unpin">Unpin</a></li><li><a href="#impl-UnsafeUnpin-for-Xpanda" title="UnsafeUnpin">UnsafeUnpin</a></li><li><a href="#impl-UnwindSafe-for-Xpanda" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2 class="in-crate"><a href="index.html">In crate xpanda</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><section id="main-content" class="content" tabindex="-1"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="index.html">xpanda</a></div><h1>Struct <span class="struct">Xpanda</span>&nbsp;<button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../src/xpanda/lib.rs.html#114-116">Source</a> </span></div><pre class="rust item-decl"><code>pub struct Xpanda { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><a href="struct.Xpanda.html" title="struct xpanda::Xpanda"><code>Xpanda</code></a> substitutes the values of variables in strings similar to
+<a href="https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html"><code>envsubst</code></a> and <a href="https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html"><code>Bash parameter expansion</code></a>.</p>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Xpanda" class="impl"><a class="src rightside" href="../src/xpanda/lib.rs.html#118-629">Source</a><a href="#impl-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></summary><div class="impl-items"><section id="method.builder" class="method"><a class="src rightside" href="../src/xpanda/lib.rs.html#130-132">Source</a><h4 class="code-header">pub fn <a href="#method.builder" class="fn">builder</a>() -&gt; <a class="struct" href="struct.Builder.html" title="struct xpanda::Builder">Builder</a></h4></section><details class="toggle method-toggle" open><summary><section id="method.expand" class="method"><a class="src rightside" href="../src/xpanda/lib.rs.html#621-628">Source</a><h4 class="code-header">pub fn <a href="#method.expand" class="fn">expand</a>(&amp;self, input: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.96.1/std/primitive.str.html">str</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.96.1/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="https://doc.rust-lang.org/1.96.1/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>, <a class="struct" href="struct.Error.html" title="struct xpanda::Error">Error</a>&gt;</h4></section></summary><div class="docblock"><p>Expands the given text by substituting the values of the variables
+inside it.</p>
 <p>Variables can appear in any of the following forms:</p>
 <table>
   <thead>
@@ -12,130 +13,186 @@
   <tbody>
     <tr>
       <td>$VAR</td>
-      <td>substituted with the corresponding value for 'VAR' if set, otherwise "".</td>
-    </tr>
+      <td>substituted with the corresponding value for 'VAR' if set,
+otherwise "".</td>     </tr>
     <tr>
       <td>${VAR}</td>
-      <td>substituted with the corresponding value for 'VAR' if set, otherwise "".</td>
-    </tr>
+      <td>substituted with the corresponding value for 'VAR' if set,
+otherwise "".</td>     </tr>
     <tr>
       <td>${VAR-default}</td>
       <td>
-        substituted with the corresponding value for 'VAR' if set, otherwise "default".
-      </td>
+        substituted with the corresponding value for 'VAR' if set,
+otherwise "default".       </td>
     </tr>
     <tr>
       <td>${VAR:-default}</td>
       <td>
-        substituted with the corresponding value for 'VAR' if set and non-empty, otherwise
-        "default".
+        substituted with the corresponding value for 'VAR' if set and
+non-empty, otherwise "default".
       </td>
     </tr>
     <tr>
       <td>${VAR+alternative}</td>
       <td>
-        substituted with "alternative" if the corresponding value for 'VAR' is set,
-        otherwise "".
+        substituted with "alternative" if the corresponding value for
+'VAR' is set, otherwise "".
       </td>
     </tr>
     <tr>
       <td>${VAR:+alternative}</td>
       <td>
-        substituted with "alternative" if the corresponding value for 'VAR' is set and
-        non-empty, otherwise "".
+        substituted with "alternative" if the corresponding value for
+'VAR' is set and non-empty, otherwise "".
       </td>
     </tr>
     <tr>
       <td>${VAR?}</td>
       <td>
-        substituted with the corresponding value for 'VAR' if set, otherwise yields an
-        error.
+        substituted with the corresponding value for 'VAR' if set,
+otherwise yields an error.
       </td>
     </tr>
     <tr>
       <td>${VAR?error}</td>
       <td>
-        substituted with the corresponding value for 'VAR' if set, otherwise yields an
-        error with the given message (in this case "error").
-      </td>
+        substituted with the corresponding value for 'VAR' if set,
+otherwise yields an error with the given message (in this
+case "error").       </td>
     </tr>
     <tr>
-      <td>${VAR?error}</td>
+      <td>${VAR:?error}</td>
       <td>
-        substituted with the corresponding value for 'VAR' if set and non-empty, otherwise
-        yields an error with the given message (in this case "error").
-      </td>
+        substituted with the corresponding value for 'VAR' if set and
+non-empty, otherwise yields an error with the given message
+(in this case "error").       </td>
     </tr>
     <tr>
       <td>${#VAR}</td>
       <td>
-        substituted with the length of the corresponding value for 'VAR' if set, otherwise
-        "0".
+        substituted with the length of the corresponding value for 'VAR'
+if set, otherwise "0".
       </td>
+    </tr>
+    <tr>
+      <td>${#}</td>
+      <td>substituted with the number of positional variables.</td>
+    </tr>
+    <tr>
+      <td>${!VAR}</td>
+      <td>
+        the value of 'VAR' is evaluated again as a variable name — the
+result is the value of the variable it names (indirect reference).
+      </td>
+    </tr>
+    <tr>
+      <td>${VAR:offset}</td>
+      <td>
+        substituted with the value of 'VAR' starting at index `offset`
+through the end. Negative `offset` counts from the end;
+parenthesize or precede with a space to disambiguate from
+`${VAR:-default}`.       </td>
+    </tr>
+    <tr>
+      <td>${VAR:offset:length}</td>
+      <td>
+        substituted with `length` characters of 'VAR' starting at index
+`offset`.       </td>
     </tr>
     <tr>
       <td>${VAR^}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with the
-        first character uppercased.
+        substituted with the value of the variable named by the value of
+`VAR`, with the first character uppercased.
       </td>
     </tr>
     <tr>
       <td>${VAR^^}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with all
-        characters uppercased.
+        substituted with the value of the variable named by the value of
+`VAR`, with all characters uppercased.
       </td>
     </tr>
     <tr>
       <td>${VAR,}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with the
-        first character lowercased.
+        substituted with the value of the variable named by the value of
+`VAR`, with the first character lowercased.
       </td>
     </tr>
     <tr>
       <td>${VAR,,}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with all
-        characters lowercased.
+        substituted with the value of the variable named by the value of
+`VAR`, with all characters lowercased.
       </td>
     </tr>
     <tr>
       <td>${VAR~}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with the
-        casing of the first character reversed.
+        substituted with the value of the variable named by the value of
+`VAR`, with the casing of the first character reversed.
       </td>
     </tr>
     <tr>
       <td>${VAR~~}</td>
       <td>
-        substituted with the value of the variable named by the value of `VAR`, with the
-        casing of all characters reversed.
+        substituted with the value of the variable named by the value of
+`VAR`, with the casing of all characters reversed.
       </td>
+    </tr>
+    <tr>
+      <td>${VAR#pattern}</td>
+      <td>$VAR with the shortest prefix matching `pattern` removed.</td>
+    </tr>
+    <tr>
+      <td>${VAR##pattern}</td>
+      <td>$VAR with the longest prefix matching `pattern` removed.</td>
+    </tr>
+    <tr>
+      <td>${VAR%pattern}</td>
+      <td>$VAR with the shortest suffix matching `pattern` removed.</td>
+    </tr>
+    <tr>
+      <td>${VAR%%pattern}</td>
+      <td>$VAR with the longest suffix matching `pattern` removed.</td>
+    </tr>
+    <tr>
+      <td>${VAR/pattern/replacement}</td>
+      <td>$VAR with the first match of `pattern` replaced by
+`replacement`.</td>
+    </tr>
+    <tr>
+      <td>${VAR//pattern/replacement}</td>
+      <td>$VAR with every match of `pattern` replaced by
+`replacement`.</td>
     </tr>
   </tbody>
 </table>
-<p><code>VAR</code> above is a named variable. Named variables can be provided using the builder:</p>
+<p><code>VAR</code> above is a named variable. Named variables can be provided using
+the builder:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>xpanda::Xpanda;
 
 <span class="kw">let </span>named_vars = HashMap::new();
-<span class="kw">let </span>xpanda = Xpanda::builder()
-    .with_named_vars(named_vars)
-    .build();</code></pre></div>
-<p>Positional variables are also supported and can be provided in the same way:</p>
+<span class="kw">let </span>xpanda = Xpanda::builder().with_named_vars(named_vars).build();</code></pre></div>
+<p>Positional variables are also supported and can be provided in the same
+way:</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>xpanda::Xpanda;
 
-<span class="kw">let </span>xpanda = Xpanda::builder()
-    .with_positional_vars(Vec::new())
-    .build();</code></pre></div>
-<p>Positional variables can be referenced using their index (starting at 1), for example, <code>$1</code>
-references the first positional variable, <code>$2</code> the second and so on. <code>$0</code> is a space concatenated
-string of all positional variables.</p>
+<span class="kw">let </span>xpanda = Xpanda::builder().with_positional_vars(Vec::new()).build();</code></pre></div>
+<p>Positional variables can be referenced using their index (starting at</p>
+<ol>
+<li>
+<ul>
+<li>for example, <code>$1</code> references the first positional variable, <code>$2</code>
+the second, and so on. <code>$0</code> is a space-concatenated string of all
+positional variables.</li>
+</ul>
+</li>
+</ol>
 <p>Here are some examples and their output:</p>
 <table>
   <thead>
@@ -208,6 +265,18 @@ string of all positional variables.</p>
       <td>$example</td>
     </tr>
     <tr>
+      <td>${VAR:2}</td>
+      <td></td>
+      <td></td>
+      <td>"ample"</td>
+    </tr>
+    <tr>
+      <td>${VAR:2:4}</td>
+      <td></td>
+      <td></td>
+      <td>"ampl"</td>
+    </tr>
+    <tr>
       <td>${VAR^}</td>
       <td></td>
       <td></td>
@@ -243,9 +312,45 @@ string of all positional variables.</p>
       <td></td>
       <td>"EXAMPLE"</td>
     </tr>
+    <tr>
+      <td>${VAR#*e}</td>
+      <td></td>
+      <td></td>
+      <td>"xample"</td>
+    </tr>
+    <tr>
+      <td>${VAR##*e}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>${VAR%e*}</td>
+      <td></td>
+      <td></td>
+      <td>"exampl"</td>
+    </tr>
+    <tr>
+      <td>${VAR%%e*}</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>${VAR/e/E}</td>
+      <td></td>
+      <td></td>
+      <td>"Example"</td>
+    </tr>
+    <tr>
+      <td>${VAR//e/E}</td>
+      <td></td>
+      <td></td>
+      <td>"ExamplE"</td>
+    </tr>
   </tbody>
 </table>
-<p>Special rules take precedence when <a href="struct.Builder.html#method.no_unset" title="Builder::no_unset"><code>Builder::no_unset</code></a> is <code>true</code>:</p>
+<p>Special rules take precedence when <a href="struct.Builder.html#method.no_unset" title="method xpanda::Builder::no_unset"><code>Builder::no_unset</code></a> is <code>true</code>:</p>
 <table>
   <thead>
     <tr>
@@ -294,6 +399,38 @@ string of all positional variables.</p>
       <td>${VAR~~}</td>
       <td>error</td>
     </tr>
+    <tr>
+      <td>${VAR:2}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR:2:4}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR#pat}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR##pat}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR%pat}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR%%pat}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR/a/b}</td>
+      <td>error</td>
+    </tr>
+    <tr>
+      <td>${VAR//a/b}</td>
+      <td>error</td>
+    </tr>
   </tbody>
 </table>
 <p>Default/Alternative values can also be variables:</p>
@@ -321,19 +458,26 @@ string of all positional variables.</p>
     </tr>
   </tbody>
 </table>
-<p>The <code>$</code> character is assumed to be the start of a variable. If the variable does not match
-any of the forms listed above, an error is returned. Variables can be escaped by prefixing them
-by an additional ‘$’, for example: <code>$$VAR</code> which yields <code>$VAR</code> and <code>${VAR-$$text}</code> which yields
-<code>$text</code> if <code>VAR</code> is unset.</p>
-<h5 id="errors"><a href="#errors">Errors</a></h5>
-<p>Returns <a href="https://doc.rust-lang.org/1.66.0/core/result/enum.Result.html#variant.Err" title="Err"><code>Err</code></a> if the given string is badly formatted and cannot be parsed.</p>
-<h5 id="examples"><a href="#examples">Examples</a></h5>
+<p>The <code>$</code> character is assumed to be the start of a variable. If the
+variable does not match any of the forms listed above, an error is
+returned. Variables can be escaped by prefixing them
+by an additional ‘$’, for example, <code>$$VAR</code> which yields <code>$VAR</code> and
+<code>${VAR-$$text}</code> which yields <code>$text</code> if <code>VAR</code> is unset.</p>
+<h5 id="errors"><a class="doc-anchor" href="#errors">§</a>Errors</h5>
+<p>Returns <a href="https://doc.rust-lang.org/1.96.1/core/result/enum.Result.html#variant.Err" title="variant core::result::Result::Err"><code>Err</code></a> if the given string is badly formatted and cannot be
+parsed.</p>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>xpanda::Xpanda;
 
 <span class="kw">let </span>xpanda = Xpanda::default();
-<span class="macro">assert_eq!</span>(xpanda.expand(<span class="string">&quot;${1:-default}&quot;</span>), <span class="prelude-val">Ok</span>(String::from(<span class="string">&quot;default&quot;</span>)));</code></pre></div>
-</div></details></div></details></div><h2 id="trait-implementations" class="small-section-header">Trait Implementations<a href="#trait-implementations" class="anchor"></a></h2><div id="trait-implementations-list"><details class="rustdoc-toggle implementors-toggle" open><summary><section id="impl-Default-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="../src/xpanda/lib.rs.html#113">source</a><a href="#impl-Default-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.default" class="method trait-impl has-srclink"><a class="srclink rightside" href="../src/xpanda/lib.rs.html#113">source</a><a href="#method.default" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/default/trait.Default.html#tymethod.default" class="fnname">default</a>() -&gt; <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h4></section></summary><div class='docblock'>Returns the “default value” for a type. <a href="https://doc.rust-lang.org/1.66.0/core/default/trait.Default.html#tymethod.default">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="small-section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor"></a></h2><div id="synthetic-implementations-list"><section id="impl-RefUnwindSafe-for-Xpanda" class="impl has-srclink"><a href="#impl-RefUnwindSafe-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Send-for-Xpanda" class="impl has-srclink"><a href="#impl-Send-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Sync-for-Xpanda" class="impl has-srclink"><a href="#impl-Sync-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Unpin-for-Xpanda" class="impl has-srclink"><a href="#impl-Unpin-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-UnwindSafe-for-Xpanda" class="impl has-srclink"><a href="#impl-UnwindSafe-for-Xpanda" class="anchor"></a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></div><h2 id="blanket-implementations" class="small-section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor"></a></h2><div id="blanket-implementations-list"><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-Any-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/any.rs.html#200">source</a><a href="#impl-Any-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/any.rs.html#201">source</a><a href="#method.type_id" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/any/trait.Any.html#tymethod.type_id" class="fnname">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.66.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.66.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/borrow.rs.html#211">source</a><a href="#impl-Borrow%3CT%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: ?<a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/91522" title="Tracking issue for const_borrow">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/borrow.rs.html#213">source</a></span><a href="#method.borrow" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fnname">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.66.0/std/primitive.reference.html">&amp;</a>T</h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/borrow.rs.html#220">source</a><a href="#impl-BorrowMut%3CT%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;T: ?<a class="trait" href="https://doc.rust-lang.org/1.66.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/91522" title="Tracking issue for const_borrow">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/borrow.rs.html#221">source</a></span><a href="#method.borrow_mut" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fnname">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.66.0/std/primitive.reference.html">&amp;mut </a>T</h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.66.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#733">source</a><a href="#impl-From%3CT%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.from" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/88674" title="Tracking issue for const_convert">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#736">source</a></span><a href="#method.from" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.From.html#tymethod.from" class="fnname">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
-</div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#717">source</a><a href="#impl-Into%3CU%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;U: <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle method-toggle" open><summary><section id="method.into" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/88674" title="Tracking issue for const_convert">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#725">source</a></span><a href="#method.into" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.Into.html#tymethod.into" class="fnname">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<span class="macro">assert_eq!</span>(xpanda.expand(<span class="string">"${1:-default}"</span>), <span class="prelude-val">Ok</span>(String::from(<span class="string">"default"</span>)));</code></pre></div></div></details></div></details></div><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Default-for-Xpanda" class="impl"><a class="src rightside" href="../src/xpanda/lib.rs.html#113">Source</a><a href="#impl-Default-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/default/trait.Default.html" title="trait core::default::Default">Default</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.default" class="method trait-impl"><a class="src rightside" href="../src/xpanda/lib.rs.html#113">Source</a><a href="#method.default" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/default/trait.Default.html#tymethod.default" class="fn">default</a>() -&gt; <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h4></section></summary><div class='docblock'>Returns the “default value” for a type. <a href="https://doc.rust-lang.org/1.96.1/core/default/trait.Default.html#tymethod.default">Read more</a></div></details></div></details></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-Xpanda" class="impl"><a href="#impl-Freeze-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-RefUnwindSafe-for-Xpanda" class="impl"><a href="#impl-RefUnwindSafe-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Send-for-Xpanda" class="impl"><a href="#impl-Send-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Sync-for-Xpanda" class="impl"><a href="#impl-Sync-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-Unpin-for-Xpanda" class="impl"><a href="#impl-Unpin-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-UnsafeUnpin-for-Xpanda" class="impl"><a href="#impl-UnsafeUnpin-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.UnsafeUnpin.html" title="trait core::marker::UnsafeUnpin">UnsafeUnpin</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section><section id="impl-UnwindSafe-for-Xpanda" class="impl"><a href="#impl-UnwindSafe-for-Xpanda" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.Xpanda.html" title="struct xpanda::Xpanda">Xpanda</a></h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/any.rs.html#141">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/any.rs.html#142">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.96.1/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.96.1/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/borrow.rs.html#212">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/borrow.rs.html#214">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.96.1/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/borrow.rs.html#221">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.96.1/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/borrow.rs.html#222">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.96.1/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.96.1/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#785">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#788">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#767-769">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#777">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
 <p>That is, this conversion is whatever the implementation of
-<code><a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.From.html" title="From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
-</div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#775">source</a><a href="#impl-TryFrom%3CU%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;U: <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl has-srclink"><a href="#associatedtype.Error-1" class="anchor"></a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.66.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/88674" title="Tracking issue for const_convert">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#781">source</a></span><a href="#method.try_from" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fnname">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.66.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="rustdoc-toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-Xpanda" class="impl has-srclink"><a class="srclink rightside" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#760">source</a><a href="#impl-TryInto%3CU%3E-for-Xpanda" class="anchor"></a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;U: <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</span></h3></section></summary><div class="impl-items"><details class="rustdoc-toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl has-srclink"><a href="#associatedtype.Error" class="anchor"></a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="rustdoc-toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl has-srclink"><span class="rightside"><span class="since" title="const unstable">const: <a href="https://github.com/rust-lang/rust/issues/88674" title="Tracking issue for const_convert">unstable</a></span> · <a class="srclink" href="https://doc.rust-lang.org/1.66.0/src/core/convert/mod.rs.html#766">source</a></span><a href="#method.try_into" class="anchor"></a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fnname">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.66.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.66.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="xpanda" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0 (69f9c33d7 2022-12-12)" ></div></body></html>
+<code><a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#827-829">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#831">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.96.1/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#834">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.96.1/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#811-813">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#815">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.96.1/src/core/convert/mod.rs.html#818">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.96.1/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.96.1/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details></div></section></div></main></body></html>

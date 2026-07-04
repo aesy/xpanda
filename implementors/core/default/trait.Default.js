@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"xpanda":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"xpanda/struct.Builder.html\" title=\"struct xpanda::Builder\">Builder</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"xpanda/struct.Xpanda.html\" title=\"struct xpanda::Xpanda\">Xpanda</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
