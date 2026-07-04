@@ -140,7 +140,7 @@ releases](https://github.com/aesy/xpanda/releases). Binaries for other platforms
 Example on how to download and install an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda-linux-amd64 -o xpanda
+curl -L https://github.com/aesy/xpanda/releases/download/v0.2.0/xpanda-linux-amd64 -o xpanda
 chmod +x xpanda
 sudo mv xpanda /usr/local/bin
 ```
@@ -150,7 +150,7 @@ sudo mv xpanda /usr/local/bin
 Example on how to download an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.1.0/xpanda-windows-amd64.exe -o xpanda.exe
+curl -L https://github.com/aesy/xpanda/releases/download/v0.2.0/xpanda-windows-amd64.exe -o xpanda.exe
 ```
 
 #### Build from source
