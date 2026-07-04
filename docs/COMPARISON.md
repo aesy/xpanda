@@ -11,9 +11,6 @@ This document lists which patterns from other programs that are supported/unsupp
 
 ## POSIX shell
 
-Patterns defined by the POSIX parameter expansion specification. These are
-portable to any conforming `/bin/sh`.
-
 | Pattern             | Description                                                                   |        Status |
 |---------------------|:------------------------------------------------------------------------------|--------------:|
 | `${param-word}`     | yields the value of `param` if set, else `word`                               |     SUPPORTED |
@@ -32,23 +29,20 @@ portable to any conforming `/bin/sh`.
 
 ## Bash
 
-Patterns added by bash on top of POSIX. Some are also present in ksh93 and zsh
-but none are portable POSIX shell.
-
-| Pattern                         | Description                                                                  |    Status |
-|---------------------------------|:-----------------------------------------------------------------------------|----------:|
-| `${#}`                          | yields the number of positional arguments (POSIX spells this `$#`)           | SUPPORTED |
-| `${!param}`                     | yields the value of the value of `param` (indirect reference)                | SUPPORTED |
-| `${param:offset}`               | yields the value of `param` from index `offset` to the end                   | SUPPORTED |
-| `${param:offset:length}`        | yields the value of `param` from index `offset` for `length` characters      | SUPPORTED |
-| `${param^}`                     | first letter of `param` uppercased                                           | SUPPORTED |
-| `${param^^}`                    | all letters of `param` uppercased                                            | SUPPORTED |
-| `${param,}`                     | first letter of `param` lowercased                                           | SUPPORTED |
-| `${param,,}`                    | all letters of `param` lowercased                                            | SUPPORTED |
-| `${param~}`                     | casing of the first letter of `param` reversed (bash 4; dropped in bash 5.1) | SUPPORTED |
-| `${param~~}`                    | casing of all letters of `param` reversed (bash 4; dropped in bash 5.1)      | SUPPORTED |
-| `${param/pattern/replacement}`  | first match of `pattern` in `param` replaced with `replacement`              | SUPPORTED |
-| `${param//pattern/replacement}` | every match of `pattern` in `param` replaced with `replacement`              | SUPPORTED |
+| Pattern                         | Description                                                             |    Status |
+|---------------------------------|:------------------------------------------------------------------------|----------:|
+| `${#}`                          | yields the number of positional arguments                               | SUPPORTED |
+| `${!param}`                     | yields the value of the value of `param` (indirect reference)           | SUPPORTED |
+| `${param:offset}`               | yields the value of `param` from index `offset` to the end              | SUPPORTED |
+| `${param:offset:length}`        | yields the value of `param` from index `offset` for `length` characters | SUPPORTED |
+| `${param^}`                     | first letter of `param` uppercased                                      | SUPPORTED |
+| `${param^^}`                    | all letters of `param` uppercased                                       | SUPPORTED |
+| `${param,}`                     | first letter of `param` lowercased                                      | SUPPORTED |
+| `${param,,}`                    | all letters of `param` lowercased                                       | SUPPORTED |
+| `${param~}`                     | casing of the first letter of `param` reversed                          | SUPPORTED |
+| `${param~~}`                    | casing of all letters of `param` reversed                               | SUPPORTED |
+| `${param/pattern/replacement}`  | first match of `pattern` in `param` replaced with `replacement`         | SUPPORTED |
+| `${param//pattern/replacement}` | every match of `pattern` in `param` replaced with `replacement`         | SUPPORTED |
 
 Arrays such as `$@` are not supported.
 
