@@ -1,7 +1,7 @@
 [package]
 name = "xpanda"
 description = "Unix shell-like parameter expansion/variable substitution"
-authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
+authors.workspace = true
 homepage = "https://github.com/aesy/xpanda"
 repository = "https://github.com/aesy/xpanda"
 documentation = "https://docs.rs/xpanda"
@@ -9,11 +9,12 @@ readme = "README.md"
 license = "MIT"
 categories = ["command-line-utilities", "template-engine", "text-processing"]
 keywords = ["environment", "variable", "substitutaion", "parameter", "expansion"]
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 
 [dev-dependencies]
-criterion = { version = "0.4.0", features = ["html_reports"] }
+criterion.workspace = true
 
 [dependencies]
 

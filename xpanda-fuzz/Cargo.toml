@@ -1,15 +1,16 @@
 [package]
 name = "xpanda-fuzz"
 publish = false
-version = "0.0.0"
-edition = "2021"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.96.0"
 
 [package.metadata]
 cargo-fuzz = true
 
 [dependencies]
 xpanda = { path = "../xpanda" }
-libfuzzer-sys = "0.4.4"
+libfuzzer-sys = "0.4.13"
 
 [[bin]]
 name = "fuzz_input"

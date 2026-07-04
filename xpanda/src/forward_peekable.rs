@@ -13,7 +13,7 @@ impl<I> ForwardPeekable<I>
 where
     I: Iterator,
 {
-    pub fn new(iter: I) -> Self {
+    pub const fn new(iter: I) -> Self {
         Self {
             iter,
             peeked: VecDeque::new(),

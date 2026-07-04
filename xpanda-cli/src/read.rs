@@ -5,8 +5,8 @@ use std::fs::{File, OpenOptions};
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 
-/// Tries to read a string in key=value format, returning the key and value as a tuple
-/// (in that order).
+/// Tries to read a string in key=value format, returning the key and value as a
+/// tuple (in that order).
 pub fn read_named_arg(arg: &str) -> Result<(String, String), String> {
     arg.rsplit_once('=')
         .map(|(key, value)| (key.to_string(), value.to_string()))
@@ -28,8 +28,8 @@ pub fn read_var_file(path: &Path) -> Result<HashMap<String, String>, String> {
             continue;
         }
 
-        let (key, value) = read_named_arg(&line)
-            .map_err(|error| format!("Failed to parse named arg: {}", error))?;
+        let (key, value) =
+            read_named_arg(&line).map_err(|error| format!("Failed to parse named arg: {error}"))?;
 
         map.insert(key, value);
     }
@@ -37,15 +37,14 @@ pub fn read_var_file(path: &Path) -> Result<HashMap<String, String>, String> {
     Ok(map)
 }
 
-pub fn read_input_file(path: &Path) -> Result<impl BufRead, String> {
+pub fn read_input_file(path: &Path) -> Result<impl BufRead + use<>, String> {
     File::open(path)
         .map(BufReader::new)
         .map_err(|error| format!("Failed to open input file '{}': {}", path.display(), error))
 }
 
-pub fn read_output_file(path: &Path) -> Result<impl Write, String> {
+pub fn read_output_file(path: &Path) -> Result<impl Write + use<>, String> {
     OpenOptions::new()
-        .write(true)
         .create_new(!path.exists())
         .append(true)
         .open(path)
@@ -53,8 +52,8 @@ pub fn read_output_file(path: &Path) -> Result<impl Write, String> {
         .map_err(|error| format!("Failed to open output file '{}': {}", path.display(), error))
 }
 
-/// Reads the next line from stdin just like [`std::io::Lines::next`] except that it includes
-/// the line ending in the returned string.
+/// Reads the next line from stdin just like [`std::io::Lines::next`] except
+/// that it includes the line ending in the returned string.
 pub fn read_line(buf: &mut impl BufRead) -> Option<Result<String, String>> {
     let mut string = String::new();
 
@@ -62,6 +61,6 @@ pub fn read_line(buf: &mut impl BufRead) -> Option<Result<String, String>> {
     match buf.read_line(&mut string) {
         Ok(0) => None,
         Ok(_) => Some(Ok(string)),
-        Err(error) => Some(Err(format!("Failed to read input: {}", error))),
+        Err(error) => Some(Err(format!("Failed to read input: {error}"))),
     }
 }

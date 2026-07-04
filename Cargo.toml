@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
     "xpanda",
     "xpanda-cli"
@@ -7,8 +8,40 @@ exclude = [
     "xpanda-fuzz"
 ]
 
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.96.0"
+authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
+
+[workspace.dependencies]
+assert_cmd = "2.2.2"
+clap = { version = "4.6.1", features = ["derive"] }
+criterion = { version = "0.8.2", features = ["html_reports"] }
+predicates = "3.1.4"
+uuid = { version = "1.23.4", features = ["v4"] }
+
+[workspace.lints.rust]
+dead_code = "allow"
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(log_level, values("NONE", "ERROR", "WARN", "INFO", "DEBUG"))'] }
+
+[workspace.lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+cargo_common_metadata = "allow"
+inline_always = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_inception = "allow"
+module_name_repetitions = "allow"
+redundant_closure = "allow"
+similar_names = "allow"
+too_many_arguments = "allow"
+
 [profile.release]
 lto = true
 strip = true
-codegen-units = 1
 panic = "abort"
+codegen-units = 1

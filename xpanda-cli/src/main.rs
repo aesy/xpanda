@@ -94,7 +94,7 @@ fn main() -> ExitCode {
         };
 
         if let Err(error) = output.write_all(text.as_bytes()) {
-            let _result = stderr.write_all(format!("Failed to write output: {}", error).as_bytes());
+            let _result = stderr.write_all(format!("Failed to write output: {error}").as_bytes());
             return ExitCode::from(1);
         }
     }

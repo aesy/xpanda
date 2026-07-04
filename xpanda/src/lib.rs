@@ -1,15 +1,14 @@
-/*!
-This crate provides the ability to expand/substitute variables in strings similar to [`envsubst`]
-and [`Bash parameter expansion`].
-
-There is a single public struct (not counting errors and builders), [`Xpanda`], which in turn
-contains a single method: `expand`. The expand method takes a string by reference and returns
-a copy of it with all variables expanded/substituted according to some patterns.
-
-[`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
-[`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html
-[`Xpanda`]: struct.Xpanda.html
-*/
+//! This crate provides the ability to expand/substitute variables in strings
+//! similar to [`envsubst`] and [`Bash parameter expansion`].
+//!
+//! There is a single public struct (not counting errors and builders),
+//! [`Xpanda`], which in turn contains a single method: `expand`. The expand
+//! method takes a string by reference and returns a copy of it with all
+//! variables expanded/substituted according to some patterns.
+//!
+//! [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
+//! [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html
+//! [`Xpanda`]: struct.Xpanda.html
 
 #![deny(clippy::all)]
 #![warn(clippy::pedantic, clippy::nursery)]
@@ -18,6 +17,7 @@ a copy of it with all variables expanded/substituted according to some patterns.
 mod ast;
 mod eval;
 mod forward_peekable;
+mod glob;
 mod lexer;
 mod parser;
 mod position;
@@ -69,8 +69,8 @@ pub struct Builder {
 }
 
 impl Builder {
-    /// With this flag set, missing variables without any default value will cause an error
-    /// instead of omitting en empty string. Off by default.
+    /// With this flag set, missing variables without any default value will
+    /// cause an error instead of omitting en empty string. Off by default.
     #[must_use]
     pub const fn no_unset(mut self, no_unset: bool) -> Self {
         self.no_unset = no_unset;
@@ -105,8 +105,8 @@ impl Builder {
     }
 }
 
-/// [`Xpanda`] substitutes the values of variables in strings similar to [`envsubst`] and
-/// [`Bash parameter expansion`].
+/// [`Xpanda`] substitutes the values of variables in strings similar to
+/// [`envsubst`] and [`Bash parameter expansion`].
 ///
 /// [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
 /// [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
@@ -131,7 +131,8 @@ impl Xpanda {
         Builder::default()
     }
 
-    /// Expands the given text by substituting the values of the variables inside it.
+    /// Expands the given text by substituting the values of the variables
+    /// inside it.
     ///
     /// Variables can appear in any of the following forms:
     ///
@@ -145,137 +146,187 @@ impl Xpanda {
     ///   <tbody>
     ///     <tr>
     ///       <td>$VAR</td>
-    ///       <td>substituted with the corresponding value for 'VAR' if set, otherwise "".</td>
-    ///     </tr>
+    ///       <td>substituted with the corresponding value for 'VAR' if set,
+    /// otherwise "".</td>     </tr>
     ///     <tr>
     ///       <td>${VAR}</td>
-    ///       <td>substituted with the corresponding value for 'VAR' if set, otherwise "".</td>
-    ///     </tr>
+    ///       <td>substituted with the corresponding value for 'VAR' if set,
+    /// otherwise "".</td>     </tr>
     ///     <tr>
     ///       <td>${VAR-default}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set, otherwise "default".
-    ///       </td>
+    ///         substituted with the corresponding value for 'VAR' if set,
+    /// otherwise "default".       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:-default}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set and non-empty, otherwise
-    ///         "default".
+    ///         substituted with the corresponding value for 'VAR' if set and
+    /// non-empty, otherwise "default".
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR+alternative}</td>
     ///       <td>
-    ///         substituted with "alternative" if the corresponding value for 'VAR' is set,
-    ///         otherwise "".
+    ///         substituted with "alternative" if the corresponding value for
+    /// 'VAR' is set, otherwise "".
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:+alternative}</td>
     ///       <td>
-    ///         substituted with "alternative" if the corresponding value for 'VAR' is set and
-    ///         non-empty, otherwise "".
+    ///         substituted with "alternative" if the corresponding value for
+    /// 'VAR' is set and non-empty, otherwise "".
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR?}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an
-    ///         error.
+    ///         substituted with the corresponding value for 'VAR' if set,
+    /// otherwise yields an error.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR?error}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set, otherwise yields an
-    ///         error with the given message (in this case "error").
-    ///       </td>
+    ///         substituted with the corresponding value for 'VAR' if set,
+    /// otherwise yields an error with the given message (in this
+    /// case "error").       </td>
     ///     </tr>
     ///     <tr>
-    ///       <td>${VAR?error}</td>
+    ///       <td>${VAR:?error}</td>
     ///       <td>
-    ///         substituted with the corresponding value for 'VAR' if set and non-empty, otherwise
-    ///         yields an error with the given message (in this case "error").
-    ///       </td>
+    ///         substituted with the corresponding value for 'VAR' if set and
+    /// non-empty, otherwise yields an error with the given message
+    /// (in this case "error").       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${#VAR}</td>
     ///       <td>
-    ///         substituted with the length of the corresponding value for 'VAR' if set, otherwise
-    ///         "0".
+    ///         substituted with the length of the corresponding value for 'VAR'
+    /// if set, otherwise "0".
     ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${#}</td>
+    ///       <td>substituted with the number of positional variables.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${!VAR}</td>
+    ///       <td>
+    ///         the value of 'VAR' is evaluated again as a variable name — the
+    /// result is the value of the variable it names (indirect reference).
+    ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR:offset}</td>
+    ///       <td>
+    ///         substituted with the value of 'VAR' starting at index `offset`
+    /// through the end. Negative `offset` counts from the end;
+    /// parenthesize or precede with a space to disambiguate from
+    /// `${VAR:-default}`.       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR:offset:length}</td>
+    ///       <td>
+    ///         substituted with `length` characters of 'VAR' starting at index
+    /// `offset`.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR^}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with the
-    ///         first character uppercased.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with the first character uppercased.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR^^}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with all
-    ///         characters uppercased.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with all characters uppercased.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR,}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with the
-    ///         first character lowercased.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with the first character lowercased.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR,,}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with all
-    ///         characters lowercased.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with all characters lowercased.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR~}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with the
-    ///         casing of the first character reversed.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with the casing of the first character reversed.
     ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR~~}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of `VAR`, with the
-    ///         casing of all characters reversed.
+    ///         substituted with the value of the variable named by the value of
+    /// `VAR`, with the casing of all characters reversed.
     ///       </td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR#pattern}</td>
+    ///       <td>$VAR with the shortest prefix matching `pattern` removed.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR##pattern}</td>
+    ///       <td>$VAR with the longest prefix matching `pattern` removed.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%pattern}</td>
+    ///       <td>$VAR with the shortest suffix matching `pattern` removed.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%%pattern}</td>
+    ///       <td>$VAR with the longest suffix matching `pattern` removed.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR/pattern/replacement}</td>
+    ///       <td>$VAR with the first match of `pattern` replaced by
+    /// `replacement`.</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR//pattern/replacement}</td>
+    ///       <td>$VAR with every match of `pattern` replaced by
+    /// `replacement`.</td>
     ///     </tr>
     ///   </tbody>
     /// </table>
     ///
-    /// `VAR` above is a named variable. Named variables can be provided using the builder:
+    /// `VAR` above is a named variable. Named variables can be provided using
+    /// the builder:
     ///
     /// ```rust
     /// use std::collections::HashMap;
     /// use xpanda::Xpanda;
     ///
     /// let named_vars = HashMap::new();
-    /// let xpanda = Xpanda::builder()
-    ///     .with_named_vars(named_vars)
-    ///     .build();
+    /// let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
     /// ```
     ///
-    /// Positional variables are also supported and can be provided in the same way:
+    /// Positional variables are also supported and can be provided in the same
+    /// way:
     ///
     /// ```rust
     /// use xpanda::Xpanda;
     ///
-    /// let xpanda = Xpanda::builder()
-    ///     .with_positional_vars(Vec::new())
-    ///     .build();
+    /// let xpanda = Xpanda::builder().with_positional_vars(Vec::new()).build();
     /// ```
     ///
-    /// Positional variables can be referenced using their index (starting at 1), for example, `$1`
-    /// references the first positional variable, `$2` the second and so on. `$0` is a space concatenated
-    /// string of all positional variables.
+    /// Positional variables can be referenced using their index (starting at
+    /// 1) - for example, `$1` references the first positional variable, `$2`
+    ///      the second, and so on. `$0` is a space-concatenated string of all
+    ///      positional variables.
     ///
     /// Here are some examples and their output:
     ///
@@ -350,6 +401,18 @@ impl Xpanda {
     ///       <td>$example</td>
     ///     </tr>
     ///     <tr>
+    ///       <td>${VAR:2}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"ample"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR:2:4}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"ampl"</td>
+    ///     </tr>
+    ///     <tr>
     ///       <td>${VAR^}</td>
     ///       <td></td>
     ///       <td></td>
@@ -384,6 +447,42 @@ impl Xpanda {
     ///       <td></td>
     ///       <td></td>
     ///       <td>"EXAMPLE"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR#*e}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"xample"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR##*e}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td></td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%e*}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"exampl"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%%e*}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td></td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR/e/E}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"Example"</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR//e/E}</td>
+    ///       <td></td>
+    ///       <td></td>
+    ///       <td>"ExamplE"</td>
     ///     </tr>
     ///   </tbody>
     /// </table>
@@ -438,6 +537,38 @@ impl Xpanda {
     ///       <td>${VAR~~}</td>
     ///       <td>error</td>
     ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR:2}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR:2:4}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR#pat}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR##pat}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%pat}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR%%pat}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR/a/b}</td>
+    ///       <td>error</td>
+    ///     </tr>
+    ///     <tr>
+    ///       <td>${VAR//a/b}</td>
+    ///       <td>error</td>
+    ///     </tr>
     ///   </tbody>
     /// </table>
     ///
@@ -468,14 +599,16 @@ impl Xpanda {
     ///   </tbody>
     /// </table>
     ///
-    /// The `$` character is assumed to be the start of a variable. If the variable does not match
-    /// any of the forms listed above, an error is returned. Variables can be escaped by prefixing them
-    /// by an additional '$', for example: `$$VAR` which yields `$VAR` and `${VAR-$$text}` which yields
-    /// `$text` if `VAR` is unset.
+    /// The `$` character is assumed to be the start of a variable. If the
+    /// variable does not match any of the forms listed above, an error is
+    /// returned. Variables can be escaped by prefixing them
+    /// by an additional '$', for example, `$$VAR` which yields `$VAR` and
+    /// `${VAR-$$text}` which yields `$text` if `VAR` is unset.
     ///
     /// # Errors
     ///
-    /// Returns [`Err`] if the given string is badly formatted and cannot be parsed.
+    /// Returns [`Err`] if the given string is badly formatted and cannot be
+    /// parsed.
     ///
     /// # Examples
     ///
@@ -489,7 +622,7 @@ impl Xpanda {
         let lexer = Lexer::new(input);
         let mut parser = Parser::new(lexer);
         let ast = parser.parse()?;
-        let result = self.evaluator.eval(ast)?;
+        let result = self.evaluator.eval(&ast)?;
 
         Ok(result)
     }

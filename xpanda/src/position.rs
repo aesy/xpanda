@@ -5,12 +5,6 @@ pub struct Position {
     pub col: usize,
 }
 
-impl Position {
-    pub const fn new(index: usize, line: usize, col: usize) -> Self {
-        Self { index, line, col }
-    }
-}
-
 impl Default for Position {
     fn default() -> Self {
         Self {

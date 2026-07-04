@@ -1,18 +1,19 @@
 [package]
 name = "xpanda-cli"
 description = "Command line interface for Unix shell-like parameter expansion/variable substitution"
-authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
+authors.workspace = true
 homepage = "https://github.com/aesy/xpanda"
 repository = "https://github.com/aesy/xpanda"
 license-file = "../LICENSE"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
 
 [dev-dependencies]
-assert_cmd = "2.0.4"
-predicates = "2.1.1"
-uuid = { version = "1.1.2", features = ["v4"] }
+assert_cmd.workspace = true
+predicates.workspace = true
+uuid.workspace = true
 
 [dependencies]
 xpanda = { path = "../xpanda" }
-clap = { version = "4.0.2", features = ["derive"] }
+clap.workspace = true

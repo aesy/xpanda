@@ -423,20 +423,21 @@ fn missing_close_brace() {
 }
 
 #[test]
-fn unexpected_token() {
+fn default_with_colon_text() {
     let mut named_vars = HashMap::new();
     named_vars.insert(String::from("VAR"), String::from("woop"));
     let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
     let input = "${VAR-:def}";
 
-    assert_eq!(
-        xpanda.expand(input),
-        Err(Error {
-            message: String::from("Unexpected token ':'"),
-            line: 1,
-            col: 7
-        })
-    );
+    assert_eq!(xpanda.expand(input), Ok(String::from("woop")));
+}
+
+#[test]
+fn default_with_colon_text_unset() {
+    let xpanda = Xpanda::default();
+    let input = "${VAR-:def}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from(":def")));
 }
 
 #[test]
@@ -547,6 +548,52 @@ fn reverse_case_all() {
 }
 
 #[test]
+fn substring() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR:2:4}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("op w")));
+}
+
+#[test]
+fn substring_no_length() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR:4}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from(" woop")));
+}
+
+#[test]
+fn substring_negative_length() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+    let input = "${VAR:1:-1}";
+
+    assert_eq!(xpanda.expand(input), Ok(String::from("oop woo")));
+}
+
+#[test]
+fn substring_negative_offset() {
+    let mut named_vars = HashMap::new();
+    named_vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(named_vars).build();
+
+    let input = "${VAR:(-3)}";
+    assert_eq!(xpanda.expand(input), Ok(String::from("oop")));
+
+    let input = "${VAR: -3}";
+    assert_eq!(xpanda.expand(input), Ok(String::from("oop")));
+
+    let input = "${VAR: -3: 2}";
+    assert_eq!(xpanda.expand(input), Ok(String::from("oo")));
+}
+
+#[test]
 fn syntax_error() {
     let mut named_vars = HashMap::new();
     named_vars.insert(String::from("VAR"), String::from("wOoP"));
@@ -571,9 +618,9 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${VAR "),
         Err(Error {
-            message: String::from("Invalid param, unexpected token \" \""),
+            message: String::from("Invalid param, unexpected EOF"),
             line: 1,
-            col: 6,
+            col: 7,
         })
     );
     assert_eq!(
@@ -585,11 +632,343 @@ fn syntax_error() {
         })
     );
     assert_eq!(
-        xpanda.expand("${VAR-:def}"),
+        xpanda.expand("${VAR:1:a}"),
         Err(Error {
-            message: String::from("Unexpected token ':'"),
+            message: String::from("Invalid number: \"a\""),
             line: 1,
-            col: 7,
+            col: 10,
         })
     );
+}
+
+#[test]
+fn prefix_removal_lazy() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("aaabbbccc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#a*b}"), Ok(String::from("bbccc")));
+}
+
+#[test]
+fn prefix_removal_greedy() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("aaabbbccc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR##a*b}"), Ok(String::from("ccc")));
+}
+
+#[test]
+fn prefix_removal_no_match() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("hello"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#xyz}"), Ok(String::from("hello")));
+}
+
+#[test]
+fn suffix_removal_lazy() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("aaabbbccc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR%b*c}"), Ok(String::from("aaabb")));
+}
+
+#[test]
+fn suffix_removal_greedy() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("aaabbbccc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR%%b*c}"), Ok(String::from("aaa")));
+}
+
+#[test]
+fn suffix_removal_path_extension() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("FILE"), String::from("photo.tar.gz"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${FILE%.*}"), Ok(String::from("photo.tar")));
+    assert_eq!(xpanda.expand("${FILE%%.*}"), Ok(String::from("photo")));
+}
+
+#[test]
+fn prefix_removal_path_basename() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("PATH"), String::from("/usr/local/bin/xpanda"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${PATH##*/}"), Ok(String::from("xpanda")));
+}
+
+#[test]
+fn replace_first() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("foo bar foo"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${VAR/foo/baz}"),
+        Ok(String::from("baz bar foo"))
+    );
+}
+
+#[test]
+fn replace_all() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("foo bar foo"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${VAR//foo/baz}"),
+        Ok(String::from("baz bar baz"))
+    );
+}
+
+#[test]
+fn replace_with_glob() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("foo123bar"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR/[0-9]*/X}"), Ok(String::from("fooX")));
+}
+
+#[test]
+fn replace_empty_replacement_deletes() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("foo bar"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR// /}"), Ok(String::from("foobar")));
+}
+
+#[test]
+fn replace_inline_param() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("hello world"));
+    vars.insert(String::from("NEEDLE"), String::from("world"));
+    vars.insert(String::from("REPL"), String::from("rust"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${VAR/$NEEDLE/$REPL}"),
+        Ok(String::from("hello rust"))
+    );
+}
+
+#[test]
+fn quoted_default_with_specials() {
+    let xpanda = Xpanda::default();
+    assert_eq!(xpanda.expand("${VAR-\"a: b\"}"), Ok(String::from("a: b")));
+}
+
+#[test]
+fn single_quoted_default_suppresses_expansion() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("X"), String::from("expanded"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR-'$X'}"), Ok(String::from("$X")));
+}
+
+#[test]
+fn double_quoted_default_expands() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("X"), String::from("expanded"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR-\"$X\"}"), Ok(String::from("expanded")));
+}
+
+#[test]
+fn quoted_glob_is_literal() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("*xyz"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#\"*\"}"), Ok(String::from("xyz")));
+}
+
+#[test]
+fn inline_param_in_default() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("OTHER"), String::from("X"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${VAR-pre$OTHER post}"),
+        Ok(String::from("preX post"))
+    );
+}
+
+#[test]
+fn interpolated_error_message() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("WHAT"), String::from("authentication"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${MISSING?missing $WHAT}"),
+        Err(Error {
+            message: String::from("missing authentication"),
+            line: 1,
+            col: 1,
+        })
+    );
+}
+
+#[test]
+fn inline_param_in_alt() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("set"));
+    vars.insert(String::from("ALT"), String::from("alt-value"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(
+        xpanda.expand("${VAR+pre-$ALT-post}"),
+        Ok(String::from("pre-alt-value-post"))
+    );
+}
+
+#[test]
+fn substring_paren_positive() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR:(2):(4)}"), Ok(String::from("op w")));
+}
+
+#[test]
+fn substring_paren_with_spaces() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("woop woop"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR:( -3 ):( 2 )}"), Ok(String::from("oo")));
+}
+
+#[test]
+fn arity_none() {
+    let xpanda = Xpanda::default();
+    assert_eq!(xpanda.expand("${#}"), Ok(String::from("0")));
+}
+
+#[test]
+fn arity_multiple() {
+    let vars = vec![String::from("a"), String::from("b"), String::from("c")];
+    let xpanda = Xpanda::builder().with_positional_vars(vars).build();
+    assert_eq!(xpanda.expand("${#}"), Ok(String::from("3")));
+}
+
+#[test]
+fn arity_in_text() {
+    let vars = vec![String::from("only")];
+    let xpanda = Xpanda::builder().with_positional_vars(vars).build();
+    assert_eq!(xpanda.expand("got ${#} arg"), Ok(String::from("got 1 arg")));
+}
+
+#[test]
+fn indirect_ref_hit() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("NAME"), String::from("TARGET"));
+    vars.insert(String::from("TARGET"), String::from("hit"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${!NAME}"), Ok(String::from("hit")));
+}
+
+#[test]
+fn indirect_ref_target_unset() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("NAME"), String::from("MISSING"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${!NAME}"), Ok(String::new()));
+}
+
+#[test]
+fn indirect_ref_missing_no_unset() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    assert!(xpanda.expand("${!NAME}").is_err());
+}
+
+#[test]
+fn dollar_escape_top_level() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("value"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("$$VAR"), Ok(String::from("$VAR")));
+    assert_eq!(xpanda.expand("$${VAR}"), Ok(String::from("${VAR}")));
+    assert_eq!(
+        xpanda.expand("pre $$VAR post"),
+        Ok(String::from("pre $VAR post"))
+    );
+}
+
+#[test]
+fn dollar_escape_in_default_body() {
+    let xpanda = Xpanda::default();
+    assert_eq!(xpanda.expand("${VAR-$$text}"), Ok(String::from("$text")));
+}
+
+#[test]
+fn whitespace_in_braces() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${ VAR }"), Ok(String::from("woop")));
+    assert_eq!(xpanda.expand("${VAR }"), Ok(String::from("woop")));
+    assert_eq!(xpanda.expand("${ VAR}"), Ok(String::from("woop")));
+}
+
+#[test]
+fn whitespace_in_default_body_is_data() {
+    let xpanda = Xpanda::default();
+    assert_eq!(xpanda.expand("${VAR-  foo  }"), Ok(String::from("  foo  ")));
+}
+
+#[test]
+fn no_unset_substring() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    assert!(xpanda.expand("${VAR:2}").is_err());
+    assert!(xpanda.expand("${VAR:2:4}").is_err());
+}
+
+#[test]
+fn no_unset_prefix_removal() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    assert!(xpanda.expand("${VAR#*e}").is_err());
+    assert!(xpanda.expand("${VAR##*e}").is_err());
+}
+
+#[test]
+fn no_unset_suffix_removal() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    assert!(xpanda.expand("${VAR%e*}").is_err());
+    assert!(xpanda.expand("${VAR%%e*}").is_err());
+}
+
+#[test]
+fn no_unset_replace() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    assert!(xpanda.expand("${VAR/a/b}").is_err());
+    assert!(xpanda.expand("${VAR//a/b}").is_err());
+}
+
+#[test]
+fn glob_question_mark() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("abc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#?}"), Ok(String::from("bc")));
+}
+
+#[test]
+fn glob_character_class() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("abc"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#[abc]}"), Ok(String::from("bc")));
+    assert_eq!(xpanda.expand("${VAR#[xyz]}"), Ok(String::from("abc")));
+}
+
+#[test]
+fn glob_range() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("m"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand("${VAR#[a-z]}"), Ok(String::new()));
+    assert_eq!(xpanda.expand("${VAR#[A-Z]}"), Ok(String::from("m")));
+}
+
+#[test]
+fn glob_backslash_escape() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("*rest"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+    assert_eq!(xpanda.expand(r"${VAR#\*}"), Ok(String::from("rest")));
 }
