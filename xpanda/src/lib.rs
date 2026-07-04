@@ -323,10 +323,10 @@ impl Xpanda {
     /// let xpanda = Xpanda::builder().with_positional_vars(Vec::new()).build();
     /// ```
     ///
-    /// Positional variables can be referenced using their index (starting at
-    /// 1) - for example, `$1` references the first positional variable, `$2`
-    ///      the second, and so on. `$0` is a space-concatenated string of all
-    ///      positional variables.
+    /// Positional variables can be referenced using their index (starting at 1)
+    /// - for example, `$1` references the first positional variable, `$2` the
+    ///   second, and so on. `$0` is a space-concatenated string of all
+    ///   positional variables.
     ///
     /// Here are some examples and their output:
     ///
