@@ -11,7 +11,7 @@ exclude = [
 [workspace.package]
 version = "0.2.0"
 edition = "2024"
-rust-version = "1.96.0"
+rust-version = "1.86.0"
 authors = ["Isak Wertwein <isak.wertwein@gmail.com>"]
 
 [workspace.dependencies]
