@@ -16,24 +16,33 @@ standard output or a file with all variables expanded/substituted using the
 provided variables.
 
 Variables can appear in the input in any of the following forms:
-$VAR                substituted with the corresponding value for `VAR` if set, otherwise ` `.
-${VAR}              substituted with the corresponding value for `VAR` if set, otherwise ` `.
-${VAR-default}      substituted with the corresponding value for `VAR` if set, otherwise `default`.
-${VAR:-default}     substituted with the corresponding value for `VAR` if set and non-empty, otherwise `default`.
-${VAR+alternative}  substituted with `alternative` if the corresponding value for `VAR` is set, otherwise ` `.
-${VAR:+alternative} substituted with `alternative` if the corresponding value for `VAR` is set and non-empty, otherwise ` `.
-${VAR?}             substituted with the corresponding value for `VAR` if set, otherwise causes the program to exit with a status code of 1 and an error printed to standard error.
-${VAR?error}        substituted with the corresponding value for `VAR` if set, otherwise causes the program to exit with a status code of 1 and `error` printed to standard error.
-${VAR?error}        substituted with the corresponding value for `VAR` if set and non-empty, otherwise causes the program to exit with a status code of 1 and `error` printed to standard error.
-${#VAR}             substituted with the length of the corresponding value for `VAR` if set, otherwise `0`.
-${#}                substituted with a number of positional variables.
-${!VAR}             substituted with the value of the variable named by the value of `VAR`.
-${VAR^}             substituted with the value of the variable named by the value of `VAR`, with the first character uppercased.
-${VAR^^}            substituted with the value of the variable named by the value of `VAR`, with all characters uppercased.
-${VAR,}             substituted with the value of the variable named by the value of `VAR`, with the first character lowercased.
-${VAR,,}            substituted with the value of the variable named by the value of `VAR`, with all characters lowercased.
-${VAR~}             substituted with the value of the variable named by the value of `VAR`, with the casing of the first character reversed.
-${VAR~~}            substituted with the value of the variable named by the value of `VAR`, with the casing of all characters reversed.
+$VAR                   substituted with the corresponding value for `VAR` if set, otherwise ` `.
+${VAR}                 substituted with the corresponding value for `VAR` if set, otherwise ` `.
+${VAR-default}         substituted with the corresponding value for `VAR` if set, otherwise `default`.
+${VAR:-default}        substituted with the corresponding value for `VAR` if set and non-empty, otherwise `default`.
+${VAR+alternative}     substituted with `alternative` if the corresponding value for `VAR` is set, otherwise ` `.
+${VAR:+alternative}    substituted with `alternative` if the corresponding value for `VAR` is set and non-empty, otherwise ` `.
+${VAR?}                substituted with the corresponding value for `VAR` if set, otherwise causes the program to exit with a status code of 1 and an error printed to standard error.
+${VAR?error}           substituted with the corresponding value for `VAR` if set, otherwise causes the program to exit with a status code of 1 and `error` printed to standard error.
+${VAR:?}               substituted with the corresponding value for `VAR` if set and non-empty, otherwise causes the program to exit with a status code of 1 and an error printed to standard error.
+${VAR:?error}          substituted with the corresponding value for `VAR` if set and non-empty, otherwise causes the program to exit with a status code of 1 and `error` printed to standard error.
+${#VAR}                substituted with the length of the corresponding value for `VAR` if set, otherwise `0`.
+${#}                   substituted with a number of positional variables.
+${!VAR}                substituted with the value of the variable named by the value of `VAR`.
+${VAR:offset}          substituted with the value of `VAR` from character index `offset` to the end, otherwise ` `. A negative `offset` must be written as `${VAR: -1}` or `${VAR:(-1)}`.
+${VAR:offset:length}   substituted with `length` characters of `VAR` from character index `offset`, otherwise ` `.
+${VAR^}                substituted with the corresponding value for `VAR`, with the first character uppercased.
+${VAR^^}               substituted with the corresponding value for `VAR`, with all characters uppercased.
+${VAR,}                substituted with the corresponding value for `VAR`, with the first character lowercased.
+${VAR,,}               substituted with the corresponding value for `VAR`, with all characters lowercased.
+${VAR~}                substituted with the corresponding value for `VAR`, with the casing of the first character reversed.
+${VAR~~}               substituted with the corresponding value for `VAR`, with the casing of all characters reversed.
+${VAR#pattern}         substituted with the value of `VAR` with the shortest prefix matching the glob `pattern` removed.
+${VAR##pattern}        substituted with the value of `VAR` with the longest prefix matching the glob `pattern` removed.
+${VAR%pattern}         substituted with the value of `VAR` with the shortest suffix matching the glob `pattern` removed.
+${VAR%%pattern}        substituted with the value of `VAR` with the longest suffix matching the glob `pattern` removed.
+${VAR/pattern/repl}    substituted with the value of `VAR` with the first match of the glob `pattern` replaced with `repl`.
+${VAR//pattern/repl}   substituted with the value of `VAR` with all matches of the glob `pattern` replaced with `repl`.
 
 `VAR` above is a named variable. Positional variables are also supported and
 are passed as trailing arguments to the program (see the examples). They can
@@ -47,16 +56,15 @@ the variable and exit the program with a status code of 1.
 
 EXAMPLES:
 `echo '$VAR' | xpanda -v VAR=value`   substitute `$VAR` with `value` using a named variable argument.
-`VAR=value echo '$VAR' | xpanda`      substitute `$VAR` with `value` using an environment variable.
-`echo '$1' | xpanda value`            substitute `$1` with `value` using a positional variable argument.
-`xpanda < some_file`                  output a copy of `some_file` with variables substituted with environment
-variables. `xpanda -f var_file < some_file`      output a copy of `some_file` with variables substituted with
-variables from `var_file`. `xpanda -v VAR=value < some_file` output  a copy of `some_file` with `$VAR`
-substituted with `value` using `-v`.
+`echo '$VAR' | VAR=value xpanda`      substitute `$VAR` with `value` using an environment variable.
+`echo '$1' | xpanda -- value`         substitute `$1` with `value` using a positional variable argument.
+`xpanda < some_file`                  output a copy of `some_file` with variables substituted with environment variables.
+`xpanda -f var_file < some_file`      output a copy of `some_file` with variables substituted with variables from `var_file`.
+`xpanda -v VAR=value < some_file`     output a copy of `some_file` with `$VAR` substituted with `value` using `-v`.
 
-The given input must be ASCII or UTF-8 encoded. Output is UTF-8 encoded and
-may be written in chunks. If no variables are provided, then values are
-sourced from environment variables.
+The given input must be ASCII or UTF-8 encoded and is read in full before any
+output is written. Output is UTF-8 encoded. If no variables are provided, then
+values are sourced from environment variables.
 
 Usage: xpanda-cli [OPTIONS] [-- [POSITIONAL_VARS]...]
 

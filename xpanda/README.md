@@ -42,4 +42,4 @@ cargo add xpanda
 
 ## MSRV
 
-The Minimum Supported Rust Version is currently `1.80.0`.
+The Minimum Supported Rust Version is currently `1.86.0`.

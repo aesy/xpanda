@@ -5,11 +5,11 @@ The following patterns/rules are supported:
 | Pattern                  | Description                                                            |
 |--------------------------|:-----------------------------------------------------------------------|
 | `$param`                 | `$param` if set, else empty                                            |
-| `${param}`               | `$param` if set and non-empty, else empty                              |
+| `${param}`               | `$param` if set, else empty                                            |
 | `${param-pattern}`       | `$param` if set, else `pattern`                                        |
 | `${param:-pattern}`      | `$param` if set and non-empty, else `pattern`                          |
-| `${param+pattern}`       | `pattern` if `param` is set and non-empty, else empty                  |
-| `${param:+pattern}`      | `pattern` if `param` is set, else empty                                |
+| `${param+pattern}`       | `pattern` if `param` is set, else empty                                |
+| `${param:+pattern}`      | `pattern` if `param` is set and non-empty, else empty                  |
 | `${param?text}`          | `$param` if set, else exit with error `text`                           |
 | `${param:?text}`         | `$param` if set and non-empty, else exit with error `text`             |
 | `${#param}`              | Character length of `$param` if set, else `0`                          |
@@ -91,10 +91,10 @@ Default/Alternative values can also be patterns:
 
 Error messages can be omitted, in which case a default message will be used:
 
-| Pattern    |                      VAR unset |                         VAR="" |
-|------------|-------------------------------:|-------------------------------:|
-| `${VAR?}`  |          error: `VAR is unset` |                            ` ` |
-| `${VAR:?}` | error: `VAR is unset or empty` | error: `VAR is unset or empty` |
+| Pattern    |                        VAR unset |                           VAR="" |
+|------------|---------------------------------:|---------------------------------:|
+| `${VAR?}`  |          error: `'VAR' is unset` |                              ` ` |
+| `${VAR:?}` | error: `'VAR' is unset or empty` | error: `'VAR' is unset or empty` |
 
 Note that writing `$VAR?` (without braces) is probably a mistake as the question mark is then not evaluated as part of
 the pattern.
@@ -103,13 +103,17 @@ the pattern.
 
 `#`, `##`, `%`, `%%`, `/` and `//` accept a glob pattern. Supported metacharacters:
 
-| Pattern | Description                               |
-|---------|-------------------------------------------|
-| `*`     | matches any (possibly empty) sequence     |
-| `?`     | matches exactly one character             |
-| `[abc]` | matches any single character in the class |
-| `[a-z]` | matches any single character in the range |
-| `\*`    | backslash escapes the next metacharacter  |
+| Pattern  | Description                                   |
+|----------|-----------------------------------------------|
+| `*`      | matches any (possibly empty) sequence         |
+| `?`      | matches exactly one character                 |
+| `[abc]`  | matches any single character in the class     |
+| `[a-z]`  | matches any single character in the range     |
+| `[!abc]` | matches any single character not in the class |
+| `[^abc]` | same as `[!abc]`                              |
+| `\*`     | backslash escapes the next metacharacter      |
+
+A `[` without a closing `]` matches a literal `[`.
 
 ## Substring offsets
 
@@ -124,11 +128,21 @@ with `-` to disambiguate from `${param:-default}`. Either form works:
 
 A space between `:` and `-` is also a valid disambiguator.
 
+Offsets and lengths count characters, not bytes. A negative offset that reaches past the start of the value yields an
+empty string, and an omitted length (`${VAR:1:}`) means a length of 0.
+
 ## Whitespace in braces
 
 Whitespace inside `${ ... }` is significant only as data. The parser trims spaces right after the opening `{` and right
-after an identifier that follows the opening `{`. So `${ VAR }` is the same as `${VAR}`, but `${VAR-  foo  }` defaults
-to `"  foo  "`.
+after the identifier at the start of the param. So `${ VAR }` is the same as `${VAR}` and `${ #VAR }` is the same as
+`${#VAR}`, but `${VAR-  foo  }` defaults to `"  foo  "`.
+
+## Braces and nesting
+
+Only `${` opens a param. Any other `{` is plain text and the first `}` closes the param, so `${VAR-{x}}` yields `{x}` if
+`VAR` is unset. Bodies may span multiple lines.
+
+Params can be nested at most 256 levels deep. Going deeper is an error.
 
 ## Quoted patterns
 

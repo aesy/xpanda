@@ -52,7 +52,7 @@ Also, check out the readme of the submodule that you are interested in:
 
 #### Prerequisites
 
-* [Rust Stable 1.96.0+](https://www.rust-lang.org/tools/install)
+* [Rust Stable 1.86.0+](https://www.rust-lang.org/tools/install)
 * [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 
 #### Build

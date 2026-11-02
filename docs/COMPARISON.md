@@ -4,10 +4,10 @@ This document lists which patterns from other programs that are supported/unsupp
 
 ## GNU envsubst
 
-| Pattern    | Description                               |    Status |
-|------------|:------------------------------------------|----------:|
-| `$param`   | `$param` if set, else empty               | SUPPORTED |
-| `${param}` | `$param` if set and non-empty, else empty | SUPPORTED |
+| Pattern    | Description                 |    Status |
+|------------|:----------------------------|----------:|
+| `$param`   | `$param` if set, else empty | SUPPORTED |
+| `${param}` | `$param` if set, else empty | SUPPORTED |
 
 ## POSIX shell
 
@@ -46,4 +46,4 @@ This document lists which patterns from other programs that are supported/unsupp
 
 Arrays such as `$@` are not supported.
 
-`$0` is equivalent with `$*`.
+`$0` is equivalent with Bash's `$*`, which is itself not supported.
