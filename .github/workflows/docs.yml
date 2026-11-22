@@ -19,20 +19,38 @@ env:
 
 jobs:
   build:
-    name: Build documentation
+    name: Build landing page and documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
       - name: Build documentation
         run: cargo doc --package xpanda --no-deps --all-features
-      - name: Redirect site root to crate docs
-        run: echo '<meta http-equiv="refresh" content="0; url=xpanda/index.html">' > target/doc/index.html
+      - name: Install landing page dependencies
+        working-directory: site
+        run: npm ci
+      # The site is served from /xpanda/, so asset URLs need that prefix.
+      - name: Build landing page
+        working-directory: site
+        run: npm run build -- --base=/xpanda/
+      # The landing page is the site root and the crate docs live under /xpanda/docs/.
+      # rustdoc writes no index page on stable, so /docs/ redirects to the crate.
+      - name: Combine pages
+        run: |
+          mkdir -p pages/docs
+          cp -r site/dist/. pages/
+          cp -r target/doc/. pages/docs/
+          echo '<!doctype html><meta http-equiv="refresh" content="0; url=xpanda/"><link rel="canonical" href="xpanda/">' > pages/docs/index.html
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: target/doc
+          path: pages
 
   deploy:
     name: Deploy to GitHub Pages

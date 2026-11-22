@@ -1,6 +1,6 @@
 # Xpanda Lib
 
-### [API Reference](https://aesy.github.io/xpanda/xpanda)
+### [API Reference](https://aesy.github.io/xpanda/docs/xpanda/)
 
 ## Usage
 
@@ -30,7 +30,7 @@ according to the [pattern rules](../docs/PATTERNS.md). For example:
 assert_eq!(xpanda.expand("${1:-default}"), Ok(String::from("default")));
 ```
 
-The [API Reference](https://aesy.github.io/xpanda/xpanda) provides more details.
+The [API Reference](https://aesy.github.io/xpanda/docs/xpanda/) provides more details.
 
 ## Installation
 

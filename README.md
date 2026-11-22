@@ -37,7 +37,7 @@ using Bash's [`eval`](https://www.gnu.org/software/bash/manual/html_node/Bourne-
 wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Windows/Linux CLI tool and a
 Rust library.
 
-[See how it compares to other programs](./docs/COMPARISON.md).
+[Try it out on the website](https://aesy.github.io/xpanda/) or [see how it compares to other programs](./docs/COMPARISON.md).
 
 ## Usage
 
