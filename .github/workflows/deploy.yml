@@ -1,0 +1,18 @@
+name: Deploy
+
+on:
+  push:
+    branches: [site]
+
+permissions:
+  actions: write
+
+jobs:
+  dispatch:
+    name: Trigger documentation build on main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch workflow
+        run: gh workflow run docs.yml --repo "${{ github.repository }}" --ref main
+        env:
+          GH_TOKEN: ${{ github.token }}

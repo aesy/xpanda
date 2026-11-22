@@ -1,0 +1,129 @@
+{
+  "meta": {
+    "title": "Xpanda: shell expansion, minus the shell",
+    "description": "Substitute variables in text with the parameter expansion you know from Bash, without running any code. A single binary for Linux, macOS and Windows, and a Rust crate."
+  },
+  "nav": {
+    "label": "Main",
+    "home": "Xpanda home",
+    "patterns": "Patterns",
+    "usage": "CLI and library",
+    "docs": "Docs",
+    "github": "GitHub"
+  },
+  "hero": {
+    "titleStart": "Shell expansion,",
+    "titleEnd": "minus the shell.",
+    "lede": "Xpanda substitutes variables in text using the parameter expansion you already know from Bash. It does more than <code>envsubst</code> and never runs code like <code>eval</code> would. It ships as a single native binary for Linux, macOS and Windows, and as a Rust crate with zero dependencies.",
+    "download": "Download the CLI",
+    "docs": "Read the API docs",
+    "copy": "Copy",
+    "copied": "Copied",
+    "license": "MIT licensed",
+    "msrv": "MSRV {{version}}",
+    "forms": "{{count}} expansion forms"
+  },
+  "demo": {
+    "label": "Live demo",
+    "caption": "Try it, everything runs in your browser",
+    "noUnset": "no unset",
+    "template": "Template",
+    "variables": "Variables",
+    "output": "Output",
+    "hint": "Try deleting <code>HOST</code> from the variables, or setting <code>PORT=443</code>."
+  },
+  "fit": {
+    "title": "More than envsubst. Less than a template engine. Never eval.",
+    "intro": "Most config templating needs defaults, required values and a little string trimming. Xpanda covers that with syntax your team already reads, and it can't run a command no matter what ends up in the input.",
+    "forms_one": "{{count}} form",
+    "forms_other": "{{count}} forms",
+    "everything": "everything",
+    "envsubst": {
+      "body": "Substitutes <code>$VAR</code> and <code>${VAR}</code>. No defaults, so a missing variable silently becomes an empty string.",
+      "verdict": "Safe, but too limited"
+    },
+    "xpanda": {
+      "body": "Defaults, alternatives, required values, length, indirection, substrings, case changes, glob trimming and replacement. Everything from POSIX and Bash expansion that makes sense outside a shell.",
+      "verdict": "Safe, and enough"
+    },
+    "eval": {
+      "body": "Expands every form, including <code>$(...)</code> command substitution. Any template, or any value inside one, <danger>can run arbitrary commands</danger>.",
+      "result": "runs whatever it finds",
+      "verdict": "Powerful, and dangerous"
+    }
+  },
+  "patterns": {
+    "title": "Every form, evaluated live.",
+    "intro": "Change the value of <code>VAR</code> and each result below is computed again. Glob patterns support <code>*</code>, <code>?</code> and character classes.",
+    "unset": "unset",
+    "noUnset": "-u (no unset)",
+    "empty": "(empty)",
+    "error": "error",
+    "forms_one": "{{count}} form",
+    "forms_other": "{{count}} forms",
+    "groups": {
+      "plain": "Plain",
+      "defaults": "Defaults and errors",
+      "length": "Length and indirection",
+      "substrings": "Substrings",
+      "case": "Case",
+      "trim": "Trim and replace"
+    },
+    "rows": {
+      "simple": "Value if set, else empty",
+      "braced": "Value if set, else empty",
+      "default": "Value if set, else default",
+      "defaultEmpty": "Value if set and non-empty, else default",
+      "alt": "alt if set, else empty",
+      "altEmpty": "alt if set and non-empty, else empty",
+      "error": "Value if set, else fail with the message",
+      "errorEmpty": "Value if set and non-empty, else fail",
+      "length": "Character length, 0 if unset",
+      "ref": "Value of the variable VAR names",
+      "count": "Number of positional variables",
+      "offset": "From index 2 to the end",
+      "offsetLength": "4 characters from index 2",
+      "negative": "Last 3 characters",
+      "upperFirst": "First character uppercased",
+      "upperAll": "All characters uppercased",
+      "lowerFirst": "First character lowercased",
+      "lowerAll": "All characters lowercased",
+      "reverseFirst": "First character's case reversed",
+      "reverseAll": "Every character's case reversed",
+      "prefixShort": "Shortest matching prefix removed",
+      "prefixLong": "Longest matching prefix removed",
+      "suffixShort": "Shortest matching suffix removed",
+      "suffixLong": "Longest matching suffix removed",
+      "replaceFirst": "First match replaced",
+      "replaceAll": "Every match replaced"
+    }
+  },
+  "usage": {
+    "title": "In your pipeline, or in your code.",
+    "cli": {
+      "title": "CLI",
+      "body": "Reads a file or standard input, writes to standard output or a file. Values come from the environment, a var file, flags or positional arguments.",
+      "comments": {
+        "env": "environment variables",
+        "file": "a var file, written to a new file",
+        "positional": "positional variables"
+      },
+      "flags": {
+        "var": "Set a named variable",
+        "varFile": "Read variables from a file",
+        "envVars": "Also read the environment",
+        "noUnset": "Fail on unset variables"
+      }
+    },
+    "library": {
+      "title": "Library",
+      "body": "One struct, one method. Build it with the variables you want available and call <code>expand</code>. Errors come back as a typed <code>Error</code>, never a panic."
+    }
+  },
+  "footer": {
+    "crates": "crates.io",
+    "docs": "docs.rs",
+    "comparison": "Comparison",
+    "license": "MIT License"
+  }
+}
