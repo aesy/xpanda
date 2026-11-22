@@ -1,3 +1,4 @@
+use crate::position::Position;
 use std::borrow::Cow;
 use std::fmt::{self, Display, Formatter};
 
@@ -96,8 +97,14 @@ pub enum Param<'a> {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Node<'a> {
-    Text { value: Cow<'a, str>, literal: bool },
-    Param(Param<'a>),
+    Text {
+        value: Cow<'a, str>,
+        literal: bool,
+    },
+    Param {
+        param: Param<'a>,
+        position: Position,
+    },
 }
 
 impl<'a> Node<'a> {

@@ -6,8 +6,9 @@ use std::borrow::Cow;
 pub struct Lexer<'a> {
     reader: StrRead<'a>,
     previous_token: Option<Token<'a>>,
+    after_prefix_operator: bool,
     nesting_level: usize,
-    in_double_quote: bool,
+    double_quote_levels: Vec<usize>,
 }
 
 impl<'a> Lexer<'a> {
@@ -15,16 +16,23 @@ impl<'a> Lexer<'a> {
         Self {
             reader: StrRead::new(source),
             previous_token: None,
+            after_prefix_operator: false,
             nesting_level: 0,
-            in_double_quote: false,
+            double_quote_levels: Vec::new(),
         }
     }
 
-    pub const fn into_iter(mut self) -> IterMut<'a> {
+    pub const fn into_iter(self) -> IterMut<'a> {
         IterMut::new(self)
     }
 
-    pub fn next_token(&mut self) -> Option<(Token<'a>, Position)> {
+    /// Returns the next token along with its start and end positions.
+    pub fn next_token(&mut self) -> Option<(Token<'a>, Position, Position)> {
+        if self.previous_token == Some(Token::OpenBrace) {
+            self.reader.consume_while(|c| c == ' ');
+        }
+
+        let start = self.reader.position().clone();
         let is_param = self.nesting_level > 0 || self.previous_token == Some(Token::DollarSign);
 
         let token = if is_param {
@@ -46,9 +54,11 @@ impl<'a> Lexer<'a> {
             _ => self.nesting_level,
         };
 
+        self.after_prefix_operator = self.previous_token == Some(Token::OpenBrace)
+            && matches!(token, Some(Token::PoundSign | Token::ExclamationMark));
         self.previous_token.clone_from(&token);
 
-        token.map(|token| (token, self.reader.position().clone()))
+        token.map(|token| (token, start, self.reader.position().clone()))
     }
 
     fn read_text(&mut self) -> Option<Token<'a>> {
@@ -84,18 +94,18 @@ impl<'a> Lexer<'a> {
             return Some(token);
         }
 
-        let in_brackets = matches!(self.previous_token, Some(Token::OpenBrace));
-
-        if in_brackets {
-            self.reader.consume_while(|c| c == ' ');
-        }
-
         let next_char = self.reader.peek_char()?;
-        let can_be_identifier = matches!(
-            self.previous_token,
-            Some(Token::DollarSign | Token::OpenBrace | Token::PoundSign | Token::ExclamationMark)
-        );
+        let in_brace_head =
+            self.previous_token == Some(Token::OpenBrace) || self.after_prefix_operator;
+        let can_be_identifier = in_brace_head || self.previous_token == Some(Token::DollarSign);
         let is_escaped = self.reader.peek_count(2) == "$$";
+
+        // Only `${` opens a param. Any other `{` is plain text and doesn't nest, as in
+        // Bash.
+        if next_char == '{' && self.previous_token != Some(Token::DollarSign) {
+            self.reader.consume_char();
+            return Some(Token::Text(Cow::Borrowed("{")));
+        }
 
         if let Some(token) = single_char_token(next_char, is_escaped) {
             self.reader.consume_char();
@@ -116,22 +126,24 @@ impl<'a> Lexer<'a> {
             },
             '"' => {
                 self.reader.consume_char();
-                self.in_double_quote = true;
+                self.double_quote_levels.push(self.nesting_level);
 
                 let text = self.reader.consume_while(|c| c != '"' && c != '$');
 
                 if self.reader.peek_char() == Some('"') {
                     self.reader.consume_char();
-                    self.in_double_quote = false;
+                    self.double_quote_levels.pop();
                 }
 
                 Token::QuotedText(Cow::Borrowed(text))
             },
-            c if can_be_identifier && c.is_numeric() => {
-                let text = self.reader.consume_while(char::is_numeric);
-                let number = text.parse().unwrap_or(0);
+            c if can_be_identifier && c.is_ascii_digit() => {
+                let text = self.reader.consume_while(|c| c.is_ascii_digit());
+                // An index too large to parse can't refer to any provided variable, so it's
+                // unset.
+                let number = text.parse().unwrap_or(usize::MAX);
 
-                if in_brackets {
+                if in_brace_head {
                     self.reader.consume_while(|c| c == ' ');
                 }
 
@@ -142,7 +154,7 @@ impl<'a> Lexer<'a> {
                     .reader
                     .consume_while(|c| c.is_alphanumeric() || c == '_');
 
-                if in_brackets {
+                if in_brace_head {
                     self.reader.consume_while(|c| c == ' ');
                 }
 
@@ -153,9 +165,7 @@ impl<'a> Lexer<'a> {
                     self.reader.consume_char();
                     self.reader.consume_char();
 
-                    let text = self
-                        .reader
-                        .consume_while(|c| !is_brace_operator(c) && c != '\n');
+                    let text = self.reader.consume_while(|c| !is_brace_operator(c));
                     let mut buf = String::with_capacity(1 + text.len());
 
                     buf.push('$');
@@ -164,9 +174,7 @@ impl<'a> Lexer<'a> {
                     return Some(Token::Text(Cow::Owned(buf)));
                 }
 
-                let text = self
-                    .reader
-                    .consume_while(|c| !is_brace_operator(c) && c != '\n');
+                let text = self.reader.consume_while(|c| !is_brace_operator(c));
 
                 if text.is_empty() {
                     return None;
@@ -180,16 +188,8 @@ impl<'a> Lexer<'a> {
     }
 
     fn handle_in_double_quote(&mut self) -> Option<Token<'a>> {
-        let inside_quoted_text = self.in_double_quote
-            && !matches!(
-                self.previous_token,
-                Some(
-                    Token::DollarSign
-                        | Token::OpenBrace
-                        | Token::PoundSign
-                        | Token::ExclamationMark
-                )
-            );
+        let inside_quoted_text = self.double_quote_levels.last() == Some(&self.nesting_level)
+            && self.previous_token != Some(Token::DollarSign);
 
         if !inside_quoted_text {
             return None;
@@ -198,8 +198,13 @@ impl<'a> Lexer<'a> {
         match self.reader.peek_char()? {
             '"' => {
                 self.reader.consume_char();
-                self.in_double_quote = false;
+                self.double_quote_levels.pop();
                 None
+            },
+            '$' if self.reader.peek_count(2) == "$$" => {
+                self.reader.consume_char();
+                self.reader.consume_char();
+                Some(Token::QuotedText(Cow::Borrowed("$")))
             },
             '$' => None,
             _ => {
@@ -266,7 +271,7 @@ impl<'a> IterMut<'a> {
 }
 
 impl<'a> Iterator for IterMut<'a> {
-    type Item = (Token<'a>, Position);
+    type Item = (Token<'a>, Position, Position);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.lexer.next_token()

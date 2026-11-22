@@ -2,13 +2,13 @@
 
 use std::collections::HashMap;
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::io::{BufRead, BufReader, BufWriter, Read, Write};
 use std::path::Path;
 
 /// Tries to read a string in key=value format, returning the key and value as a
 /// tuple (in that order).
 pub fn read_named_arg(arg: &str) -> Result<(String, String), String> {
-    arg.rsplit_once('=')
+    arg.split_once('=')
         .map(|(key, value)| (key.to_string(), value.to_string()))
         .ok_or_else(|| String::from("'=' character missing in key value pair"))
 }
@@ -52,15 +52,13 @@ pub fn read_output_file(path: &Path) -> Result<impl Write + use<>, String> {
         .map_err(|error| format!("Failed to open output file '{}': {}", path.display(), error))
 }
 
-/// Reads the next line from stdin just like [`std::io::Lines::next`] except
-/// that it includes the line ending in the returned string.
-pub fn read_line(buf: &mut impl BufRead) -> Option<Result<String, String>> {
+/// Reads all of the input into a string.
+pub fn read_input(reader: &mut impl Read) -> Result<String, String> {
     let mut string = String::new();
 
-    #[allow(clippy::significant_drop_in_scrutinee)]
-    match buf.read_line(&mut string) {
-        Ok(0) => None,
-        Ok(_) => Some(Ok(string)),
-        Err(error) => Some(Err(format!("Failed to read input: {error}"))),
-    }
+    reader
+        .read_to_string(&mut string)
+        .map_err(|error| format!("Failed to read input: {error}"))?;
+
+    Ok(string)
 }

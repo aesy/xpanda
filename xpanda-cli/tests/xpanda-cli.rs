@@ -1,4 +1,5 @@
 use assert_cmd::Command;
+use predicates::prelude::predicate;
 use predicates::prelude::predicate::str::diff;
 use std::env::temp_dir;
 use std::fs;
@@ -34,7 +35,7 @@ fn no_unset_error() {
         .write_stdin("$VAR")
         .assert()
         .failure()
-        .stderr(diff("1:1 'VAR' is unset"));
+        .stderr(diff("1:1 'VAR' is unset\n"));
 }
 
 #[test]
@@ -56,7 +57,7 @@ fn var_error() {
         .write_stdin("${VAR?msg}")
         .assert()
         .failure()
-        .stderr(diff("1:1 msg"));
+        .stderr(diff("1:1 msg\n"));
 }
 
 #[test]
@@ -66,7 +67,7 @@ fn var_unset_error() {
         .write_stdin("${VAR?}")
         .assert()
         .failure()
-        .stderr(diff("1:1 'VAR' is unset"));
+        .stderr(diff("1:1 'VAR' is unset\n"));
 }
 
 #[test]
@@ -77,7 +78,7 @@ fn var_unset_or_empty_error() {
         .write_stdin("${VAR:?}")
         .assert()
         .failure()
-        .stderr(diff("1:1 'VAR' is unset or empty"));
+        .stderr(diff("1:1 'VAR' is unset or empty\n"));
 }
 
 #[test]
@@ -159,7 +160,7 @@ fn unexpected_eof_error() {
         .write_stdin("${VAR")
         .assert()
         .failure()
-        .stderr(diff("1:6 Invalid param, unexpected EOF"));
+        .stderr(diff("1:6 Invalid param, unexpected EOF\n"));
 }
 
 #[test]
@@ -183,4 +184,81 @@ fn multiline_success() {
         .assert()
         .success()
         .stdout(diff("abcdef\nghijkl"));
+}
+
+#[test]
+fn multiline_param_success() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(["-v", "DEF=def"])
+        .write_stdin("${VAR-a\nb}")
+        .assert()
+        .success()
+        .stdout(diff("a\nb"));
+}
+
+#[test]
+fn error_position_on_later_line() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(["-v", "DEF=def"])
+        .write_stdin("abc\n  ${VAR?msg}")
+        .assert()
+        .failure()
+        .stderr(diff("2:3 msg\n"));
+}
+
+#[test]
+fn named_var_value_with_equals_sign() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(["-v", "VAR=a=b"])
+        .write_stdin("$VAR")
+        .assert()
+        .success()
+        .stdout(diff("a=b"));
+}
+
+#[test]
+fn var_file_value_with_equals_sign() {
+    let mut file = temp_dir();
+    file.push(Uuid::new_v4().to_string() + "-xpanda-test-vars");
+    fs::write(&file, "VAR=a=b").unwrap();
+
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(["-f", file.to_str().unwrap()])
+        .write_stdin("$VAR")
+        .assert()
+        .success()
+        .stdout(diff("a=b"));
+}
+
+#[test]
+#[cfg(target_os = "linux")]
+fn output_write_failure() {
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .args(["-o", "/dev/full"])
+        .args(["-v", "VAR=woop"])
+        .write_stdin("$VAR")
+        .assert()
+        .failure()
+        .stderr(predicate::str::starts_with("Failed to write output"));
+}
+
+#[test]
+#[cfg(unix)]
+fn non_unicode_env_var_is_skipped() {
+    use std::ffi::OsStr;
+    use std::os::unix::ffi::OsStrExt;
+
+    Command::cargo_bin("xpanda-cli")
+        .unwrap()
+        .env("XPANDA_TEST_INVALID", OsStr::from_bytes(b"\xff"))
+        .env("VAR", "woop")
+        .write_stdin("$VAR")
+        .assert()
+        .success()
+        .stdout(diff("woop"));
 }

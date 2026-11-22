@@ -1,18 +1,9 @@
 use crate::str_read::StrRead;
-use std::fmt::{Debug, Display, Formatter};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Error {
-    pub message: String,
+pub enum Error {
+    TrailingBackslash,
 }
-
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.message)
-    }
-}
-
-impl std::error::Error for Error {}
 
 #[derive(Debug, Clone)]
 enum Token {
@@ -21,8 +12,11 @@ enum Token {
     AnyStr,
     // ?
     AnyChar,
-    // [..]
-    AnyOf(Vec<Enclosed>),
+    // [..] | [!..] | [^..]
+    AnyOf {
+        variants: Vec<Enclosed>,
+        negated: bool,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -68,14 +62,23 @@ impl Glob {
                     match reader.consume_char() {
                         Some(escaped) => push_char(&mut tokens, escaped),
                         None => {
-                            return Err(Error {
-                                message: String::from("Trailing backslash in pattern"),
-                            });
+                            return Err(Error::TrailingBackslash);
                         },
                     }
                 },
+                // A `[` that is never closed is an ordinary character, as in Bash.
+                '[' if !pattern[reader.position().index..].contains(']') => {
+                    reader.consume_char();
+                    push_char(&mut tokens, c);
+                },
                 '[' => {
                     reader.consume_char();
+                    let negated = matches!(reader.peek_char(), Some('!' | '^'));
+
+                    if negated {
+                        reader.consume_char();
+                    }
+
                     let mut variants = Vec::new();
 
                     loop {
@@ -84,7 +87,6 @@ impl Glob {
                             Some(c1) => {
                                 reader.consume_char();
                                 if reader.peek_char() == Some('-') {
-                                    let saved_idx = 1;
                                     reader.consume_char();
                                     match reader.peek_char() {
                                         Some(']') | None => {
@@ -96,7 +98,6 @@ impl Glob {
                                             variants.push(Enclosed::Range { from: c1, to: c2 });
                                         },
                                     }
-                                    let _ = saved_idx;
                                 } else {
                                     variants.push(Enclosed::Char(c1));
                                 }
@@ -104,16 +105,8 @@ impl Glob {
                         }
                     }
 
-                    match reader.consume_char() {
-                        Some(']') => {},
-                        _ => {
-                            return Err(Error {
-                                message: String::from("Unterminated character class"),
-                            });
-                        },
-                    }
-
-                    tokens.push(Token::AnyOf(variants));
+                    reader.consume_char();
+                    tokens.push(Token::AnyOf { variants, negated });
                 },
                 _ => {
                     reader.consume_char();
@@ -170,6 +163,12 @@ impl Glob {
     /// pattern with `replacement`. A "match" is the longest substring at the
     /// current scan position that the pattern matches.
     pub fn replace(&self, input: &str, replacement: &str, all_occurrences: bool) -> String {
+        // An empty value has no position to scan, but `*` still matches it. Bash
+        // doesn't treat an empty pattern as a match though.
+        if input.is_empty() && !self.tokens.is_empty() && self.matches(input) {
+            return replacement.to_string();
+        }
+
         let mut out = String::with_capacity(input.len());
         let mut i = 0;
 
@@ -219,66 +218,48 @@ fn pick(lengths: &[usize], greedy: bool) -> Option<usize> {
 /// Return the set of prefix byte-lengths of `input` that the token sequence
 /// fully consumes. An empty result means no match.
 fn match_lengths(tokens: &[Token], input: &str) -> Vec<usize> {
-    if tokens.is_empty() {
-        return vec![0];
+    // Tracking reachable positions instead of backtracking keeps this linear in
+    // the number of tokens. The positions stay sorted and free of duplicates.
+    let mut positions = vec![0];
+
+    for token in tokens {
+        let Some(&first) = positions.first() else {
+            break;
+        };
+
+        positions = match token {
+            Token::AnyStr => (first..=input.len())
+                .filter(|&position| input.is_char_boundary(position))
+                .collect(),
+            _ => positions
+                .iter()
+                .filter_map(|&position| {
+                    single_match_len(token, &input[position..]).map(|len| position + len)
+                })
+                .collect(),
+        };
     }
 
-    let mut results: Vec<usize> = Vec::new();
-    match &tokens[0] {
-        Token::AnyStr => {
-            let mut i = 0;
+    positions
+}
 
-            loop {
-                if input.is_char_boundary(i) {
-                    for j in match_lengths(&tokens[1..], &input[i..]) {
-                        results.push(i + j);
-                    }
-                }
+/// Return the byte-length consumed by a token that matches a fixed number of
+/// characters at the start of `input`, if it matches.
+fn single_match_len(token: &Token, input: &str) -> Option<usize> {
+    match token {
+        Token::AnyStr => None,
+        Token::ExactStr(s) => input.starts_with(s.as_str()).then_some(s.len()),
+        Token::AnyChar => input.chars().next().map(char::len_utf8),
+        Token::AnyOf { variants, negated } => {
+            let c = input.chars().next()?;
+            let matches = variants.iter().any(|v| match v {
+                Enclosed::Char(x) => *x == c,
+                Enclosed::Range { from, to } => *from <= c && c <= *to,
+            });
 
-                if i >= input.len() {
-                    break;
-                }
-
-                i += 1;
-            }
-        },
-        Token::AnyChar => {
-            if let Some(c) = input.chars().next() {
-                let n = c.len_utf8();
-
-                for j in match_lengths(&tokens[1..], &input[n..]) {
-                    results.push(n + j);
-                }
-            }
-        },
-        Token::ExactStr(s) => {
-            if input.starts_with(s.as_str()) {
-                let n = s.len();
-
-                for j in match_lengths(&tokens[1..], &input[n..]) {
-                    results.push(n + j);
-                }
-            }
-        },
-        Token::AnyOf(variants) => {
-            if let Some(c) = input.chars().next() {
-                let matches = variants.iter().any(|v| match v {
-                    Enclosed::Char(x) => *x == c,
-                    Enclosed::Range { from, to } => *from <= c && c <= *to,
-                });
-
-                if matches {
-                    let n = c.len_utf8();
-
-                    for j in match_lengths(&tokens[1..], &input[n..]) {
-                        results.push(n + j);
-                    }
-                }
-            }
+            (matches != *negated).then_some(c.len_utf8())
         },
     }
-
-    results
 }
 
 #[cfg(test)]

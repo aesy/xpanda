@@ -100,7 +100,7 @@ mod tests {
     fn consume_while() {
         let mut reader = StrRead::new("hi!");
         assert_eq!(reader.consume_while(char::is_alphabetic), "hi");
-        assert_eq!(reader.consume_while(|c| true), "!");
-        assert_eq!(reader.consume_while(|c| true), "");
+        assert_eq!(reader.consume_while(|_| true), "!");
+        assert_eq!(reader.consume_while(|_| true), "");
     }
 }

@@ -1,26 +1,34 @@
 use crate::ast::{Ast, Identifier, Modifier, Node, Param};
+use crate::error::ErrorKind;
 use crate::forward_peekable::{ForwardPeekable, IteratorExt};
 use crate::lexer::{self, Lexer};
 use crate::position::Position;
 use crate::token::Token;
 use std::borrow::Cow;
+use std::fmt::Display;
 use std::mem;
+
+// Parsing and evaluation recurse per level, and a stack overflow can't be
+// caught by the caller.
+const MAX_NESTING_DEPTH: usize = 256;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Error {
-    pub message: String,
+    pub kind: ErrorKind,
     pub position: Position,
 }
 
 impl Error {
-    const fn new(message: String, position: Position) -> Self {
-        Self { message, position }
+    const fn new(kind: ErrorKind, position: Position) -> Self {
+        Self { kind, position }
     }
 }
 
 pub struct Parser<'a> {
     iter: ForwardPeekable<lexer::IterMut<'a>>,
     position: Option<Position>,
+    end_position: Position,
+    depth: usize,
 }
 
 impl<'a> Parser<'a> {
@@ -28,6 +36,8 @@ impl<'a> Parser<'a> {
         Self {
             iter: lexer.into_iter().forward_peekable(),
             position: None,
+            end_position: Position::default(),
+            depth: 0,
         }
     }
 
@@ -44,30 +54,34 @@ impl<'a> Parser<'a> {
 
     #[must_use]
     fn peek_token(&mut self) -> Option<&Token<'a>> {
-        self.iter.peek().map(|(token, _)| token)
+        if self.iter.peek().is_none() {
+            self.position = Some(self.end_position.clone());
+        }
+
+        self.iter.peek().map(|(token, ..)| token)
     }
 
     #[must_use]
     fn next_token(&mut self) -> Option<Token<'a>> {
-        if let Some((token, position)) = self.iter.next() {
-            self.position = Some(position);
+        if let Some((token, start, end)) = self.iter.next() {
+            self.position = Some(start);
+            self.end_position = end;
             Some(token)
         } else {
+            self.position = Some(self.end_position.clone());
             None
         }
     }
 
     fn skip_token(&mut self) {
-        self.next_token();
+        let _ = self.next_token();
     }
 
     fn expect_token(&mut self, expected: &Token<'a>) -> Result<(), Error> {
         match self.next_token() {
             Some(ref actual) if actual == expected => Ok(()),
-            Some(unexpected) => {
-                Err(self.create_error(format!("Expected {expected}, found {unexpected}")))
-            },
-            None => Err(self.create_error(format!("Expected {expected}, found EOF"))),
+            Some(unexpected) => Err(self.expected_error(expected, &unexpected)),
+            None => Err(self.expected_error(expected, &"EOF")),
         }
     }
 
@@ -78,24 +92,40 @@ impl<'a> Parser<'a> {
 
                 Ok(Node::text(text))
             },
-            Some(Token::DollarSign) => {
+            Some(Token::DollarSign) => self.parse_param_node(),
+            Some(token) => {
+                let kind = ErrorKind::UnexpectedToken {
+                    token: token.to_string(),
+                };
                 self.skip_token();
 
-                Ok(Node::Param(self.parse_param()?))
+                Err(self.create_error(kind))
             },
-            Some(token) => {
-                let msg = format!("Unexpected token {token}");
-
-                Err(self.create_error(msg))
-            },
-            None => Err(self.create_error("Unexpected EOF")),
+            None => Err(self.create_error(ErrorKind::UnexpectedEof)),
         }
+    }
+
+    fn parse_param_node(&mut self) -> Result<Node<'a>, Error> {
+        self.skip_token();
+
+        let position = self.position.clone().unwrap_or_default();
+        let param = self.parse_param()?;
+
+        Ok(Node::Param { param, position })
     }
 
     fn parse_param(&mut self) -> Result<Param<'a>, Error> {
         match self.peek_token() {
             Some(Token::OpenBrace) => {
                 self.skip_token();
+
+                if self.depth == MAX_NESTING_DEPTH {
+                    return Err(self.create_error(ErrorKind::NestingTooDeep {
+                        max_depth: MAX_NESTING_DEPTH,
+                    }));
+                }
+
+                self.depth += 1;
 
                 let param = match self.peek_token() {
                     Some(Token::PoundSign) => self.parse_len_or_arity_param(),
@@ -107,17 +137,30 @@ impl<'a> Parser<'a> {
                             Some(Token::PoundSign) => self.parse_trim_prefix_param(identifier),
                             Some(Token::Percent) => self.parse_trim_suffix_param(identifier),
                             Some(Token::ForwardSlash) => self.parse_replace_param(identifier),
-                            Some(Token::Caret) => self.parse_uppercase_param(identifier),
-                            Some(Token::Comma) => self.parse_lowercase_param(identifier),
-                            Some(Token::Tilde) => self.parse_reverse_case_param(identifier),
+                            Some(Token::Caret) => {
+                                self.parse_case_param(identifier, &Token::Caret, |all| {
+                                    Modifier::Upper { all }
+                                })
+                            },
+                            Some(Token::Comma) => {
+                                self.parse_case_param(identifier, &Token::Comma, |all| {
+                                    Modifier::Lower { all }
+                                })
+                            },
+                            Some(Token::Tilde) => {
+                                self.parse_case_param(identifier, &Token::Tilde, |all| {
+                                    Modifier::Reverse { all }
+                                })
+                            },
                             Some(_) => self.parse_default_alt_error_or_sub_param(identifier),
-                            _ => Err(self.create_error("Invalid param, unexpected EOF")),
+                            _ => Err(self.create_error(ErrorKind::InvalidParamEof)),
                         }
                     },
-                    None => Err(self.create_error("Expected param, found EOF")),
+                    None => Err(self.expected_error(&"param", &"EOF")),
                 }?;
 
                 self.expect_token(&Token::CloseBrace)?;
+                self.depth -= 1;
 
                 Ok(param)
             },
@@ -133,7 +176,7 @@ impl<'a> Parser<'a> {
             Some(_) => Ok(Param::Length {
                 identifier: self.parse_identifier()?,
             }),
-            None => Err(self.create_error("Expected identifier or close brace, found EOF")),
+            None => Err(self.expected_error(&"identifier or close brace", &"EOF")),
         }
     }
 
@@ -163,19 +206,8 @@ impl<'a> Parser<'a> {
 
         if treat_empty_as_unset && leading_ws {
             self.skip_token();
-            let offset = self.parse_number_maybe_parens()?;
-            let length = if self.peek_token() == Some(&Token::Colon) {
-                self.skip_token();
-                Some(self.parse_number_maybe_parens()?)
-            } else {
-                None
-            };
 
-            return Ok(Param::Sub {
-                identifier,
-                offset,
-                length,
-            });
+            return self.parse_sub_param(identifier);
         }
 
         match self.peek_token() {
@@ -211,26 +243,40 @@ impl<'a> Parser<'a> {
                 modifier: None,
             }),
             Some(Token::Text(_) | Token::OpenParen) if treat_empty_as_unset => {
-                let offset = self.parse_number_maybe_parens()?;
-                let length = if self.peek_token() == Some(&Token::Colon) {
-                    self.skip_token();
-                    Some(self.parse_number_maybe_parens()?)
-                } else {
-                    None
-                };
-
-                Ok(Param::Sub {
-                    identifier,
-                    offset,
-                    length,
-                })
+                self.parse_sub_param(identifier)
             },
             Some(token) => {
-                let msg = format!("Invalid param, unexpected token {token}");
-                Err(self.create_error(msg))
+                let kind = ErrorKind::InvalidParamToken {
+                    token: token.to_string(),
+                };
+                self.skip_token();
+
+                Err(self.create_error(kind))
             },
-            None => Err(self.create_error("Invalid param, unexpected EOF")),
+            None => Err(self.create_error(ErrorKind::InvalidParamEof)),
         }
+    }
+
+    fn parse_sub_param(&mut self, identifier: Identifier<'a>) -> Result<Param<'a>, Error> {
+        let offset = self.parse_number_maybe_parens()?;
+        let length = if self.peek_token() == Some(&Token::Colon) {
+            self.skip_token();
+
+            // Bash treats an omitted length as 0.
+            if self.peek_token() == Some(&Token::CloseBrace) {
+                Some(0)
+            } else {
+                Some(self.parse_number_maybe_parens()?)
+            }
+        } else {
+            None
+        };
+
+        Ok(Param::Sub {
+            identifier,
+            offset,
+            length,
+        })
     }
 
     fn parse_trim_prefix_param(&mut self, identifier: Identifier<'a>) -> Result<Param<'a>, Error> {
@@ -299,10 +345,15 @@ impl<'a> Parser<'a> {
         })
     }
 
-    fn parse_uppercase_param(&mut self, identifier: Identifier<'a>) -> Result<Param<'a>, Error> {
-        self.expect_token(&Token::Caret)?;
+    fn parse_case_param(
+        &mut self,
+        identifier: Identifier<'a>,
+        operator: &Token<'a>,
+        modifier: fn(bool) -> Modifier,
+    ) -> Result<Param<'a>, Error> {
+        self.expect_token(operator)?;
 
-        let all = if self.peek_token() == Some(&Token::Caret) {
+        let all = if self.peek_token() == Some(operator) {
             self.skip_token();
             true
         } else {
@@ -311,39 +362,7 @@ impl<'a> Parser<'a> {
 
         Ok(Param::Simple {
             identifier,
-            modifier: Some(Modifier::Upper { all }),
-        })
-    }
-
-    fn parse_lowercase_param(&mut self, identifier: Identifier<'a>) -> Result<Param<'a>, Error> {
-        self.expect_token(&Token::Comma)?;
-
-        let all = if self.peek_token() == Some(&Token::Comma) {
-            self.skip_token();
-            true
-        } else {
-            false
-        };
-
-        Ok(Param::Simple {
-            identifier,
-            modifier: Some(Modifier::Lower { all }),
-        })
-    }
-
-    fn parse_reverse_case_param(&mut self, identifier: Identifier<'a>) -> Result<Param<'a>, Error> {
-        self.expect_token(&Token::Tilde)?;
-
-        let all = if self.peek_token() == Some(&Token::Tilde) {
-            self.skip_token();
-            true
-        } else {
-            false
-        };
-
-        Ok(Param::Simple {
-            identifier,
-            modifier: Some(Modifier::Reverse { all }),
+            modifier: Some(modifier(all)),
         })
     }
 
@@ -358,7 +377,7 @@ impl<'a> Parser<'a> {
     fn parse_text(&mut self) -> Result<Option<Cow<'a, str>>, Error> {
         match self.next_token() {
             Some(Token::Text(text)) => Ok(Some(text)),
-            Some(token) => Err(self.create_error(format!("Expected text, found {token}"))),
+            Some(token) => Err(self.expected_error(&"text", &token)),
             None => Ok(None),
         }
     }
@@ -367,8 +386,8 @@ impl<'a> Parser<'a> {
         match self.next_token() {
             Some(Token::Identifier(name)) => Ok(Identifier::Named(name)),
             Some(Token::Index(index)) => Ok(Identifier::Indexed(index)),
-            Some(token) => Err(self.create_error(format!("Expected identifier, found {token}"))),
-            None => Err(self.create_error("Expected identifier, found EOF")),
+            Some(token) => Err(self.expected_error(&"identifier", &token)),
+            None => Err(self.expected_error(&"identifier", &"EOF")),
         }
     }
 
@@ -404,10 +423,10 @@ impl<'a> Parser<'a> {
                 let mut buf = sign;
                 buf.push_str(text.trim());
                 buf.parse::<isize>()
-                    .map_err(|_| self.create_error(format!("Invalid number: \"{buf}\"")))
+                    .map_err(|_| self.create_error(ErrorKind::InvalidNumber { value: buf.clone() }))
             },
-            Some(token) => Err(self.create_error(format!("Expected number, found {token}"))),
-            None => Err(self.create_error("Expected number, found EOF")),
+            Some(token) => Err(self.expected_error(&"number", &token)),
+            None => Err(self.expected_error(&"number", &"EOF")),
         }
     }
 
@@ -428,15 +447,14 @@ impl<'a> Parser<'a> {
 
             match peek {
                 None => {
-                    return Err(self.create_error("Unexpected EOF"));
+                    return Err(self.create_error(ErrorKind::UnexpectedEof));
                 },
                 Some(t) if is_terminator(t) => {
                     break;
                 },
                 Some(Token::DollarSign) => {
                     flush_buffers(&mut nodes, &mut text_buf, &mut literal_buf);
-                    self.skip_token();
-                    nodes.push(Node::Param(self.parse_param()?));
+                    nodes.push(self.parse_param_node()?);
                 },
                 Some(Token::QuotedText(_)) => {
                     if !text_buf.is_empty() {
@@ -466,8 +484,15 @@ impl<'a> Parser<'a> {
         Ok(nodes)
     }
 
-    fn create_error(&mut self, msg: impl Into<String>) -> Error {
-        Error::new(msg.into(), self.position.take().unwrap_or_default())
+    fn expected_error(&mut self, expected: &impl Display, found: &impl Display) -> Error {
+        self.create_error(ErrorKind::Expected {
+            expected: expected.to_string(),
+            found: found.to_string(),
+        })
+    }
+
+    fn create_error(&mut self, kind: ErrorKind) -> Error {
+        Error::new(kind, self.position.take().unwrap_or_default())
     }
 }
 

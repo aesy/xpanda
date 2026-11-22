@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use xpanda::{Error, Xpanda};
+use xpanda::{Error, ErrorKind, Xpanda};
 
 #[test]
 fn simple_index() {
@@ -39,7 +39,9 @@ fn simple_index_no_unset() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("'1' is unset"),
+            kind: ErrorKind::Unset {
+                name: String::from("1"),
+            },
             line: 1,
             col: 1
         })
@@ -93,7 +95,9 @@ fn simple_named_no_unset() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("'VAR' is unset"),
+            kind: ErrorKind::Unset {
+                name: String::from("VAR"),
+            },
             line: 1,
             col: 1
         })
@@ -272,7 +276,9 @@ fn error_index() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("msg"),
+            kind: ErrorKind::UserMessage {
+                message: String::from("msg"),
+            },
             line: 1,
             col: 1
         })
@@ -287,7 +293,9 @@ fn error_named() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("msg"),
+            kind: ErrorKind::UserMessage {
+                message: String::from("msg"),
+            },
             line: 1,
             col: 1
         })
@@ -305,7 +313,9 @@ fn error_index_no_empty() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("msg"),
+            kind: ErrorKind::UserMessage {
+                message: String::from("msg"),
+            },
             line: 1,
             col: 1
         })
@@ -322,7 +332,9 @@ fn error_named_no_empty() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("msg"),
+            kind: ErrorKind::UserMessage {
+                message: String::from("msg"),
+            },
             line: 1,
             col: 1
         })
@@ -337,7 +349,9 @@ fn error_no_message() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("'VAR' is unset"),
+            kind: ErrorKind::Unset {
+                name: String::from("VAR"),
+            },
             line: 1,
             col: 1
         })
@@ -354,7 +368,9 @@ fn error_no_message_no_empty() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("'VAR' is unset or empty"),
+            kind: ErrorKind::UnsetOrEmpty {
+                name: String::from("VAR"),
+            },
             line: 1,
             col: 1
         })
@@ -398,7 +414,9 @@ fn len_no_unset() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("'VAR' is unset"),
+            kind: ErrorKind::Unset {
+                name: String::from("VAR"),
+            },
             line: 1,
             col: 1
         })
@@ -415,7 +433,7 @@ fn missing_close_brace() {
     assert_eq!(
         xpanda.expand(input),
         Err(Error {
-            message: String::from("Invalid param, unexpected EOF"),
+            kind: ErrorKind::InvalidParamEof,
             line: 1,
             col: 6
         })
@@ -602,7 +620,7 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${VAR"),
         Err(Error {
-            message: String::from("Invalid param, unexpected EOF"),
+            kind: ErrorKind::InvalidParamEof,
             line: 1,
             col: 6,
         })
@@ -610,7 +628,7 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${VAR-"),
         Err(Error {
-            message: String::from("Unexpected EOF"),
+            kind: ErrorKind::UnexpectedEof,
             line: 1,
             col: 7,
         })
@@ -618,7 +636,7 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${VAR "),
         Err(Error {
-            message: String::from("Invalid param, unexpected EOF"),
+            kind: ErrorKind::InvalidParamEof,
             line: 1,
             col: 7,
         })
@@ -626,7 +644,10 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${#"),
         Err(Error {
-            message: String::from("Expected identifier or close brace, found EOF"),
+            kind: ErrorKind::Expected {
+                expected: String::from("identifier or close brace"),
+                found: String::from("EOF"),
+            },
             line: 1,
             col: 4,
         })
@@ -634,9 +655,11 @@ fn syntax_error() {
     assert_eq!(
         xpanda.expand("${VAR:1:a}"),
         Err(Error {
-            message: String::from("Invalid number: \"a\""),
+            kind: ErrorKind::InvalidNumber {
+                value: String::from("a"),
+            },
             line: 1,
-            col: 10,
+            col: 9,
         })
     );
 }
@@ -798,7 +821,9 @@ fn interpolated_error_message() {
     assert_eq!(
         xpanda.expand("${MISSING?missing $WHAT}"),
         Err(Error {
-            message: String::from("missing authentication"),
+            kind: ErrorKind::UserMessage {
+                message: String::from("missing authentication"),
+            },
             line: 1,
             col: 1,
         })
@@ -971,4 +996,202 @@ fn glob_backslash_escape() {
     vars.insert(String::from("VAR"), String::from("*rest"));
     let xpanda = Xpanda::builder().with_named_vars(vars).build();
     assert_eq!(xpanda.expand(r"${VAR#\*}"), Ok(String::from("rest")));
+}
+
+fn with_var(value: &str) -> Xpanda {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from(value));
+
+    Xpanda::builder().with_named_vars(vars).build()
+}
+
+fn expand_ok(xpanda: &Xpanda, input: &str) -> String {
+    xpanda.expand(input).unwrap()
+}
+
+#[test]
+fn identifier_like_text_in_bodies_is_kept() {
+    let xpanda = with_var("abcdef");
+
+    assert_eq!(expand_ok(&xpanda, "${VAR#abc}"), "def");
+    assert_eq!(expand_ok(&xpanda, "${VAR##abc}"), "def");
+    assert_eq!(expand_ok(&with_var("123"), "${VAR#1}"), "23");
+    assert_eq!(expand_ok(&with_var("007x"), "${VAR#007}"), "x");
+    assert_eq!(expand_ok(&xpanda, "${UNSET-#foo}"), "#foo");
+    assert_eq!(expand_ok(&xpanda, "${UNSET-a!foo}"), "a!foo");
+    assert_eq!(expand_ok(&xpanda, "${UNSET-#007}"), "#007");
+}
+
+#[test]
+fn substring_counts_characters() {
+    let xpanda = with_var("åäö");
+
+    assert_eq!(expand_ok(&xpanda, "${VAR:1}"), "äö");
+    assert_eq!(expand_ok(&xpanda, "${VAR:1:1}"), "ä");
+    assert_eq!(expand_ok(&xpanda, "${VAR: -1}"), "ö");
+    assert_eq!(expand_ok(&xpanda, "${VAR:0:-1}"), "åä");
+    assert_eq!(expand_ok(&xpanda, "${#VAR}"), "3");
+}
+
+#[test]
+fn substring_edge_cases_match_bash() {
+    let xpanda = with_var("abc");
+
+    assert_eq!(expand_ok(&xpanda, "${VAR: -5}"), "");
+    assert_eq!(expand_ok(&xpanda, "${VAR:(-5)}"), "");
+    assert_eq!(expand_ok(&xpanda, "${VAR:1:}"), "");
+}
+
+#[test]
+fn with_env_vars_sources_env_vars() {
+    let xpanda = Xpanda::builder().with_env_vars().build();
+
+    assert_eq!(
+        xpanda.expand("$CARGO_PKG_NAME"),
+        Ok(String::from(env!("CARGO_PKG_NAME")))
+    );
+}
+
+#[test]
+fn error_display() {
+    let error = Xpanda::default().expand("abc ${VAR?}").unwrap_err();
+
+    assert_eq!(error.to_string(), "1:5 'VAR' is unset");
+
+    let boxed: Box<dyn std::error::Error> = Box::new(error);
+
+    assert_eq!(boxed.to_string(), "1:5 'VAR' is unset");
+}
+
+#[test]
+fn nested_params_in_double_quotes() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("B"), String::from("b"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+
+    assert_eq!(expand_ok(&xpanda, r#"${U-"${B}x"}"#), "bx");
+    assert_eq!(expand_ok(&xpanda, r#"${U-"${C-y}"}"#), "y");
+    assert_eq!(expand_ok(&xpanda, r#"${U-"${C-"x y"} z"}"#), "x y z");
+    assert_eq!(expand_ok(&xpanda, r#"${U-"$B c"}"#), "b c");
+    assert_eq!(expand_ok(&xpanda, r#"${U-"$$B"}"#), "$B");
+}
+
+#[test]
+fn invalid_indexes_are_unset() {
+    let xpanda = Xpanda::builder()
+        .with_positional_vars(vec![String::from("one")])
+        .build();
+
+    assert_eq!(expand_ok(&xpanda, "[$99999999999999999999]"), "[]");
+    assert_eq!(expand_ok(&xpanda, "[$٣]"), "[]");
+}
+
+#[test]
+fn indirect_ref_to_positional() {
+    let xpanda = Xpanda::builder()
+        .with_positional_vars(vec![String::from("2"), String::from("two")])
+        .build();
+
+    assert_eq!(expand_ok(&xpanda, "${!1}"), "two");
+}
+
+#[test]
+fn literal_braces_in_bodies() {
+    let xpanda = Xpanda::builder().build();
+
+    assert_eq!(expand_ok(&xpanda, "${U-{x}}"), "{x}");
+    assert_eq!(expand_ok(&xpanda, "${U-{x}y}"), "{xy}");
+    assert_eq!(expand_ok(&xpanda, r#"${U:-{"a":1}}"#), "{a:1}");
+}
+
+#[test]
+fn newlines_in_bodies() {
+    let xpanda = Xpanda::builder().build();
+
+    assert_eq!(expand_ok(&xpanda, "${U-a\nb}"), "a\nb");
+}
+
+#[test]
+fn replace_on_empty_value() {
+    let xpanda = with_var("");
+
+    assert_eq!(expand_ok(&xpanda, "${VAR/*/x}"), "x");
+    assert_eq!(expand_ok(&xpanda, "${VAR//*/x}"), "x");
+    assert_eq!(expand_ok(&xpanda, "${VAR/a*/x}"), "");
+    assert_eq!(expand_ok(&xpanda, "${VAR/$VAR/x}"), "");
+}
+
+#[test]
+fn glob_negated_class() {
+    let xpanda = with_var("bcd");
+
+    assert_eq!(expand_ok(&xpanda, "${VAR#[!a]}"), "cd");
+    assert_eq!(expand_ok(&xpanda, "${VAR#[^a]}"), "cd");
+    assert_eq!(expand_ok(&xpanda, "${VAR#[!b]}"), "bcd");
+}
+
+#[test]
+fn glob_unterminated_class_is_literal() {
+    assert_eq!(expand_ok(&with_var("[a"), "${VAR#[}"), "a");
+}
+
+#[test]
+fn whitespace_around_prefix_operators() {
+    let mut vars = HashMap::new();
+    vars.insert(String::from("VAR"), String::from("OTHER"));
+    vars.insert(String::from("OTHER"), String::from("woop"));
+    let xpanda = Xpanda::builder().with_named_vars(vars).build();
+
+    assert_eq!(expand_ok(&xpanda, "${ #VAR }"), "5");
+    assert_eq!(expand_ok(&xpanda, "${#VAR }"), "5");
+    assert_eq!(expand_ok(&xpanda, "${ !VAR }"), "woop");
+}
+
+#[test]
+fn glob_many_stars_finish_quickly() {
+    let xpanda = with_var(&"a".repeat(200));
+    let input = format!("${{VAR#{}b}}", "*a".repeat(50));
+
+    assert_eq!(xpanda.expand(&input), Ok("a".repeat(200)));
+}
+
+#[test]
+fn too_deep_nesting_is_an_error() {
+    let xpanda = Xpanda::builder().build();
+    let nested = |depth: usize| "${A-".repeat(depth) + "x" + &"}".repeat(depth);
+
+    assert_eq!(xpanda.expand(&nested(256)), Ok(String::from("x")));
+    assert_eq!(
+        xpanda.expand(&nested(200_000)).unwrap_err().kind,
+        ErrorKind::NestingTooDeep { max_depth: 256 }
+    );
+}
+
+#[test]
+fn eval_error_positions() {
+    let xpanda = Xpanda::builder().no_unset(true).build();
+    let position = |input: &str| {
+        let error = xpanda.expand(input).unwrap_err();
+
+        (error.line, error.col)
+    };
+
+    assert_eq!(position("abc $VAR"), (1, 5));
+    assert_eq!(position("a\n  ${VAR?msg}"), (2, 3));
+    assert_eq!(position("abc ${X-${VAR?msg}}"), (1, 9));
+    assert_eq!(position("åäö $VAR"), (1, 5));
+}
+
+#[test]
+fn parse_error_positions() {
+    let xpanda = Xpanda::builder().build();
+    let position = |input: &str| {
+        let error = xpanda.expand(input).unwrap_err();
+
+        (error.line, error.col)
+    };
+
+    assert_eq!(position("abc $"), (1, 6));
+    assert_eq!(position("abc ${VAR=x}"), (1, 10));
+    assert_eq!(position("a\n${#V x}"), (2, 6));
 }

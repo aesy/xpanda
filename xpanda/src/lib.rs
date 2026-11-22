@@ -7,14 +7,14 @@
 //! variables expanded/substituted according to some patterns.
 //!
 //! [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
-//! [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html
+//! [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
 //! [`Xpanda`]: struct.Xpanda.html
 
 #![deny(clippy::all)]
 #![warn(clippy::pedantic, clippy::nursery)]
-#![allow(unused)]
 
 mod ast;
+mod error;
 mod eval;
 mod forward_peekable;
 mod glob;
@@ -24,42 +24,12 @@ mod position;
 mod str_read;
 mod token;
 
+pub use crate::error::{Error, ErrorKind};
 use crate::eval::Evaluator;
 use crate::lexer::Lexer;
 use crate::parser::Parser;
-use crate::position::Position;
 use std::collections::HashMap;
 use std::env;
-
-#[derive(Debug, Clone, Eq, PartialEq)]
-pub struct Error {
-    pub message: String,
-    pub line: usize,
-    pub col: usize,
-}
-
-impl Error {
-    #[must_use]
-    pub const fn new(message: String, position: &Position) -> Self {
-        Self {
-            message,
-            line: position.line,
-            col: position.col,
-        }
-    }
-}
-
-impl From<parser::Error> for Error {
-    fn from(error: parser::Error) -> Self {
-        Self::new(error.message, &error.position)
-    }
-}
-
-impl From<eval::Error> for Error {
-    fn from(error: eval::Error) -> Self {
-        Self::new(error.message, &Position::default())
-    }
-}
 
 #[derive(Default)]
 pub struct Builder {
@@ -70,7 +40,7 @@ pub struct Builder {
 
 impl Builder {
     /// With this flag set, missing variables without any default value will
-    /// cause an error instead of omitting en empty string. Off by default.
+    /// cause an error instead of omitting an empty string. Off by default.
     #[must_use]
     pub const fn no_unset(mut self, no_unset: bool) -> Self {
         self.no_unset = no_unset;
@@ -78,9 +48,15 @@ impl Builder {
     }
 
     /// Adds all environment variables as named variables.
+    ///
+    /// Variables with a non-Unicode name or value are skipped.
     #[must_use]
     pub fn with_env_vars(mut self) -> Self {
-        self.named_vars.extend(env::vars());
+        self.named_vars.extend(
+            env::vars_os().filter_map(|(key, value)| {
+                Some((key.into_string().ok()?, value.into_string().ok()?))
+            }),
+        );
         self
     }
 
@@ -110,7 +86,6 @@ impl Builder {
 ///
 /// [`envsubst`]: https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html
 /// [`Bash parameter expansion`]: https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
-#[derive(Default)]
 pub struct Xpanda {
     evaluator: Evaluator,
 }
@@ -147,16 +122,19 @@ impl Xpanda {
     ///     <tr>
     ///       <td>$VAR</td>
     ///       <td>substituted with the corresponding value for 'VAR' if set,
-    /// otherwise "".</td>     </tr>
+    /// otherwise "".</td>
+    ///     </tr>
     ///     <tr>
     ///       <td>${VAR}</td>
     ///       <td>substituted with the corresponding value for 'VAR' if set,
-    /// otherwise "".</td>     </tr>
+    /// otherwise "".</td>
+    ///     </tr>
     ///     <tr>
     ///       <td>${VAR-default}</td>
     ///       <td>
     ///         substituted with the corresponding value for 'VAR' if set,
-    /// otherwise "default".       </td>
+    /// otherwise "default".
+    ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:-default}</td>
@@ -190,15 +168,16 @@ impl Xpanda {
     ///       <td>${VAR?error}</td>
     ///       <td>
     ///         substituted with the corresponding value for 'VAR' if set,
-    /// otherwise yields an error with the given message (in this
-    /// case "error").       </td>
+    /// otherwise yields an error with the given message (in this case "error").
+    ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR:?error}</td>
     ///       <td>
     ///         substituted with the corresponding value for 'VAR' if set and
-    /// non-empty, otherwise yields an error with the given message
-    /// (in this case "error").       </td>
+    /// non-empty, otherwise yields an error with the given message (in this
+    /// case "error").
+    ///       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${#VAR}</td>
@@ -214,7 +193,7 @@ impl Xpanda {
     ///     <tr>
     ///       <td>${!VAR}</td>
     ///       <td>
-    ///         the value of 'VAR' is evaluated again as a variable name — the
+    ///         the value of 'VAR' is evaluated again as a variable name - the
     /// result is the value of the variable it names (indirect reference).
     ///       </td>
     ///     </tr>
@@ -235,44 +214,38 @@ impl Xpanda {
     ///     <tr>
     ///       <td>${VAR^}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with the first character uppercased.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with the first character
+    /// uppercased.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR^^}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with all characters uppercased.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with all characters
+    /// uppercased.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR,}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with the first character lowercased.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with the first character
+    /// lowercased.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR,,}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with all characters lowercased.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with all characters
+    /// lowercased.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR~}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with the casing of the first character reversed.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with the casing of the
+    /// first character reversed.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR~~}</td>
     ///       <td>
-    ///         substituted with the value of the variable named by the value of
-    /// `VAR`, with the casing of all characters reversed.
-    ///       </td>
+    ///         substituted with the value of 'VAR', with the casing of all
+    /// characters reversed.       </td>
     ///     </tr>
     ///     <tr>
     ///       <td>${VAR#pattern}</td>
@@ -625,5 +598,12 @@ impl Xpanda {
         let result = self.evaluator.eval(&ast)?;
 
         Ok(result)
+    }
+}
+
+impl Default for Xpanda {
+    #[inline]
+    fn default() -> Self {
+        Self::builder().with_env_vars().build()
     }
 }

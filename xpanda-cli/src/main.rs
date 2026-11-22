@@ -5,7 +5,7 @@ mod args;
 mod read;
 
 use crate::args::Args;
-use crate::read::{read_input_file, read_line, read_output_file, read_var_file};
+use crate::read::{read_input, read_input_file, read_output_file, read_var_file};
 use clap::Parser;
 use std::io::{self, BufRead, Write};
 use std::process::ExitCode;
@@ -34,7 +34,7 @@ fn main() -> ExitCode {
         let file_vars = match read_var_file(&var_file) {
             Ok(vars) => vars,
             Err(error) => {
-                let _result = stderr.write_all(error.as_bytes());
+                let _ = writeln!(stderr, "{error}");
                 return ExitCode::from(1);
             },
         };
@@ -51,7 +51,7 @@ fn main() -> ExitCode {
         match read_input_file(&path) {
             Ok(file) => Box::new(file),
             Err(error) => {
-                let _result = stderr.write_all(error.as_bytes());
+                let _ = writeln!(stderr, "{error}");
                 return ExitCode::from(1);
             },
         }
@@ -63,7 +63,7 @@ fn main() -> ExitCode {
         match read_output_file(&path) {
             Ok(file) => Box::new(file),
             Err(error) => {
-                let _result = stderr.write_all(error.as_bytes());
+                let _ = writeln!(stderr, "{error}");
                 return ExitCode::from(1);
             },
         }
@@ -71,32 +71,29 @@ fn main() -> ExitCode {
         Box::new(io::stdout().lock())
     };
 
-    let mut line_number = 0;
-    while let Some(line) = read_line(&mut input) {
-        line_number += 1;
-
-        let line = match line {
-            Ok(line) => line,
-            Err(error) => {
-                let _result = stderr.write_all(error.as_bytes());
-                return ExitCode::from(1);
-            },
-        };
-
-        let text = match xpanda.expand(&line) {
-            Ok(text) => text,
-            Err(error) => {
-                let _result = stderr.write_all(
-                    format!("{}:{} {}", line_number, error.col, error.message).as_bytes(),
-                );
-                return ExitCode::from(1);
-            },
-        };
-
-        if let Err(error) = output.write_all(text.as_bytes()) {
-            let _result = stderr.write_all(format!("Failed to write output: {error}").as_bytes());
+    let source = match read_input(&mut input) {
+        Ok(source) => source,
+        Err(error) => {
+            let _ = writeln!(stderr, "{error}");
             return ExitCode::from(1);
-        }
+        },
+    };
+
+    let text = match xpanda.expand(&source) {
+        Ok(text) => text,
+        Err(error) => {
+            let _ = writeln!(stderr, "{error}");
+            return ExitCode::from(1);
+        },
+    };
+
+    // Buffered writers ignore errors when flushing on drop, so flush explicitly.
+    if let Err(error) = output
+        .write_all(text.as_bytes())
+        .and_then(|()| output.flush())
+    {
+        let _ = writeln!(stderr, "Failed to write output: {error}");
+        return ExitCode::from(1);
     }
 
     ExitCode::SUCCESS
