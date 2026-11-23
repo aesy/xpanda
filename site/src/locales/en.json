@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Xpanda: shell expansion, minus the shell",
-    "description": "Substitute variables in text with the parameter expansion you know from Bash, without running any code. A single binary for Linux and Windows, and a Rust crate."
+    "description": "Substitute variables in text with the parameter expansion you know from Bash, without running any code. A single binary for Linux, macOS and Windows, and a Rust crate."
   },
   "nav": {
     "label": "Main",
@@ -14,7 +14,7 @@
   "hero": {
     "titleStart": "Shell expansion,",
     "titleEnd": "minus the shell.",
-    "lede": "Xpanda substitutes variables in text using the parameter expansion you already know from Bash. It does more than <code>envsubst</code> and never runs code like <code>eval</code> would. It ships as a single native binary for Linux and Windows, and as a Rust crate with zero dependencies.",
+    "lede": "Xpanda substitutes variables in text using the parameter expansion you already know from Bash. It does more than <code>envsubst</code> and never runs code like <code>eval</code> would. It ships as a single native binary for Linux, macOS and Windows, and as a Rust crate with zero dependencies.",
     "download": "Download the CLI",
     "docs": "Read the API docs",
     "copy": "Copy",

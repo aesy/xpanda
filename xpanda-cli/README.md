@@ -66,7 +66,7 @@ The given input must be ASCII or UTF-8 encoded and is read in full before any
 output is written. Output is UTF-8 encoded. If no variables are provided, then
 values are sourced from environment variables.
 
-Usage: xpanda-cli [OPTIONS] [-- [POSITIONAL_VARS]...]
+Usage: xpanda [OPTIONS] [-- [POSITIONAL_VARS]...]
 
 Arguments:
   [POSITIONAL_VARS]...
@@ -136,19 +136,31 @@ Options:
           Print version
 ```
 
-## Installation:
+## Installation
 
 ### Binaries
 
-The latest stable `Xpanda` releases are available as [prebuilt binaries for 64-bit Linux and Windows under Github
-releases](https://github.com/aesy/xpanda/releases). Binaries for other platforms have to be built from source.
+The latest stable `Xpanda` releases are available as [prebuilt binaries under Github
+releases](https://github.com/aesy/xpanda/releases) for Linux (x86-64 and ARM64, statically linked), macOS (Apple
+silicon) and Windows (x86-64). Binaries for other platforms have to be built from source.
 
 #### Linux
+
+Example on how to download and install an `Xpanda` binary using [curl](https://curl.se/) (use `xpanda-linux-arm64`
+on ARM64):
+
+```shell
+curl -L https://github.com/aesy/xpanda/releases/latest/download/xpanda-linux-amd64 -o xpanda
+chmod +x xpanda
+sudo mv xpanda /usr/local/bin
+```
+
+#### macOS
 
 Example on how to download and install an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.2.0/xpanda-linux-amd64 -o xpanda
+curl -L https://github.com/aesy/xpanda/releases/latest/download/xpanda-macos-arm64 -o xpanda
 chmod +x xpanda
 sudo mv xpanda /usr/local/bin
 ```
@@ -158,19 +170,27 @@ sudo mv xpanda /usr/local/bin
 Example on how to download an `Xpanda` binary using [curl](https://curl.se/):
 
 ```shell
-curl -L https://github.com/aesy/xpanda/releases/download/v0.2.0/xpanda-windows-amd64.exe -o xpanda.exe
+curl -L https://github.com/aesy/xpanda/releases/latest/download/xpanda-windows-amd64.exe -o xpanda.exe
 ```
 
-#### Build from source
+### Cargo
+
+`Xpanda` can also be installed from [crates.io](https://crates.io/crates/xpanda-cli):
+
+```shell
+cargo install xpanda-cli
+```
+
+### Build from source
 
 To build the CLI, run the following command:
 
 ```shell
-cargo build --bin xpanda-cli --target <target> --release
+cargo build --bin xpanda --target <target> --release
 ```
 
 The resulting binary can be found in the repositories root directory under `target/<target>/release/` called
-`xpanda-cli`.
+`xpanda`.
 
 The `<target>` options can be found
 at [Rust's platform support page](https://doc.rust-lang.org/nightly/rustc/platform-support.html).

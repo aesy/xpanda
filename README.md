@@ -34,7 +34,7 @@
 Safe Unix shell-like parameter expansion/variable substitution for those who need a more powerful alternative to
 [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html) but don't want to resort to
 using Bash's [`eval`](https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html), while also not
-wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Windows/Linux CLI tool and a
+wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Linux/macOS/Windows CLI tool and a
 Rust library.
 
 [Try it out on the website](https://aesy.github.io/xpanda/) or [see how it compares to other programs](./docs/COMPARISON.md).

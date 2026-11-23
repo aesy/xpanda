@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 #[test]
 fn positional_var_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["--", "woop"])
         .write_stdin("$1")
@@ -18,7 +18,7 @@ fn positional_var_success() {
 
 #[test]
 fn named_var_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "DEF=woop"])
         .write_stdin("${VAR-$DEF}")
@@ -29,7 +29,7 @@ fn named_var_success() {
 
 #[test]
 fn no_unset_error() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .arg("-u")
         .write_stdin("$VAR")
@@ -40,7 +40,7 @@ fn no_unset_error() {
 
 #[test]
 fn env_var_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .env("VAR", "woop")
         .arg("-e")
@@ -52,7 +52,7 @@ fn env_var_success() {
 
 #[test]
 fn var_error() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .write_stdin("${VAR?msg}")
         .assert()
@@ -62,7 +62,7 @@ fn var_error() {
 
 #[test]
 fn var_unset_error() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .write_stdin("${VAR?}")
         .assert()
@@ -72,7 +72,7 @@ fn var_unset_error() {
 
 #[test]
 fn var_unset_or_empty_error() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "VAR="])
         .write_stdin("${VAR:?}")
@@ -83,7 +83,7 @@ fn var_unset_or_empty_error() {
 
 #[test]
 fn arity_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["--", "one", "two"])
         .write_stdin("${#}")
@@ -94,7 +94,7 @@ fn arity_success() {
 
 #[test]
 fn ref_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "VAR=woop"])
         .args(["--", "VAR"])
@@ -110,7 +110,7 @@ fn input_file_success() {
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-input");
     fs::write(&file, "$VAR").unwrap();
 
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-i", file.to_str().unwrap()])
         .args(["-v", "VAR=woop"])
@@ -124,7 +124,7 @@ fn output_file_success() {
     let mut file = temp_dir();
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-output");
 
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-o", file.to_str().unwrap()])
         .args(["-v", "VAR=woop"])
@@ -143,7 +143,7 @@ fn var_file_success() {
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-vars");
     fs::write(&file, "VAR=woop").unwrap();
 
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-f", file.to_str().unwrap()])
         .write_stdin("$VAR")
@@ -154,7 +154,7 @@ fn var_file_success() {
 
 #[test]
 fn unexpected_eof_error() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "VAR=woop"])
         .write_stdin("${VAR")
@@ -165,7 +165,7 @@ fn unexpected_eof_error() {
 
 #[test]
 fn default_body_with_colon() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "VAR=woop"])
         .write_stdin("${VAR-:def}")
@@ -176,7 +176,7 @@ fn default_body_with_colon() {
 
 #[test]
 fn multiline_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "DEF=def"])
         .args(["--", "jkl"])
@@ -188,7 +188,7 @@ fn multiline_success() {
 
 #[test]
 fn multiline_param_success() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "DEF=def"])
         .write_stdin("${VAR-a\nb}")
@@ -199,7 +199,7 @@ fn multiline_param_success() {
 
 #[test]
 fn error_position_on_later_line() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "DEF=def"])
         .write_stdin("abc\n  ${VAR?msg}")
@@ -210,7 +210,7 @@ fn error_position_on_later_line() {
 
 #[test]
 fn named_var_value_with_equals_sign() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-v", "VAR=a=b"])
         .write_stdin("$VAR")
@@ -225,7 +225,7 @@ fn var_file_value_with_equals_sign() {
     file.push(Uuid::new_v4().to_string() + "-xpanda-test-vars");
     fs::write(&file, "VAR=a=b").unwrap();
 
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-f", file.to_str().unwrap()])
         .write_stdin("$VAR")
@@ -237,7 +237,7 @@ fn var_file_value_with_equals_sign() {
 #[test]
 #[cfg(target_os = "linux")]
 fn output_write_failure() {
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .args(["-o", "/dev/full"])
         .args(["-v", "VAR=woop"])
@@ -253,7 +253,7 @@ fn non_unicode_env_var_is_skipped() {
     use std::ffi::OsStr;
     use std::os::unix::ffi::OsStrExt;
 
-    Command::cargo_bin("xpanda-cli")
+    Command::cargo_bin("xpanda")
         .unwrap()
         .env("XPANDA_TEST_INVALID", OsStr::from_bytes(b"\xff"))
         .env("VAR", "woop")

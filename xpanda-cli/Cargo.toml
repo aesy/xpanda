@@ -4,10 +4,17 @@ description = "Command line interface for Unix shell-like parameter expansion/va
 authors.workspace = true
 homepage = "https://github.com/aesy/xpanda"
 repository = "https://github.com/aesy/xpanda"
-license-file = "../LICENSE"
+readme = "README.md"
+license = "MIT"
+categories = ["command-line-utilities", "template-engine", "text-processing"]
+keywords = ["environment", "variable", "substitution", "envsubst", "cli"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+
+[[bin]]
+name = "xpanda"
+path = "src/main.rs"
 
 [dev-dependencies]
 assert_cmd.workspace = true
@@ -15,5 +22,5 @@ predicates.workspace = true
 uuid.workspace = true
 
 [dependencies]
-xpanda = { path = "../xpanda" }
+xpanda = { path = "../xpanda", version = "0.2.0" }
 clap.workspace = true
