@@ -19,7 +19,7 @@
 
 [docs-url]: https://docs.rs/xpanda
 
-[github-actions-image]: https://img.shields.io/github/actions/workflow/status/aesy/xpanda/ci.yml?branch=master&style=flat-square
+[github-actions-image]: https://img.shields.io/github/actions/workflow/status/aesy/xpanda/ci.yml?branch=main&style=flat-square
 
 [github-actions-url]: https://github.com/aesy/xpanda/actions
 
@@ -29,15 +29,17 @@
 
 [license-image]: https://img.shields.io/github/license/aesy/xpanda?style=flat-square
 
-[license-url]: https://github.com/aesy/xpanda/blob/master/LICENSE
+[license-url]: https://github.com/aesy/xpanda/blob/main/LICENSE
 
 Safe Unix shell-like parameter expansion/variable substitution for those who need a more powerful alternative to
 [`envsubst`](https://www.gnu.org/software/gettext/manual/html_node/envsubst-Invocation.html) but don't want to resort to
 using Bash's [`eval`](https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html), while also not
-wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Linux/macOS/Windows CLI tool and a
+wanting to use a full-on templating engine. `Xpanda` is available as a native single-binary Linux/macOS/Windows CLI tool
+and a
 Rust library.
 
-[Try it out on the website](https://aesy.github.io/xpanda/) or [see how it compares to other programs](./docs/COMPARISON.md).
+[Try it out on the website](https://aesy.github.io/xpanda/)
+or [see how it compares to other programs](./docs/COMPARISON.md).
 
 ## Usage
 
@@ -77,7 +79,7 @@ $ cargo clippy
 
 ##### Unit/Integration/Doc Testing
 
-All code that goes into master must pass all tests. To run all tests, use:
+All code that goes into main must pass all tests. To run all tests, use:
 
 ```sh
 $ cargo test
