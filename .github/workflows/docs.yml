@@ -4,6 +4,7 @@ name: Generate Documentation
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -23,6 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          ref: site
+          path: site
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: actions/setup-node@v7
