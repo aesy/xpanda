@@ -66,7 +66,8 @@ impl Glob {
                         },
                     }
                 },
-                // A `[` that is never closed is an ordinary character, as in Bash.
+                // A `[` that is never closed is an ordinary character, as in
+                // Bash.
                 '[' if !pattern[reader.position().index..].contains(']') => {
                     reader.consume_char();
                     push_char(&mut tokens, c);
@@ -163,8 +164,8 @@ impl Glob {
     /// pattern with `replacement`. A "match" is the longest substring at the
     /// current scan position that the pattern matches.
     pub fn replace(&self, input: &str, replacement: &str, all_occurrences: bool) -> String {
-        // An empty value has no position to scan, but `*` still matches it. Bash
-        // doesn't treat an empty pattern as a match though.
+        // An empty value has no position to scan, but `*` still matches it.
+        // Bash doesn't treat an empty pattern as a match though.
         if input.is_empty() && !self.tokens.is_empty() && self.matches(input) {
             return replacement.to_string();
         }

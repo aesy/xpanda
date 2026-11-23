@@ -51,7 +51,8 @@ pub enum Param<'a> {
         alt: Vec<Node<'a>>,
         treat_empty_as_unset: bool,
     },
-    // ${identifier?} | ${identifier:?} | ${identifier?error} | ${identifier:?error}
+    // ${identifier?} | ${identifier:?} | ${identifier?error} |
+    // ${identifier:?error}
     WithError {
         identifier: Identifier<'a>,
         error: Vec<Node<'a>>,

@@ -317,7 +317,8 @@ impl Evaluator {
         let param = self.eval_simple_param(identifier)?;
         let len = param.chars().count();
         let start = if offset < 0 {
-            // Bash yields nothing when a negative offset reaches past the start.
+            // Bash yields nothing when a negative offset reaches past the
+            // start.
             match len.checked_sub(offset.unsigned_abs()) {
                 Some(index) => index,
                 None => return Ok(String::new()),

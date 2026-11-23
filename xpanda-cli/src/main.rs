@@ -87,7 +87,8 @@ fn main() -> ExitCode {
         },
     };
 
-    // Buffered writers ignore errors when flushing on drop, so flush explicitly.
+    // Buffered writers ignore errors when flushing on drop, so flush
+    // explicitly.
     if let Err(error) = output
         .write_all(text.as_bytes())
         .and_then(|()| output.flush())

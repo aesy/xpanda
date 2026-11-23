@@ -100,8 +100,8 @@ impl<'a> Lexer<'a> {
         let can_be_identifier = in_brace_head || self.previous_token == Some(Token::DollarSign);
         let is_escaped = self.reader.peek_count(2) == "$$";
 
-        // Only `${` opens a param. Any other `{` is plain text and doesn't nest, as in
-        // Bash.
+        // Only `${` opens a param. Any other `{` is plain text and doesn't
+        // nest, as in Bash.
         if next_char == '{' && self.previous_token != Some(Token::DollarSign) {
             self.reader.consume_char();
             return Some(Token::Text(Cow::Borrowed("{")));
@@ -139,8 +139,8 @@ impl<'a> Lexer<'a> {
             },
             c if can_be_identifier && c.is_ascii_digit() => {
                 let text = self.reader.consume_while(|c| c.is_ascii_digit());
-                // An index too large to parse can't refer to any provided variable, so it's
-                // unset.
+                // An index too large to parse can't refer to any provided
+                // variable, so it's unset.
                 let number = text.parse().unwrap_or(usize::MAX);
 
                 if in_brace_head {
